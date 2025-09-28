@@ -1,0 +1,26 @@
+configuration {
+    font: "Fira Code 12";
+    width: 20%;
+    lines: 10;
+    padding: 10;
+}
+
+element-text {
+    background-color: transparent;
+    text-color: #000000;
+}
+
+element {
+    background-color: transparent;
+    text-color: #000000;
+}
+
+element selected {
+    background-color: #f0f0f0;
+    text-color: #000000;
+}
+
+element highlight {
+    background-color: #ffff00;
+    text-color: #000000;
+}

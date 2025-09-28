@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Get the current active window ID
+CURRENT_WINDOW=$(xdotool getactivewindow)
+
+# Get all windows (excluding the current one) and format for rofi
+rofi -show window -theme "$HOME/.config/rofi/launch.rasi" \
+  -window-format "{w} · {c} · {t}" \
+  | grep -v "$(xprop -id "$CURRENT_WINDOW" | grep WM_NAME | cut -d '"' -f2)"

@@ -1,0 +1,63 @@
+#! /bin/sh
+
+# fix java apps
+wmname LG3D &
+export _JAVA_AWT_WM_NONREPARENTING=1
+
+export XDG_CURRENT_DESKTOP=bspwm # or "KDE" if needed for some apps
+export XDG_DATA_DIRS="/usr/share:/usr/local/share:$HOME/.local/share"
+export QT_QPA_PLATFORMTHEME="qt5ct"
+export GTK_THEME=Flat-Remix-GTK-Red-Darkest
+
+# apt without dialogs
+export DEBIAN_FRONTEND=noninteractive
+
+#flatpak
+export XDG_DATA_DIRS=/var/lib/flatpak/exports/share:$HOME/.local/share/flatpak/exports/share:$XDG_DATA_DIRS
+
+#workspaces
+bspc monitor -d 1 2 3 4 5 6 7 8 9 0
+
+#border colors
+# bspc config focused_border_color "#c60505"
+# bspc config normal_border_color "#000000"
+
+#border width, gap, ratio etc...
+bspc config border_width 2
+bspc config window_gap 0
+bspc config split_ratio 0.52
+bspc config borderless_monocle true
+bspc config gapless_monocle true
+#bspc config single_monocle 	 true
+#bspc config focus_follows_pointer true
+
+bspc config pointer_modifier mod4         # Use Super (Windows key) as the modifier
+bspc config pointer_action1 move          # Super + left click to move windows
+bspc config pointer_action3 resize_corner # Super + right click to resize by corner
+
+bspc config center_pseudo_tiled true
+bspc config honor_size_hints true
+
+#rules for programs
+bspc rule -a "jadx-gui" state=floating
+bspc rule -a "Zathura" state=tiled
+bspc rule -a "Maltego state"=floating #rectangle=1280x800+160+50
+bspc rule -a "tk" state=floating
+bspc rule -a "Tk" state=floating
+bspc rule -a "megasync" state=tiled
+#bspc rule -a "pavucontrol" state=floating rectangle=1280x800+160+50
+bspc rule -a "Burp Suite Community Edition" state=floating    #rectangle=1280x800+160+50
+bspc rule -a "burp-StartBurp" title="Settings" state=floating #rectangle=1286x700+155+112
+bspc rule -a "Color_picker_gui.py" state=floating rectangle=400x400
+bspc rule -a "Xfce4-notes" state=floating sticky=on rectangle=400x400
+
+#scripts
+"$HOME/.config/bspwm/start"
+
+#(cursor theme is in ~/.icons and you "select it" in the ~/.Xresources file)
+xsetroot -cursor_name left_ptr -xcf /usr/share/icons/Adwaita/cursors/left_ptr 32
+xrdb -merge ~/.Xresources
+export XCURSOR_SIZE=32
+export XCURSOR_THEME=Adwaita
+
+vibrant-cli eDP-1 0.3

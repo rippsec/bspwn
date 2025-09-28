@@ -1,0 +1,168 @@
+/* ~/.config/rofi/lhost.rasi */
+* {
+    /* Color Scheme */
+    bg:             #1b1c1e;
+    bg-alt:         #282a36;
+    fg:             #f8f8f8;
+    fg-alt:         #a9b1d6;
+    accent:         #c5f467;
+    accent-alt:     #50fa7b;
+    alert:          #f7768e;
+    border-col:     #44475a;
+    
+    /* Dimensions */
+    width:          25em;
+    lines:          6;  /* Increased for interface options */
+    
+    /* Typography */
+    font:           "Fira Code Nerd Font Mono Bold 20";
+}
+
+window {
+    border:         1px;
+    border-color:   @border-col;
+    background-color: @bg;
+    
+    padding:        25px;
+    width:          @width;
+}
+
+mainbox {
+    background-color: @bg;
+    spacing:        5px;
+    padding:        0px;
+    children:       [ "inputbar", "message", "listview" ];
+}
+
+inputbar {
+    children:       [ "prompt", "entry" ];
+    background-color: @bg;
+    border:         1px;
+    border-color:   @border-col;
+    padding:        12px;
+    spacing:        10px;
+}
+
+prompt {
+    background-color: transparent;
+    text-color:     @accent;
+    font:           @font;
+    padding:        0px 5px 0px 0px;
+}
+
+entry {
+    background-color: transparent;
+    text-color:     @fg;
+    placeholder:    "Type ipv4 addr / interface here";
+    placeholder-color: @fg-alt;
+    font:           @font;
+    padding:        0px;
+}
+
+message {
+    background-color: @bg-alt;
+    text-color:     @fg;
+    border:         1px;
+    border-color:   @border-col;
+    
+    padding:        8px 12px;
+    margin:         0px 0px 0px 0px;
+}
+
+textbox {
+    background-color: transparent;
+    text-color:     @fg;
+    font:           @font;
+}
+
+listview {
+    background-color: @bg;
+    border:         1px;
+    border-color:   @border-col;
+    
+    scrollbar:      false;
+    padding:        8px;
+    spacing:        4px;
+    lines:          @lines;
+    cycle:          false;
+    dynamic:        true;
+}
+
+element {
+    background-color: @bg;
+    text-color:     @fg;
+    padding:        10px;
+}
+
+element-text {
+    background-color: transparent;
+    text-color:     inherit;
+}
+
+element normal.normal {
+    background-color: @bg;
+    text-color:     @fg;
+}
+
+element normal.urgent {
+    background-color: @bg;
+    text-color:     @alert;
+}
+
+element normal.active {
+    background-color: @bg;
+    text-color:     @accent-alt;
+}
+
+element selected.normal {
+    background-color: @bg-alt;
+    text-color:     @accent;
+    border:         1px;
+    border-color:   @accent;
+}
+
+element selected.urgent {
+    background-color: @bg-alt;
+    text-color:     @alert;
+    border:         1px;
+    border-color:   @alert;
+}
+
+element selected.active {
+    background-color: @bg-alt;
+    text-color:     @accent-alt;
+    border:         1px;
+    border-color:   @accent-alt;
+}
+
+element alternate.normal {
+    background-color: @bg;
+    text-color:     @fg;
+}
+
+element alternate.urgent {
+    background-color: @bg;
+    text-color:     @alert;
+}
+
+element alternate.active {
+    background-color: @bg;
+    text-color:     @accent-alt;
+}
+
+/* Special styling for the clear option */
+element.selected.urgent {
+    text-color:     @alert;
+    background-color: @bg-alt;
+    border-color:   @alert;
+}
+
+/* Error message styling */
+error-message {
+    background-color: @bg;
+    text-color:     @alert;
+    padding:        10px;
+    border:         1px;
+    border-color:   @alert;
+}
+
