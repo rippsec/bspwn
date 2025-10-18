@@ -1,2 +1,258 @@
+! ==============================================
+!XTerm and UXTerm Configuration (~/.Xresources)
+! ==============================================
+
+! --------------------------
+! System Cursor Theme
+! --------------------------
 Xcursor.theme: Adwaita
 Xcursor.size: 32
+
+! --------------------------
+! General Settings
+! --------------------------
+XTerm*termName: xterm-256color
+UXTerm*termName: xterm-256color
+XTerm*loginShell: true
+UXTerm*loginShell: true
+XTerm*eightBitInput: false
+UXTerm*eightBitInput: false
+XTerm*bellIsUrgent: true
+UXTerm*bellIsUrgent: true
+XTerm*bellSuppress: false
+UXTerm*bellSuppress: false
+XTerm*visualBell: false
+UXTerm*visualBell: false
+XTerm*marginBell: false
+UXTerm*marginBell: false
+XTerm*enableBell: true
+UXTerm*enableBell: true
+XTerm*rightScrollBar: false
+UXTerm*rightScrollBar: false
+XTerm*scrollBar: false
+UXTerm*scrollBar: false
+XTerm*scrollTtyOutput: false
+UXTerm*scrollTtyOutput: false
+XTerm*saveLines: 10000
+UXTerm*saveLines: 10000
+XTerm*ptyInitialErase: true
+UXTerm*ptyInitialErase: true
+XTerm*vt100.utf8: true
+UXTerm*vt100.utf8: true
+XTerm*jumpScroll: true
+UXTerm*jumpScroll: true
+XTerm*multiClickTime: 250
+UXTerm*multiClickTime: 250
+XTerm*showWinMapped: false
+UXTerm*showWinMapped: false
+XTerm*vt100.alternateScroll: true
+UXTerm*vt100.alternateScroll: true
+
+! --------------------------
+! Font Settings
+! --------------------------
+XTerm*faceName: 0xProto Nerd Font Mono
+UXTerm*faceName: 0xProto Nerd Font Mono
+XTerm*faceSize: 14
+UXTerm*faceSize: 14
+XTerm*boldFont: 0xProto Nerd Font Mono Bold
+UXTerm*boldFont: 0xProto Nerd Font Mono Bold
+XTerm*wideFont: 0xProto Nerd Font Mono
+UXTerm*wideFont: 0xProto Nerd Font Mono
+XTerm*wideBoldFont: 0xProto Nerd Font Mono Bold
+UXTerm*wideBoldFont: 0xProto Nerd Font Mono Bold
+XTerm*renderFont: true
+UXTerm*renderFont: true
+XTerm*forceBoxChars: false
+UXTerm*forceBoxChars: false
+XTerm*charClass: 32:48,35:48,37-39:48,43:48,45-47:48,64:48,92:48,124:48,126:48,161:48,167:48,176-178:48,187:48,188-192:48,196:48,213:48,215:48,247:48
+UXTerm*charClass: 32:48,35:48,37-39:48,43:48,45-47:48,64:48,92:48,124:48,126:48,161:48,167:48,176-178:48,187:48,188-192:48,196:48,213:48,215:48,247:48
+XTerm*vt100.scaleHeight: 1.2
+UXTerm*vt100.scaleHeight: 1.2
+XTerm*boldMode: true
+UXTerm*boldMode: true
+
+! --------------------------
+! Cursor Settings
+! --------------------------
+
+XTerm*cursorBar: true
+XTerm*pointerShape: box
+UXTerm*pointerShape: box
+XTerm*alwaysHighlight: true
+UXTerm*alwaysHighlight: true
+XTerm*pointerColor: #2D3F76
+UXTerm*pointerColor: #2D3F76
+XTerm*pointerColorBackground: #282A36
+UXTerm*pointerColorBackground: #282A36
+XTerm*blinkDontCare: false
+UXTerm*blinkDontCare: false
+XTerm*highlightColor: #2D3F76
+UXTerm*highlightColor: #2D3F76
+XTerm*cursorBlink: false
+UXTerm*cursorBlink: false
+
+! --------------------------
+! Mouse Settings
+! --------------------------
+XTerm*numlock: true
+UXTerm*numlock: true
+XTerm*allowSendEvents: false
+UXTerm*allowSendEvents: false
+XTerm*allowCsrEvents: false
+UXTerm*allowCsrEvents: false
+XTerm*allowTstp: false
+UXTerm*allowTstp: false
+XTerm*metaSendsEscape: true
+UXTerm*metaSendsEscape: true
+XTerm*backarrowKeyIsErase: false
+UXTerm*backarrowKeyIsErase: false
+XTerm*backspaceKeyIsErase: true
+UXTerm*backspaceKeyIsErase: true
+XTerm*deleteIsDEL: false
+UXTerm*deleteIsDEL: false
+XTerm*ttyModes: -ctsxon -vhangup -hup erase ^?
+UXTerm*ttyModes: -ctsxon -vhangup -hup erase ^?
+
+! --------------------------
+! Window Settings
+! --------------------------
+XTerm*geometry: 100x30
+UXTerm*geometry: 100x30
+XTerm*borderWidth: 0
+UXTerm*borderWidth: 0
+XTerm*internalBorder: 10
+UXTerm*internalBorder: 10
+XTerm*title: XTerm
+UXTerm*title: UXTerm
+XTerm*iconName: xterm-icon
+UXTerm*iconName: uxterm-icon
+XTerm*minimizeButton: false
+UXTerm*minimizeButton: false
+XTerm*maximizeButton: false
+UXTerm*maximizeButton: false
+XTerm*command: /bin/bash -l
+UXTerm*command: /bin/bash -l
+XTerm*toolBar: false
+UXTerm*toolBar: false
+XTerm*menuBar: false
+UXTerm*menuBar: false
+XTerm*decTerminalID: 1000
+UXTerm*decTerminalID: 1000
+XTerm*useInsert: false
+UXTerm*useInsert: false
+XTerm*initialEraseAttributes: 0
+UXTerm*initialEraseAttributes: 0
+XTerm*eraseSavedLines: 0
+UXTerm*eraseSavedLines: 0
+XTerm*oldXtermFKeys: false
+UXTerm*oldXtermFKeys: false
+XTerm*vt100Graphics: false
+UXTerm*vt100Graphics: false
+XTerm*vt100Keys: true
+UXTerm*vt100Keys: true
+XTerm*keepSelectionProgs: xclipboard,xterm,xwinclip
+UXTerm*keepSelectionProgs: xclipboard,xterm,xwinclip
+XTerm*selectToClipboard: true
+UXTerm*selectToClipboard: true
+
+! --------------------------
+! Appearance Settings (Dracula)
+! --------------------------
+XTerm*foreground: #F8F8F2
+UXTerm*foreground: #F8F8F2
+XTerm*background: #282A36
+UXTerm*background: #282A36
+XTerm*cursorColor: #FFB86C
+UXTerm*cursorColor: #FFB86C
+XTerm*color0: #21222C
+UXTerm*color0: #21222C
+XTerm*color1: #FF5555
+UXTerm*color1: #FF5555
+XTerm*color2: #50FA7B
+UXTerm*color2: #50FA7B
+XTerm*color3: #F1FA8C
+UXTerm*color3: #F1FA8C
+XTerm*color4: #5185a8
+UXTerm*color4: #5185a8
+XTerm*color5: #FF79C6
+UXTerm*color5: #FF79C6
+XTerm*color6:  #BD93F9
+UXTerm*color6: #BD93F9
+XTerm*color7: #BFBFBF
+UXTerm*color7: #BFBFBF
+XTerm*color8: #4D4D4D
+UXTerm*color8: #4D4D4D
+XTerm*color9: #FF6E67
+UXTerm*color9: #FF6E67
+XTerm*color10: #5AF78E
+UXTerm*color10: #5AF78E
+XTerm*color11: #F4F99D
+UXTerm*color11: #F4F99D
+XTerm*color12: #CAA9FA
+UXTerm*color12: #CAA9FA
+XTerm*color13: #FF92D0
+UXTerm*color13: #FF92D0
+XTerm*color14: #9AEDFE
+UXTerm*color14: #9AEDFE
+XTerm*color15: #E6E6E6
+UXTerm*color15: #E6E6E6
+XTerm*colorBDMode: true
+UXTerm*colorBDMode: true
+XTerm*colorMode: true
+UXTerm*colorMode: true
+XTerm*colorULMode: true
+UXTerm*colorULMode: true
+XTerm*underLine: ~0
+UXTerm*underLine: ~0
+XTerm*highlightTextColor: #65BCFF
+UXTerm*highlightTextColor: #65BCFF
+XTerm*borderColor: #44475A
+UXTerm*borderColor: #44475A
+XTerm*printAttributes: 0
+UXTerm*printAttributes: 0
+
+! --------------------------
+! Keyboard Shortcuts (Translations) - FIXED
+! --------------------------
+XTerm*VT100.Translations: #override \n\
+    Ctrl Shift <Key>C: copy-selection(CLIPBOARD) \n\
+    Ctrl Shift <Key>V: insert-selection(CLIPBOARD) \n\
+    Shift <Key>Insert: insert-selection(CLIPBOARD) \n\
+    Ctrl Shift <Key>Insert: insert-selection(CLIPBOARD) \n\
+    ~Shift~Ctrl<Btn2Up>: insert-selection(PRIMARY, CUT_BUFFER0) \n\
+    Meta <Key>BackSpace: string(0x7f) \n\
+    Meta <Key>Delete: string(0x7f) \n\
+    Ctrl Shift <Key>Up: scroll-back(1,line) \n\
+    Ctrl Shift <Key>Down: scroll-forw(1,line) \n\
+    Ctrl Shift <Key>Page_Up: scroll-back(1,halfpage) \n\
+    Ctrl Shift <Key>Page_Down: scroll-forw(1,halfpage) \n\
+    Ctrl Shift <Key>Home: scroll-to(begin) \n\
+    Ctrl Shift <Key>End: scroll-to(end) \n\
+    Ctrl Shift <Key>minus: smaller-vt-font() \n\
+    Ctrl Shift <Key>equal: larger-vt-font() \n\
+    Ctrl Shift <Key>0: set-vt-font(d) \n\
+    Ctrl Shift <Key>Q: quit()
+
+UXTerm*VT100.Translations: #override \n\
+    Ctrl Shift <Key>C: copy-selection(CLIPBOARD) \n\
+    Ctrl Shift <Key>V: insert-selection(CLIPBOARD) \n\
+    Shift <Key>Insert: insert-selection(CLIPBOARD) \n\
+    Ctrl Shift <Key>Insert: insert-selection(CLIPBOARD) \n\
+    ~Shift~Ctrl<Btn2Up>: insert-selection(PRIMARY, CUT_BUFFER0) \n\
+    Meta <Key>BackSpace: string(0x7f) \n\
+    Meta <Key>Delete: string(0x7f) \n\
+    Ctrl Shift <Key>Up: scroll-back(1,line) \n\
+    Ctrl Shift <Key>Down: scroll-forw(1,line) \n\
+    Ctrl Shift <Key>Page_Up: scroll-back(1,halfpage) \n\
+    Ctrl Shift <Key>Page_Down: scroll-forw(1,halfpage) \n\
+    Ctrl Shift <Key>Home: scroll-to(begin) \n\
+    Ctrl Shift <Key>End: scroll-to(end) \n\
+    Ctrl Shift <Key>minus: smaller-vt-font() \n\
+    Ctrl Shift <Key>equal: larger-vt-font() \n\
+    Ctrl Shift <Key>0: set-vt-font(d) \n\
+    Ctrl Shift <Key>Q: quit()
+
+
+
+! Apply changes with: xrdb -merge ~/.Xresources

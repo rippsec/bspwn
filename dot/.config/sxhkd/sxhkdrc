@@ -20,13 +20,15 @@ super + e
         notify-send -u low "Touchpad: ENABLED"; \
     fi
 
-# firefox
-super + shift + f
-  firefox
+# browser
+super + shift + g
+  chromium --disable-gpu --disable-accelerated-2d-canvas --disable-accelerated-video-decode --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-renderer-backgrounding --disable-features=VizDisplayCompositor --disable-gcm-client --enable-unsafe-swiftshader --disable-webrtc
+
 
 # terminal emulator
 super + Return
-	kitty
+# kitty
+  uxterm
 
 # program launcher
 super + d
@@ -141,12 +143,12 @@ XF86AudioMicMute
 
 
 XF86AudioRaiseVolume
-  pamixer -i 5 && \
+  pamixer -i 3 && \
   VOL=$(pamixer --get-volume) && \
   notify-send -u low -h string:x-canonical-private-synchronous:volume "Volume: $VOL%" -h int:value:$VOL -t 1000
 
 XF86AudioLowerVolume
-  pamixer -d 5 && \
+  pamixer -d 3 && \
   VOL=$(pamixer --get-volume) && \
   notify-send -u low -h string:x-canonical-private-synchronous:volume "Volume: $VOL%" -h int:value:$VOL -t 1000
 
@@ -160,14 +162,14 @@ XF86AudioMute
   fi
 
 XF86MonBrightnessUp
-  brightnessctl s +1% && \
+  brightnessctl s +3% && \
   BRIGHT=$(brightnessctl g) && \
   MAX=$(brightnessctl m) && \
   PERCENT=$((BRIGHT * 100 / MAX)) && \
   notify-send -u low -h string:x-canonical-private-synchronous:brightness "Brightness: $PERCENT%" -h int:value:$PERCENT -t 1000
 
 XF86MonBrightnessDown
-  brightnessctl s 1%- && \
+  brightnessctl s 3%- && \
   BRIGHT=$(brightnessctl g) && \
   MAX=$(brightnessctl m) && \
   PERCENT=$((BRIGHT * 100 / MAX)) && \
