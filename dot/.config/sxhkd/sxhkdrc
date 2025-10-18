@@ -28,8 +28,9 @@ super + shift + g
 # terminal emulator
 super + Return
 # kitty
-  uxterm
-
+# uxterm
+# uxterm -e "tmux attach-session -t uxterm || tmux new-session -s uxterm"
+  alacritty -e bash -c "tmux attach-session -t tty || tmux new-session -s tty"
 # program launcher
 super + d
 	rofi -show drun -theme "$HOME/.config/rofi/launch.rasi"

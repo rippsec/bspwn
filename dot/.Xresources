@@ -64,11 +64,11 @@ UXTerm*wideBoldFont: 0xProto Nerd Font Mono Bold
 XTerm*renderFont: true
 UXTerm*renderFont: true
 XTerm*forceBoxChars: false
-UXTerm*forceBoxChars: false
+UXTerm*forceBoxChars: true
 XTerm*charClass: 32:48,35:48,37-39:48,43:48,45-47:48,64:48,92:48,124:48,126:48,161:48,167:48,176-178:48,187:48,188-192:48,196:48,213:48,215:48,247:48
 UXTerm*charClass: 32:48,35:48,37-39:48,43:48,45-47:48,64:48,92:48,124:48,126:48,161:48,167:48,176-178:48,187:48,188-192:48,196:48,213:48,215:48,247:48
-XTerm*vt100.scaleHeight: 1.2
-UXTerm*vt100.scaleHeight: 1.2
+XTerm*vt100.scaleHeight: 1.0
+UXTerm*vt100.scaleHeight: 1.0
 XTerm*boldMode: true
 UXTerm*boldMode: true
 
@@ -76,7 +76,7 @@ UXTerm*boldMode: true
 ! Cursor Settings
 ! --------------------------
 
-XTerm*cursorBar: true
+! XTerm*cursorBar: true
 XTerm*pointerShape: box
 UXTerm*pointerShape: box
 XTerm*alwaysHighlight: true
@@ -111,18 +111,21 @@ XTerm*backspaceKeyIsErase: true
 UXTerm*backspaceKeyIsErase: true
 XTerm*deleteIsDEL: false
 UXTerm*deleteIsDEL: false
-XTerm*ttyModes: -ctsxon -vhangup -hup erase ^?
-UXTerm*ttyModes: -ctsxon -vhangup -hup erase ^?
+! XTerm*ttyModes: -ctsxon -vhangup -hup erase ^?
+! UXTerm*ttyModes: -ctsxon -vhangup -hup erase ^?
+XTerm*ttyModes: erase ^?
+UXTerm*ttyModes: erase ^?
+
 
 ! --------------------------
 ! Window Settings
 ! --------------------------
-XTerm*geometry: 100x30
-UXTerm*geometry: 100x30
+XTerm*geometry: 123x40
+UXTerm*geometry: 800x160
 XTerm*borderWidth: 0
 UXTerm*borderWidth: 0
-XTerm*internalBorder: 10
-UXTerm*internalBorder: 10
+XTerm*internalBorder: 15
+UXTerm*internalBorder: 15
 XTerm*title: XTerm
 UXTerm*title: UXTerm
 XTerm*iconName: xterm-icon
@@ -156,61 +159,65 @@ UXTerm*keepSelectionProgs: xclipboard,xterm,xwinclip
 XTerm*selectToClipboard: true
 UXTerm*selectToClipboard: true
 
+
 ! --------------------------
-! Appearance Settings (Dracula)
+! Appearance Settings for UXTerm and XTerm
 ! --------------------------
-XTerm*foreground: #F8F8F2
-UXTerm*foreground: #F8F8F2
-XTerm*background: #282A36
-UXTerm*background: #282A36
-XTerm*cursorColor: #FFB86C
-UXTerm*cursorColor: #FFB86C
-XTerm*color0: #21222C
-UXTerm*color0: #21222C
-XTerm*color1: #FF5555
-UXTerm*color1: #FF5555
-XTerm*color2: #50FA7B
-UXTerm*color2: #50FA7B
-XTerm*color3: #F1FA8C
-UXTerm*color3: #F1FA8C
-XTerm*color4: #5185a8
-UXTerm*color4: #5185a8
-XTerm*color5: #FF79C6
-UXTerm*color5: #FF79C6
-XTerm*color6:  #BD93F9
-UXTerm*color6: #BD93F9
-XTerm*color7: #BFBFBF
-UXTerm*color7: #BFBFBF
-XTerm*color8: #4D4D4D
-UXTerm*color8: #4D4D4D
-XTerm*color9: #FF6E67
-UXTerm*color9: #FF6E67
-XTerm*color10: #5AF78E
-UXTerm*color10: #5AF78E
-XTerm*color11: #F4F99D
-UXTerm*color11: #F4F99D
-XTerm*color12: #CAA9FA
-UXTerm*color12: #CAA9FA
-XTerm*color13: #FF92D0
-UXTerm*color13: #FF92D0
-XTerm*color14: #9AEDFE
-UXTerm*color14: #9AEDFE
-XTerm*color15: #E6E6E6
-UXTerm*color15: #E6E6E6
+XTerm*foreground:  #B3B1AD
+UXTerm*foreground: #B3B1AD
+XTerm*background:  #171717
+UXTerm*background: #171717
+XTerm*cursorColor: #E6B450
+UXTerm*cursorColor: #E6B450
+
+XTerm*color0:  #0A0E14
+UXTerm*color0: #0A0E14
+XTerm*color1:  #FF3333
+UXTerm*color1: #FF3333
+XTerm*color2:  #C2D94C
+UXTerm*color2: #C2D94C
+XTerm*color3:  #FF8F40
+UXTerm*color3: #FF8F40
+XTerm*color4:  #59C2FF
+UXTerm*color4: #59C2FF
+XTerm*color5:  #FFEE99
+UXTerm*color5: #FFEE99
+XTerm*color6:  #95E6CB
+UXTerm*color6: #95E6CB
+XTerm*color7:  #B3B1AD
+UXTerm*color7: #B3B1AD
+XTerm*color8:  #4D5566
+UXTerm*color8: #4D5566
+XTerm*color9:  #FF3333
+UXTerm*color9: #FF3333
+XTerm*color10: #C2D94C
+UXTerm*color10: #C2D94C
+XTerm*color11: #FF8F40
+UXTerm*color11: #FF8F40
+XTerm*color12: #59C2FF
+UXTerm*color12: #59C2FF
+XTerm*color13: #FFEE99
+UXTerm*color13: #FFEE99
+XTerm*color14: #95E6CB
+UXTerm*color14: #95E6CB
+XTerm*color15: #B3B1AD
+UXTerm*color15: #B3B1AD
+
 XTerm*colorBDMode: true
 UXTerm*colorBDMode: true
 XTerm*colorMode: true
 UXTerm*colorMode: true
 XTerm*colorULMode: true
 UXTerm*colorULMode: true
-XTerm*underLine: ~0
-UXTerm*underLine: ~0
-XTerm*highlightTextColor: #65BCFF
-UXTerm*highlightTextColor: #65BCFF
-XTerm*borderColor: #44475A
-UXTerm*borderColor: #44475A
+XTerm*underLine: true
+UXTerm*underLine: true
+XTerm*highlightTextColor: #59C2FF
+UXTerm*highlightTextColor: #59C2FF
+XTerm*borderColor: #0A0E14
+UXTerm*borderColor: #0A0E14
 XTerm*printAttributes: 0
 UXTerm*printAttributes: 0
+
 
 ! --------------------------
 ! Keyboard Shortcuts (Translations) - FIXED
@@ -230,7 +237,7 @@ XTerm*VT100.Translations: #override \n\
     Ctrl Shift <Key>Home: scroll-to(begin) \n\
     Ctrl Shift <Key>End: scroll-to(end) \n\
     Ctrl Shift <Key>minus: smaller-vt-font() \n\
-    Ctrl Shift <Key>equal: larger-vt-font() \n\
+    Ctrl Shift <Key>plus: larger-vt-font() \n\
     Ctrl Shift <Key>0: set-vt-font(d) \n\
     Ctrl Shift <Key>Q: quit()
 
@@ -249,7 +256,7 @@ UXTerm*VT100.Translations: #override \n\
     Ctrl Shift <Key>Home: scroll-to(begin) \n\
     Ctrl Shift <Key>End: scroll-to(end) \n\
     Ctrl Shift <Key>minus: smaller-vt-font() \n\
-    Ctrl Shift <Key>equal: larger-vt-font() \n\
+    Ctrl Shift <Key>plus: larger-vt-font() \n\
     Ctrl Shift <Key>0: set-vt-font(d) \n\
     Ctrl Shift <Key>Q: quit()
 

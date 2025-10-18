@@ -35,7 +35,7 @@ bspc config pointer_modifier mod4         # Use Super (Windows key) as the modif
 bspc config pointer_action1 move          # Super + left click to move windows
 bspc config pointer_action3 resize_corner # Super + right click to resize by corner
 
-bspc config center_pseudo_tiled true
+bspc config center_pseudo_tiled false
 bspc config honor_size_hints true
 
 #rules for programs
