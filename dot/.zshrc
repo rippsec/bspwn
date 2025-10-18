@@ -48,8 +48,8 @@ bindkey '^[[Z' undo                               # shift + tab undo
 #source $HOME/.local/share/fzf-tab/fzf-tab.plugin.zsh
 
 
-source $HOME/.local/share/zsh-copybuffer/zsh-copybuffer.zsh
-source $HOME/.local/share/zsh-notes/zsh-notes.plugin.zsh
+#source $HOME/.local/share/zsh-copybuffer/zsh-copybuffer.zsh
+#source $HOME/.local/share/zsh-notes/zsh-notes.plugin.zsh
 export EDITOR="vim"
 source <(fzf --zsh)
 

@@ -6,10 +6,10 @@ TERM = "xterm-256color"
 
 [window]
 # Window dimensions (columns x lines)
-dimensions = { columns = 123, lines = 40 }
+# dimensions = { columns = 123, lines = 40 }
 
 # Window padding
-padding = { x = 15, y = 15 }
+padding = { x = 5, y = 5 }
 
 # Disable window decorations
 decorations = "full"
@@ -44,7 +44,7 @@ italic = { family = "0xProto Nerd Font Mono", style = "Italic" }
 bold_italic = { family = "0xProto Nerd Font Mono", style = "Italic" }
 
 # Font size
-size = 14.0
+size = 12.0
 
 # Offset adjustments
 offset = { x = 0, y = 0 }
@@ -58,7 +58,7 @@ builtin_box_drawing = false
 [colors]
 # Default colors
 [colors.primary]
-background = "#171717"
+background = "#1c1c1c"
 foreground = "#B3B1AD"
 
 # Cursor colors
@@ -72,23 +72,23 @@ text = "#59C2FF"
 background = "#2D3F76"
 
 # Normal colors
-[colors.normal]
-black   = "#0A0E14"
-red     = "#FF3333"
-green   = "#C2D94C"
-yellow  = "#FF8F40"
-blue    = "#59C2FF"
-magenta = "#FFEE99"
-cyan    = "#95E6CB"
-white   = "#B3B1AD"
+[colors.bright]
+black   = "#1d2839"
+red     = "#a30000"
+green   = "#829520"
+yellow  = "#ba4d00"
+blue    = "#006cab"
+magenta = "#e5bf00"
+cyan    = "#239670"
+white   = "#aeaca8"
 
 # Bright colors
-[colors.bright]
-black   = "#4D5566"
+[colors.normal]
+black   = "#2e333d"
 red     = "#FF3333"
 green   = "#C2D94C"
 yellow  = "#FF8F40"
-blue    = "#59C2FF"
+blue    = "#007cc4"
 magenta = "#FFEE99"
 cyan    = "#95E6CB"
 white   = "#B3B1AD"
