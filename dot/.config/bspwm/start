@@ -57,9 +57,6 @@ xinput set-prop 'SynPS/2 Synaptics TouchPad' 'libinput Tapping Enabled' 1 &
 xinput set-prop 'SynPS/2 Synaptics TouchPad' "libinput Disable While Typing Enabled" 1 &
 #syndaemon -i 2.0 -d
 
-# Disable middle button from mouse (change this to yours)
-xinput set-button-map 'Logitech USB Optical Mouse' 1 0 3 4 5 6 7
-
 ### System Settings
 # Disable beep sound
 xset -b

@@ -13,7 +13,7 @@
 super + e
     enabled=$(xinput list-props 'SynPS/2 Synaptics TouchPad'  | grep 'Device Enabled'|tr -d "\t"|cut -d ":" -f2); \
     if [ "$enabled" -eq 1 ]; then \
-        xinput disable 'SynPS/2 Synaptics TouchPad'; \
+        xinput disable 'SynPS/2 Synaptics TouchPad' ; \
         notify-send -u low "Touchpad: DISABLED"; \
     else \
         xinput enable 'SynPS/2 Synaptics TouchPad'; \
@@ -130,10 +130,10 @@ super + x
 #	pamixer -t
 
 #XF86MonBrightnessUp
-#         brightnessctl s +10%
+#         brightnessctl s +1%
 
 #XF86MonBrightnessDown
-#         brightnessctl s 10%-
+#         brightnessctl s 1%-
 
 XF86AudioMicMute
 	$HOME/.config/sxhkd/scripts/micvol.sh toggle
@@ -160,14 +160,14 @@ XF86AudioMute
   fi
 
 XF86MonBrightnessUp
-  brightnessctl s +10% && \
+  brightnessctl s +1% && \
   BRIGHT=$(brightnessctl g) && \
   MAX=$(brightnessctl m) && \
   PERCENT=$((BRIGHT * 100 / MAX)) && \
   notify-send -u low -h string:x-canonical-private-synchronous:brightness "Brightness: $PERCENT%" -h int:value:$PERCENT -t 1000
 
 XF86MonBrightnessDown
-  brightnessctl s 10%- && \
+  brightnessctl s 1%- && \
   BRIGHT=$(brightnessctl g) && \
   MAX=$(brightnessctl m) && \
   PERCENT=$((BRIGHT * 100 / MAX)) && \

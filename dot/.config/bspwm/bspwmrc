@@ -60,4 +60,4 @@ xrdb -merge ~/.Xresources
 export XCURSOR_SIZE=32
 export XCURSOR_THEME=Adwaita
 
-vibrant-cli eDP-1 0.3
+#vibrant-cli eDP-1 0.3
