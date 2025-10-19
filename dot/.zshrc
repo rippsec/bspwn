@@ -243,17 +243,17 @@ if [ "$color_prompt" = yes ]; then
         case $PROMPT_STYLE in
             detailed)
                 local ipaddr=$(get_ipaddr)
-                PROMPT="${BGCOLOR}${FGCOLOR}[%n${symbol}$ipaddr:%~]%(#.#.$)${ENDCOLOR}"
+                PROMPT="${BGCOLOR}${FGCOLOR}[%n${symbol}$ipaddr:%~]%(#.#.$)${ENDCOLOR} "
                 ;;
             ipdir)
                 local ipaddr=$(get_ipaddr)
-                PROMPT="${BGCOLOR}${FGCOLOR}[$ipaddr:%~]%(#.#.$)${ENDCOLOR}"
+                PROMPT="${BGCOLOR}${FGCOLOR}[$ipaddr:%~]%(#.#.$)${ENDCOLOR} "
                 ;;
             dir)
-                PROMPT="${BGCOLOR}${FGCOLOR}[%~]%(#.#.$)${ENDCOLOR}"
+                PROMPT="${BGCOLOR}${FGCOLOR}[%~]%(#.#.$)${ENDCOLOR} "
                 ;;
             minimal)
-                PROMPT="${BGCOLOR}${FGCOLOR}%(#.#.$)${ENDCOLOR}"
+                PROMPT="${BGCOLOR}${FGCOLOR}%(#.#.$)${ENDCOLOR} "
                 ;;
         esac
     }
@@ -352,7 +352,7 @@ if [ "$color_prompt" = yes ]; then
 
         local saved_prompt=$PROMPT
         #PROMPT="${FGCOLOR}%(#.#.$)${ENDCOLOR}"
-        PROMPT="%(#.#.$)"
+        PROMPT="%(#.#.$) "
         zle .reset-prompt
         PROMPT=$saved_prompt
 

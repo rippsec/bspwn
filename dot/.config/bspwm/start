@@ -99,7 +99,7 @@ process_list=(
   "lxde-settings-daemon"
   "xss-lock --ignore-sleep -- slock" # Add --ignore-sleep for robustness
   "xfce4-notes"
-  "picom"
+#  "picom"
   "xbindkeys"
 )
 
