@@ -9,7 +9,7 @@ TERM = "xterm-256color"
 # dimensions = { columns = 123, lines = 40 }
 
 # Window padding
-padding = { x = 5, y = 5 }
+padding = { x = 5, y = 10 }
 
 # Disable window decorations
 decorations = "full"
@@ -32,16 +32,16 @@ multiplier = 3
 
 [font]
 # Normal font
-normal = { family = "0xProto Nerd Font Mono", style = "Regular" }
+normal = { family = "Hack Nerd Font Mono", style = "Regular" }
 
 # Bold font
-bold = { family = "0xProto Nerd Font Mono", style = "Regular" }
+bold = { family = "Hack Nerd Font Mono", style = "Regular" }
 
 # Italic font
-italic = { family = "0xProto Nerd Font Mono", style = "Italic" }
+italic = { family = "Hack Nerd Font Mono", style = "Italic" }
 
 # Bold italic font
-bold_italic = { family = "0xProto Nerd Font Mono", style = "Italic" }
+bold_italic = { family = "Hack Nerd Font Mono", style = "Italic" }
 
 # Font size
 size = 12.0
@@ -53,12 +53,12 @@ offset = { x = 0, y = 0 }
 glyph_offset = { x = 0, y = 0 }
 
 # Use built-in font for box drawing characters
-builtin_box_drawing = false
+builtin_box_drawing = true
 
 [colors]
 # Default colors
 [colors.primary]
-background = "#1c1c1c"
+background = "#202020"
 foreground = "#B3B1AD"
 
 # Cursor colors
