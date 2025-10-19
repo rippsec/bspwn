@@ -2,6 +2,7 @@ set backupdir=~/.vimtmp/backup//
 set directory=~/.vimtmp/swap//
 set undodir=~/.vimtmp/undo//
 
+set ignorecase
 set ruler
 set list
 filetype on

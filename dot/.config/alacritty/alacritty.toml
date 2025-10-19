@@ -71,24 +71,22 @@ cursor = "#E6B450"
 text = "#59C2FF"
 background = "#2D3F76"
 
-# Normal colors
 [colors.bright]
-black   = "#1d2839"
-red     = "#a30000"
-green   = "#829520"
-yellow  = "#ba4d00"
-blue    = "#006cab"
-magenta = "#e5bf00"
-cyan    = "#239670"
-white   = "#aeaca8"
+black   = "#2e333d"
+red     = "#FF3333"
+green   = "#C2D94C"
+yellow  = "#FF8F40"
+blue    = "#58b6ed"
+magenta = "#FFEE99"
+cyan    = "#95E6CB"
+white   = "#B3B1AD"
 
-# Bright colors
 [colors.normal]
 black   = "#2e333d"
 red     = "#FF3333"
 green   = "#C2D94C"
 yellow  = "#FF8F40"
-blue    = "#007cc4"
+blue    = "#58b6ed"
 magenta = "#FFEE99"
 cyan    = "#95E6CB"
 white   = "#B3B1AD"
