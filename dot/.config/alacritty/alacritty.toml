@@ -64,7 +64,8 @@ foreground = "#B3B1AD"
 # Cursor colors
 [colors.cursor]
 text = "#171717"
-cursor = "#E6B450"
+#cursor = "#E6B450"
+cursor = "#FF3333"
 
 # Selection colors
 [colors.selection]
@@ -109,7 +110,7 @@ save_to_clipboard = true
 
 [cursor]
 # Cursor style
-style = { shape = "Block", blinking = "Off" }
+style = { shape = "Beam", blinking = "Off" }
 
 # Cursor blinking interval in milliseconds
 blink_interval = 750
