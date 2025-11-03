@@ -30,12 +30,19 @@ super + shift + f
 
 
 
-# terminal emulator
+# terminal emulator with tmux session
 super + Return
 # kitty
 # uxterm
 # uxterm -e "tmux attach-session -t uxterm || tmux new-session -s uxterm"
   alacritty -e bash -c "tmux attach-session -t tty || tmux new-session -s tty"
+
+# plain terminal
+super + shift + Return
+  alacritty
+
+
+
 # program launcher
 super + d
 	rofi -show drun -theme "$HOME/.config/rofi/launch.rasi"
@@ -120,11 +127,7 @@ super + shift + r
 
 #lock the screen
 super + x 
-  slock && pamixer -t
-  #betterlockscreen -l -q
-  #dm-tool lock
-  #/bin/xfce4-screensaver-command --lock
-  #$HOME/.config/sxhkd/scripts/lockscreen
+  xlock
 
 #brightness volume microphone etc...
 

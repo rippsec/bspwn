@@ -34,10 +34,10 @@ case "$chosen" in
 		 shutdown -r now
 		;;
 	$lock)
-		if command -v slock; then
-			slock
+		if command -v xlock; then
+			xlock
 		else
-			msg "Lock command 'slock' not found. Please install it."
+			msg "Lock command 'xlock' not found. Please install it."
 		fi
 		;;
 	$suspend)

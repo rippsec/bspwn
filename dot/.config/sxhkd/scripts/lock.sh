@@ -1,0 +1,6 @@
+#!/bin/bash
+pamixer -t
+playerctl --all-players pause
+i3lock -c 000000 --nofork
+# Optional: unmute/resume after unlock
+pamixer -u  # unmute

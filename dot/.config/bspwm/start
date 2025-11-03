@@ -1,53 +1,15 @@
 #!/bin/bash
 
-##################### AUTOSTART ###############################
-
-# Set screen resolution
-# xrandr -s 1600x900
-#feh --bg-fill $HOME/.config/bspwm/_img/img.png
-
-### Wallpaper
-# Use feh to set image wallpaper, example
-#feh --bg-fill ~/Pictures/wallpapers/bitmap.png
-
-# solid color
-#hsetroot -add "#760000" -add "#000000" -gradient 0
-#hsetroot -root -solid "#111111"
-#hsetroot -solid "#7f0808"
+# additional settings
 
 #feh --bg-fill /usr/share/backgrounds/kali-16x9/bt-4chinese4a-1440x900.jpg || hsetroot -solid '#121212'
 feh --bg-fill $HOME/.config/bspwm/kalib.jpg || hsetroot -solid '#121212'
-#hsetroot -solid "#9d0000" -center "$HOME/.config/bspwm/_img/img.png"
-#hsetroot -solid "#770000"
-#hsetroot -solid 121212
-
-function _background() {
-  # Custom wallpaper path
-  wallpaper="$HOME/Pictures/wallpapers/x.png"
-
-  # Default background image path
-  default_bg="$HOME/.config/bspwm/_img/bg.png"
-  # Check if custom wallpaper exists
-  if [ -f "$wallpaper" ]; then
-    feh --bg-fill "$wallpaper"
-  else
-    # Check if default background image exists
-    if [ -f "$default_bg" ]; then
-      hsetroot -solid "#A90A0A" -center "$default_bg"
-    else
-      # Fallback to powderblue color
-      hsetroot -solid "#B0E0E6"
-    fi
-  fi
-}
-
-#_background
 
 ### Mouse and Touchpad Settings
 # TrackPoint settings
 xinput set-prop 'TPPS/2 IBM TrackPoint' 'libinput Accel Speed' -0.6 &
 
-# Touchpad settings for T470
+# Touchpad settings for T450
 xinput set-prop 'SynPS/2 Synaptics TouchPad' 'libinput Accel Speed' -0.1 &
 xinput set-prop 'SynPS/2 Synaptics TouchPad' 'libinput Scroll Method Enabled' 0 1 0 &
 xinput set-prop 'SynPS/2 Synaptics TouchPad' 'libinput Horizontal Scroll Enabled' 1 &
@@ -86,6 +48,7 @@ restart_process() {
 # In your autostart script, before restarting processes:
 pkill -f "xss-lock.*slock" || true # Force-kill existing instances
 pkill -f xfce4-notifyd || true#
+
 # Define processes (use quotes for commands with arguments)
 process_list=(
   #  "kdeconnectd"
@@ -108,6 +71,4 @@ for process in "${process_list[@]}"; do
   restart_process $process
 done
 
-############################################################
-redshift -x
-redshift -P -O 4500
+redshift -x ; redshift -P -O 4500

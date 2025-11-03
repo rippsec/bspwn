@@ -48,24 +48,24 @@ DISPLAY=":$(ls /tmp/.X11-unix/ | grep -oP 'X\d+' | sed 's/X//' | head -n1)"
 echo "Locking $ACTIVE_USER on $DISPLAY (Xauthority: ${XAUTH:-none})" >> /tmp/lid.log
 
 # Lock screen
-if command -v slock >/dev/null; then
-    # Run slock as the active user
+if command -v xlock >/dev/null; then
+    # Run xlock as the active user
     if [ "$(id -u)" = "0" ]; then
-        sudo -u "$ACTIVE_USER" env DISPLAY="$DISPLAY" XAUTHORITY="$XAUTH" slock &
+        sudo -u "$ACTIVE_USER" env DISPLAY="$DISPLAY" XAUTHORITY="$XAUTH" xlock &
     else
-        env DISPLAY="$DISPLAY" XAUTHORITY="$XAUTH" slock &
+        env DISPLAY="$DISPLAY" XAUTHORITY="$XAUTH" xlock &
     fi
     
-    # Give slock time to initialize
+    # Give xlock time to initialize
     sleep 1
     
-    # Verify slock is running
-    if ! pgrep -u "$ACTIVE_USER" slock >/dev/null; then
-        echo "Error: slock failed to start" >> /tmp/lid.log
+    # Verify xlock is running
+    if ! pgrep -u "$ACTIVE_USER" xlock >/dev/null; then
+        echo "Error: xlock failed to start" >> /tmp/lid.log
         exit 1
     fi
 else
-    echo "Error: slock not found" >> /tmp/lid.log
+    echo "Error: xlock not found" >> /tmp/lid.log
     exit 1
 fi
 
