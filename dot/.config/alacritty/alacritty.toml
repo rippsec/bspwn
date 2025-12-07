@@ -58,7 +58,8 @@ builtin_box_drawing = true
 [colors]
 # Default colors
 [colors.primary]
-background = "#202020"
+# background = "#202020"
+background = "#000000"
 foreground = "#B3B1AD"
 
 # Cursor colors

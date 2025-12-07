@@ -104,6 +104,9 @@ super + shift + escape
 Print
   flameshot gui
 
+super + shift + s 
+  flameshot gui
+
 #selects a region & copies it to clipboard
 ctrl + Print
 	$HOME/.config/sxhkd/scripts/scc.sh -r -c ; notify-send -u low 'screenshot: copied region to clipboard' -t 777

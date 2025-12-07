@@ -3,7 +3,7 @@
 # additional settings
 
 #feh --bg-fill /usr/share/backgrounds/kali-16x9/bt-4chinese4a-1440x900.jpg || hsetroot -solid '#121212'
-feh --bg-fill $HOME/.config/bspwm/kalib.jpg || hsetroot -solid '#121212'
+feh --bg-fill /usr/share/backgrounds/kali-16x9/backtrack-3-black.png || hsetroot -solid '#121212'
 
 ### Mouse and Touchpad Settings
 # TrackPoint settings
@@ -71,4 +71,4 @@ for process in "${process_list[@]}"; do
   restart_process $process
 done
 
-redshift -x ; redshift -P -O 4500
+redshift -x ; redshift -P -O 2500
