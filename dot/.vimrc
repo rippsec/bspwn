@@ -2,9 +2,6 @@ set backupdir=~/.vimtmp/backup//
 set directory=~/.vimtmp/swap//
 set undodir=~/.vimtmp/undo//
 
-" Set cursor shapes for different modes
-set guicursor=n-v-c:block,i-ci-ve:ver25,r-cr:hor20,o:hor50
-
 set ignorecase
 set ruler
 set list

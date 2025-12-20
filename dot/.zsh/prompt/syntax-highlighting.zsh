@@ -45,7 +45,7 @@ if [ -f /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
     ZSH_HIGHLIGHT_STYLES[bracket-level-5]=fg=cyan
     ZSH_HIGHLIGHT_STYLES[cursor-matchingbracket]=standout
     ZSH_HIGHLIGHT_STYLES[alias]=fg=magenta
-    ZSH_HIGHLIGHT_REGEXP+=('sudo' bg=red,fg=black,bold)
+    ZSH_HIGHLIGHT_REGEXP+=('sudo' bg=#ff0000,fg=#ffbb00,bold)
     ZSH_HIGHLIGHT_REGEXP+=('sudo' bg=red,fg=black,bold)
     ZSH_HIGHLIGHT_REGEXP+=('rm(\s+-[^\s]+|\s+--[^\s]+)*' bg=red,fg=black,bold)
     ZSH_HIGHLIGHT_REGEXP+=('sudo\s+rm(\s+-[^\s]+|\s+--[^\s]+)*' bg=red,fg=black,bold)
