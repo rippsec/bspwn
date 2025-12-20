@@ -112,7 +112,7 @@ save_to_clipboard = true
 
 [cursor]
 # Cursor style
-style = { shape = "Beam", blinking = "Off" }
+style = { shape = "Block", blinking = "Off" }
 
 # Cursor blinking interval in milliseconds
 blink_interval = 750
