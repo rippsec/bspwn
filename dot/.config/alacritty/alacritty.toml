@@ -9,7 +9,7 @@ TERM = "xterm-256color"
 # dimensions = { columns = 123, lines = 40 }
 
 # Window padding
-padding = { x = 5, y = 0 }
+padding = { x = 15, y = 10 }
 
 # Disable window decorations
 decorations = "full"
@@ -112,7 +112,7 @@ save_to_clipboard = true
 
 [cursor]
 # Cursor style
-style = { shape = "Block", blinking = "Off" }
+style = { shape = "Beam", blinking = "Off" }
 
 # Cursor blinking interval in milliseconds
 blink_interval = 750
