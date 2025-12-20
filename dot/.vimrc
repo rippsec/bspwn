@@ -47,7 +47,6 @@ nnoremap <leader>P "+P
 set clipboard=unnamedplus
 set t_Co=256
 
-
 " autosave
 :au FocusLost * silent! wa
 set updatetime=15000  " 15 second

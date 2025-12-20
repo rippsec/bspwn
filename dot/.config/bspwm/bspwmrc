@@ -19,8 +19,7 @@ export XDG_DATA_DIRS=/var/lib/flatpak/exports/share:$HOME/.local/share/flatpak/e
 bspc monitor -d 1 2 3 4 5 6 7 8 9 0
 
 #border colors
-# bspc config focused_border_color "#c60505"
-# bspc config normal_border_color "#000000"
+bspc config focused_border_color "#c60505"
 
 #border width, gap, ratio etc...
 bspc config border_width 1
@@ -52,7 +51,8 @@ bspc rule -a "Color_picker_gui.py" state=floating rectangle=400x400
 bspc rule -a "Xfce4-notes" state=floating sticky=on rectangle=400x400
 
 #scripts
-"$HOME/.config/bspwm/start"
+$HOME/.config/bspwm/start
+# $HOME/.config/bspwm/custom/touchgrass daemon
 
 #(cursor theme is in ~/.icons and you "select it" in the ~/.Xresources file)
 xsetroot -cursor_name left_ptr -xcf /usr/share/icons/Adwaita/cursors/left_ptr 32
@@ -60,4 +60,4 @@ xrdb -merge ~/.Xresources
 export XCURSOR_SIZE=32
 export XCURSOR_THEME=Adwaita
 
-vibrant-cli eDP-1 0.6
+vibrant-cli eDP-1 0.3

@@ -9,7 +9,7 @@ TERM = "xterm-256color"
 # dimensions = { columns = 123, lines = 40 }
 
 # Window padding
-padding = { x = 5, y = 10 }
+padding = { x = 20, y = 20 }
 
 # Disable window decorations
 decorations = "full"
@@ -32,16 +32,16 @@ multiplier = 3
 
 [font]
 # Normal font
-normal = { family = "Hack Nerd Font Mono", style = "Regular" }
+normal = { family = "AdwaitaMono Nerd Font Mono", style = "Regular" }
 
 # Bold font
-bold = { family = "Hack Nerd Font Mono", style = "Regular" }
+bold = { family = "AdwaitaMono Nerd Font Mono", style = "Regular" }
 
 # Italic font
-italic = { family = "Hack Nerd Font Mono", style = "Italic" }
+italic = { family = "AdwaitaMono Nerd Font Mono", style = "Italic" }
 
 # Bold italic font
-bold_italic = { family = "Hack Nerd Font Mono", style = "Italic" }
+bold_italic = { family = "AdwaitaMono Nerd Font Mono", style = "Italic" }
 
 # Font size
 size = 12.0
@@ -58,40 +58,40 @@ builtin_box_drawing = true
 [colors]
 # Default colors
 [colors.primary]
-# background = "#202020"
-background = "#000000"
+background = "#2c2c2c"
 foreground = "#B3B1AD"
 
 # Cursor colors
 [colors.cursor]
-text = "#171717"
-#cursor = "#E6B450"
-cursor = "#FF3333"
+text = "#000000"
+cursor = "#DCA3A3"
 
 # Selection colors
 [colors.selection]
 text = "#59C2FF"
 background = "#2D3F76"
 
-[colors.bright]
-black   = "#2e333d"
-red     = "#FF3333"
-green   = "#C2D94C"
-yellow  = "#FF8F40"
-blue    = "#58b6ed"
-magenta = "#FFEE99"
-cyan    = "#95E6CB"
-white   = "#B3B1AD"
 
-[colors.normal]
-black   = "#2e333d"
-red     = "#FF3333"
-green   = "#C2D94C"
-yellow  = "#FF8F40"
-blue    = "#58b6ed"
-magenta = "#FFEE99"
-cyan    = "#95E6CB"
-white   = "#B3B1AD"
+[colors.bright] # ColorIntense
+black   = "#709080"
+red     = "#DCA3A3"
+green   = "#72D5A3"
+yellow  = "#F0DFAF"
+blue    = "#94BFF3"
+magenta = "#EC93D3"
+cyan    = "#93E0E3"
+white   = "#FFFFFF"
+
+[colors.normal] # Color
+black   = "#709080"
+red     = "#DCA3A3"
+green   = "#72D5A3"
+yellow  = "#F0DFAF"
+blue    = "#94BFF3"
+magenta = "#EC93D3"
+cyan    = "#93E0E3"
+white   = "#FFFFFF"
+
 
 [bell]
 # Visual bell animation
@@ -111,7 +111,7 @@ save_to_clipboard = true
 
 [cursor]
 # Cursor style
-style = { shape = "Beam", blinking = "Off" }
+style = { shape = "Block", blinking = "Off" }
 
 # Cursor blinking interval in milliseconds
 blink_interval = 750

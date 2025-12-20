@@ -2,8 +2,10 @@
 
 # additional settings
 
-#feh --bg-fill /usr/share/backgrounds/kali-16x9/bt-4chinese4a-1440x900.jpg || hsetroot -solid '#121212'
-feh --bg-fill /usr/share/backgrounds/kali-16x9/backtrack-3-black.png || hsetroot -solid '#121212'
+wallpape="$HOME/.config/bspwm/img/kali.png
+feh --bg-fill "$wallpape" || hsetroot -solid '#121212'
+
+hsetroot -solid '#121212'
 
 ### Mouse and Touchpad Settings
 # TrackPoint settings

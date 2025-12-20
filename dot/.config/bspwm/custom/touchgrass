@@ -1,0 +1,373 @@
+#!/bin/bash
+
+# Touch Grass Timer - Enhanced with pause detection
+# Auto-lock screen after 45 minutes of active use
+# Pauses during manual locks and lid close
+
+TIMER_FILE="/tmp/touch_grass_timer"
+PAUSE_FILE="/tmp/touch_grass_pause"
+STATE_FILE="/tmp/touch_grass_state"
+LOCK_TRIGGERED="/tmp/touch_grass_locked"
+PAUSED_TIME_FILE="/tmp/touch_grass_paused_time"
+CONFIG_FILE="$HOME/.config/touch-grass/config"
+DAEMON_PID_FILE="/tmp/touch_grass_daemon.pid"
+
+# Default settings (in seconds)
+WORK_DURATION=2700 # 45 minutes
+CHECK_INTERVAL=5   # Check every 5 seconds for better responsiveness
+
+# Lock screen messages
+LOCK_MESSAGES=(
+  "You've been on the computer too long!"
+  "Time to touch grass! 🌱"
+  "Go outside and breathe!"
+  "Your eyes need a break!"
+  "Stand up and stretch!"
+  "Time for a real-world quest!"
+  "The sun misses you!"
+  "Go hydrate yourself!"
+)
+
+# Colors for i3lock-color (if used)
+BG_COLOR="1e1e2eFF"
+TEXT_COLOR="cdd6f4FF"
+HIGHLIGHT_COLOR="f38ba8FF"
+
+# Load config
+load_config() {
+  if [[ -f "$CONFIG_FILE" ]]; then
+    source "$CONFIG_FILE"
+  fi
+  WORK_DURATION=${WORK_DURATION:-2700}
+  CHECK_INTERVAL=${CHECK_INTERVAL:-5}
+}
+
+# Initialize timer
+init_timer() {
+  mkdir -p "$(dirname "$CONFIG_FILE")"
+  if [[ ! -f "$TIMER_FILE" ]]; then
+    date +%s >"$TIMER_FILE"
+    echo "active" >"$STATE_FILE"
+  fi
+  rm -f "$LOCK_TRIGGERED"
+  rm -f "$PAUSE_FILE"
+}
+
+# Get random lock message
+get_lock_message() {
+  echo "${LOCK_MESSAGES[$RANDOM % ${#LOCK_MESSAGES[@]}]}"
+}
+
+# Check if screen is locked or lid is closed
+is_paused() {
+  # Check for manual lock (xlock, i3lock, etc)
+  if pgrep -x "i3lock|i3lock-color|slock|betterlockscreen" >/dev/null; then
+    return 0
+  fi
+
+  # Check if lid is closed
+  if [[ -f /proc/acpi/button/lid/LID/state ]]; then
+    if grep -q "closed" /proc/acpi/button/lid/LID/state; then
+      return 0
+    fi
+  fi
+
+  # Alternative lid detection for modern systems
+  for lid in /sys/class/power_supply/*/present; do
+    if [[ -f "$lid" ]]; then
+      local lid_state=$(cat "$lid" 2>/dev/null)
+      if [[ "$lid_state" == "0" ]]; then
+        return 0
+      fi
+    fi
+  done
+
+  # Check systemd logind for lid state
+  if command -v loginctl >/dev/null 2>&1; then
+    if loginctl show-session $(loginctl show-user $(whoami) -p Display --value) -p IdleHint --value 2>/dev/null | grep -q "yes"; then
+      # Additional check: if screen is actually locked
+      if pgrep -x "i3lock|slock" >/dev/null 2>&1; then
+        return 0
+      fi
+    fi
+  fi
+
+  return 1
+}
+
+# Lock screen with message (for auto-lock only)
+lock_screen() {
+  local message="$1"
+
+  # Detect available lock screen
+  if command -v betterlockscreen >/dev/null 2>&1; then
+    betterlockscreen -l dim --text "$message"
+  elif command -v i3lock-color >/dev/null 2>&1; then
+    i3lock-color \
+      --nofork \
+      --color="$BG_COLOR" \
+      --inside-color="${BG_COLOR}cc" \
+      --ring-color="$HIGHLIGHT_COLOR" \
+      --line-uses-inside \
+      --keyhl-color="$TEXT_COLOR" \
+      --bshl-color="$HIGHLIGHT_COLOR" \
+      --separator-color="00000000" \
+      --insidever-color="${BG_COLOR}cc" \
+      --ringver-color="$HIGHLIGHT_COLOR" \
+      --insidewrong-color="${BG_COLOR}cc" \
+      --ringwrong-color="$HIGHLIGHT_COLOR" \
+      --time-str="%H:%M" \
+      --date-str="%A, %d %B" \
+      --verif-text="Verifying..." \
+      --wrong-text="Wrong!" \
+      --noinput-text="No Input" \
+      --lock-text="Locking..." \
+      --lockfailed-text="Lock Failed" \
+      --time-font="FiraCode Nerd Font" \
+      --date-font="FiraCode Nerd Font" \
+      --layout-font="FiraCode Nerd Font" \
+      --verif-font="FiraCode Nerd Font" \
+      --wrong-font="FiraCode Nerd Font" \
+      --ind-pos="x+w/2:y+h/2" \
+      --time-pos="ix:iy-100" \
+      --date-pos="tx:ty+30" \
+      --greeter-text="$message" \
+      --greeter-pos="ix:iy+100" \
+      --greeter-color="$TEXT_COLOR" \
+      --greeter-size=24
+  elif command -v i3lock >/dev/null 2>&1; then
+    notify-send -u critical "Touch Grass Timer" "$message" -t 5000
+    i3lock -c "$BG_COLOR" -n
+  elif command -v slock >/dev/null 2>&1; then
+    notify-send -u critical "Touch Grass Timer" "$message" -t 5000
+    slock
+  else
+    notify-send -u critical "Touch Grass Timer" "$message - No lock screen found!" -t 10000
+    return 1
+  fi
+
+  return 0
+}
+
+# Reset timer
+reset_timer() {
+  date +%s >"$TIMER_FILE"
+  echo "active" >"$STATE_FILE"
+  rm -f "$LOCK_TRIGGERED"
+  rm -f "$PAUSE_FILE"
+  rm -f "$PAUSED_TIME_FILE"
+}
+
+# Pause timer
+pause_timer() {
+  if [[ ! -f "$PAUSE_FILE" ]]; then
+    date +%s >"$PAUSE_FILE"
+  fi
+}
+
+# Resume timer
+resume_timer() {
+  if [[ -f "$PAUSE_FILE" ]]; then
+    local pause_start=$(cat "$PAUSE_FILE")
+    local pause_end=$(date +%s)
+    local pause_duration=$((pause_end - pause_start))
+
+    # Add paused time to start time (effectively extending the deadline)
+    local current_start=$(cat "$TIMER_FILE")
+    local new_start=$((current_start + pause_duration))
+    echo "$new_start" >"$TIMER_FILE"
+
+    # Track total paused time
+    local total_paused=$(cat "$PAUSED_TIME_FILE" 2>/dev/null || echo 0)
+    total_paused=$((total_paused + pause_duration))
+    echo "$total_paused" >"$PAUSED_TIME_FILE"
+
+    rm -f "$PAUSE_FILE"
+  fi
+}
+
+# Daemon mode - continuously monitor
+daemon() {
+  # Save daemon PID
+  echo $$ >"$DAEMON_PID_FILE"
+
+  echo "Touch Grass Timer daemon started (${WORK_DURATION}s work intervals)"
+  echo "Timer will pause during manual locks and lid close"
+
+  local was_paused=false
+
+  while true; do
+    local is_currently_paused=false
+
+    # Check if we should pause
+    if is_paused; then
+      is_currently_paused=true
+
+      # If we just entered pause state
+      if [[ "$was_paused" == false ]]; then
+        echo "System paused (lock/lid closed) - timer paused"
+        pause_timer
+        was_paused=true
+      fi
+    else
+      # If we just resumed from pause
+      if [[ "$was_paused" == true ]]; then
+        echo "System resumed - timer resumed"
+        resume_timer
+        was_paused=false
+      fi
+    fi
+
+    # Only check timer if not paused
+    if [[ "$is_currently_paused" == false ]]; then
+      local current_time=$(date +%s)
+      local start_time=$(cat "$TIMER_FILE" 2>/dev/null || echo "$current_time")
+      local elapsed=$((current_time - start_time))
+      local remaining=$((WORK_DURATION - elapsed))
+
+      # Check if timer expired and not already locked
+      if [[ $elapsed -ge $WORK_DURATION && ! -f "$LOCK_TRIGGERED" ]]; then
+        echo "Work period complete! Locking screen..."
+
+        # Play sound notification
+        if command -v paplay >/dev/null 2>&1; then
+          paplay /usr/share/sounds/freedesktop/stereo/alarm-clock-elapsed.oga 2>/dev/null &
+        fi
+
+        # Show pre-lock notification
+        notify-send -u critical "Touch Grass Timer" "Time's up! Locking screen in 5 seconds..." -t 4000
+        sleep 5
+
+        # Mark as locked
+        touch "$LOCK_TRIGGERED"
+
+        # Lock screen with message
+        local message=$(get_lock_message)
+        lock_screen "$message"
+
+        # After unlock, reset timer
+        echo "Screen unlocked. Resetting timer..."
+        reset_timer
+        notify-send "Touch Grass Timer" "Timer reset. Next break in 45 minutes." -t 3000
+      fi
+
+      # Warning at 5 minutes remaining
+      if [[ $remaining -le 300 && $remaining -gt $((300 - CHECK_INTERVAL)) ]]; then
+        notify-send "Touch Grass Timer" "⚠️ 5 minutes until lock!" -t 3000
+      fi
+
+      # Warning at 1 minute remaining
+      if [[ $remaining -le 60 && $remaining -gt $((60 - CHECK_INTERVAL)) ]]; then
+        notify-send -u critical "Touch Grass Timer" "⚠️ 1 minute until lock!" -t 3000
+      fi
+    fi
+
+    sleep "$CHECK_INTERVAL"
+  done
+}
+
+# Status for polybar/statusbar
+status() {
+  # Check if daemon is running
+  if [[ ! -f "$DAEMON_PID_FILE" ]] || ! kill -0 $(cat "$DAEMON_PID_FILE" 2>/dev/null) 2>/dev/null; then
+    echo "%{F#5e5e5e}󰁪 OFF%{F-}" # Gray, inactive icon
+    return
+  fi
+
+  local current_time=$(date +%s)
+  local start_time=$(cat "$TIMER_FILE" 2>/dev/null || echo "$current_time")
+  local elapsed=$((current_time - start_time))
+  local remaining=$((WORK_DURATION - elapsed))
+
+  # Check if paused
+  if is_paused; then
+    echo "%{F#ebcb8b}󰏤 PAUSED%{F-}" # Yellow, paused icon
+    return
+  fi
+
+  if [[ $remaining -lt 0 ]]; then
+    remaining=0
+  fi
+
+  local minutes=$((remaining / 60))
+  local seconds=$((remaining % 60))
+
+  # Color and icon based on time remaining
+  local color="#a3be8c" # Green
+  local icon="󰥔"        # Grass/timer icon
+
+  if [[ $remaining -le 300 ]]; then
+    color="#ebcb8b" # Yellow
+    icon="󰥔"
+  fi
+  if [[ $remaining -le 60 ]]; then
+    color="#bf616a" # Red
+    icon="󰀦"        # Alert icon
+  fi
+
+  printf "%%{F%s}%s %02d:%02d%%{F-}" "$color" "$icon" "$minutes" "$seconds"
+}
+
+# Stop daemon
+stop_daemon() {
+  if [[ -f "$DAEMON_PID_FILE" ]]; then
+    local pid=$(cat "$DAEMON_PID_FILE")
+    if kill -0 "$pid" 2>/dev/null; then
+      kill "$pid"
+      echo "Daemon stopped (PID: $pid)"
+    else
+      echo "Daemon not running"
+    fi
+    rm -f "$DAEMON_PID_FILE"
+  else
+    echo "Daemon not running"
+  fi
+}
+
+# Main command handler
+load_config
+init_timer
+
+case "${1:-daemon}" in
+daemon | start)
+  # Check if already running
+  if [[ -f "$DAEMON_PID_FILE" ]] && kill -0 $(cat "$DAEMON_PID_FILE" 2>/dev/null) 2>/dev/null; then
+    echo "Daemon already running (PID: $(cat "$DAEMON_PID_FILE"))"
+    exit 1
+  fi
+  daemon
+  ;;
+stop)
+  stop_daemon
+  ;;
+reset)
+  reset_timer
+  echo "Timer reset"
+  ;;
+status)
+  status
+  ;;
+lock-now)
+  touch "$LOCK_TRIGGERED"
+  lock_screen "$(get_lock_message)"
+  reset_timer
+  ;;
+config)
+  echo "Config file: $CONFIG_FILE"
+  echo "Current work duration: $((WORK_DURATION / 60)) minutes"
+  echo ""
+  echo "To change duration, edit config file:"
+  echo "WORK_DURATION=3600  # 60 minutes"
+  ;;
+*)
+  echo "Usage: $0 {daemon|start|stop|reset|status|lock-now|config}"
+  echo ""
+  echo "  daemon    - Run timer daemon (default)"
+  echo "  stop      - Stop daemon"
+  echo "  reset     - Reset timer"
+  echo "  status    - Show current status (for polybar)"
+  echo "  lock-now  - Lock screen immediately"
+  echo "  config    - Show configuration"
+  exit 1
+  ;;
+esac
