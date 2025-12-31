@@ -8,10 +8,10 @@ show_options() {
   echo "┌── Current Configuration Options ──"
   for var in "${allowed[@]}"; do
     if [[ -v $var ]]; then
-      printf "│ [1;36m%-6s[0m ▸ %s
+      printf "│ [1;36m%-6s[0m ▸ %s
 " "$var" "${(P)var}"
     else
-      printf "│ [1;31m%-6s[0m ▸ %s
+      printf "│ [1;31m%-6s[0m ▸ %s
 " "$var" "(not set)"
     fi
   done
@@ -193,7 +193,7 @@ function clear_all(){
 function mac(){
     find /sys/class/net -mindepth 1 -maxdepth 1 ! -name lo -printf "%P: " -execdir cat {}/address \; \
         | sort -n -r \
-        | awk '{printf "[01;32m%s[0m - [01;31m%s[0m
+        | awk '{printf "[01;32m%s[0m - [01;31m%s[0m
 ",$1,$2 }'
 }
 

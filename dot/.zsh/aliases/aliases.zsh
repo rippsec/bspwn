@@ -48,3 +48,7 @@ alias rot13-encode='tr "A-Za-z" "N-ZA-Mn-za-m"'
 alias rot13-decode='tr "A-Za-z" "N-ZA-Mn-za-m"'
 alias copy='cp'
 alias move='mv'
+
+alias lsof='sudo lsof'
+alias autorecon='sudo autorecon'
+alias responder='sudo responder'

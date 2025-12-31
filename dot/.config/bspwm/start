@@ -2,10 +2,8 @@
 
 # additional settings
 
-wallpape="$HOME/.config/bspwm/img/kali.png
+wallpape="$HOME/.config/bspwm/img/kali.png"
 feh --bg-fill "$wallpape" || hsetroot -solid '#121212'
-
-hsetroot -solid '#121212'
 
 ### Mouse and Touchpad Settings
 # TrackPoint settings

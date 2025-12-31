@@ -50,6 +50,12 @@ super + d
 #switch between window
 super + Tab
   rofi -show window -selected-row 1 -theme "$HOME/.config/rofi/launch.rasi"
+
+alt + Tab
+  rofi -show window -selected-row 1 -theme "$HOME/.config/rofi/launch.rasi"
+
+
+
 # run program
 super + r
   rofi -show run -theme "$HOME/.config/rofi/launch.rasi"
