@@ -26,8 +26,12 @@ super + shift + g
 
 # browser
 super + shift + f
-  chromium --disable-gpu --disable-accelerated-2d-canvas --disable-accelerated-video-decode --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-renderer-backgrounding --disable-features=VizDisplayCompositor --disable-gcm-client --enable-unsafe-swiftshader --disable-webrtc
+  firefox-esr
 
+# caido
+
+super + shift + c
+  caido
 
 
 # terminal emulator with tmux session

@@ -40,30 +40,31 @@ shorten_path() {
 update_prompt() {
     # Determine symbol & prompt based on user
     local symbol='@'
-    local FGCOLOR='%{%B%F{1}%}'
-    local BGCOLOR=''
+    local FGCOLOR='%{%B%F{red}%}'
+    local BGCOLOR='' #'%{%B%K{white}%}'
     local ENDCOLOR='%{%b%f%k%}'
+    # ROOT INDICATOR
     if [[ $EUID -eq 0 ]]; then
         symbol='󰚌'
-        FGCOLOR='%{%B%F{0}%}'
-        BGCOLOR='%{%K{1}%}'
+        FGCOLOR='%{%B%F{white}%}'
+        BGCOLOR='%{%K{#ff0000}%}'
         ENDCOLOR='%{%b%f%k%}'
     fi
 
     case $PROMPT_STYLE in
         detailed)
             local ipaddr=$(get_ipaddr)
-            PROMPT="${BGCOLOR}${FGCOLOR}[%n${symbol}$ipaddr:%~]%(#.#.$)${ENDCOLOR} "
+            PROMPT="${BGCOLOR}${FGCOLOR}[%n${symbol}$ipaddr:%~]%(#.#.$)${ENDCOLOR}"
             ;;
         ipdir)
             local ipaddr=$(get_ipaddr)
-            PROMPT="${BGCOLOR}${FGCOLOR}[$ipaddr:%~]%(#.#.$)${ENDCOLOR} "
+            PROMPT="${BGCOLOR}${FGCOLOR}[$ipaddr:%~]%(#.#.$)${ENDCOLOR}"
             ;;
         dir)
-            PROMPT="${BGCOLOR}${FGCOLOR}[%~]%(#.#.$)${ENDCOLOR} "
+            PROMPT="${BGCOLOR}${FGCOLOR}[%~]%(#.#.$)${ENDCOLOR}"
             ;;
         minimal)
-            PROMPT="${BGCOLOR}${FGCOLOR}%(#.#.$)${ENDCOLOR} "
+            PROMPT="${BGCOLOR}${FGCOLOR}%(#.#.$)${ENDCOLOR}"
             ;;
     esac
 }
