@@ -29,11 +29,11 @@ style = "Bold"
 
 [font.italic]
 family = "AdwaitaMono Nerd Font Mono"
-style = "Italic"
+style = "Bold"
 
 [font.bold_italic]
 family = "AdwaitaMono Nerd Font Mono"
-style = "Italic"
+style = "Bold"
 
 [font.offset]
 x = 0

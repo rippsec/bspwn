@@ -1,5 +1,6 @@
 # sxhkdrc
 
+
 # wm independent hotkeys
 # --- custom bindings ---
 
@@ -20,16 +21,19 @@ super + e
         notify-send -u low "Touchpad: ENABLED"; \
     fi
 
-# browser
+# chromium
 super + shift + g
   chromium --disable-gpu --disable-accelerated-2d-canvas --disable-accelerated-video-decode --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-renderer-backgrounding --disable-features=VizDisplayCompositor --disable-gcm-client --enable-unsafe-swiftshader --disable-webrtc
 
-# browser
+# firefox
 super + shift + f
   firefox-esr
 
-# caido
+# brave
+super + shift + b
+  flatpak run com.brave.Browser
 
+# caido
 super + shift + c
   caido
 
@@ -48,21 +52,12 @@ super + shift + Return
 
 
 # program launcher
-super + d
+super + {d,r}
 	rofi -show drun -theme "$HOME/.config/rofi/launch.rasi"
 
 #switch between window
 super + Tab
-  rofi -show window -selected-row 1 -theme "$HOME/.config/rofi/launch.rasi"
-
-alt + Tab
-  rofi -show window -selected-row 1 -theme "$HOME/.config/rofi/launch.rasi"
-
-
-
-# run program
-super + r
-  rofi -show run -theme "$HOME/.config/rofi/launch.rasi"
+  rofi -show window -theme "$HOME/.config/rofi/window.rasi"
 
 # file explorer (rofi)
 #super + f
