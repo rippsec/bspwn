@@ -43,7 +43,7 @@ super + Return
 # kitty
 # uxterm
 # uxterm -e "tmux attach-session -t uxterm || tmux new-session -s uxterm"
-  alacritty -e bash -c "tmux attach-session -t tty || tmux new-session -s tty"
+  alacritty -e bash -c "tmux attach-session -t x || tmux new-session -s x"
 
 # plain terminal
 super + shift + Return
