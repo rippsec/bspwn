@@ -54,17 +54,17 @@ update_prompt() {
     case $PROMPT_STYLE in
         detailed)
             local ipaddr=$(get_ipaddr)
-            PROMPT="${BGCOLOR}${FGCOLOR}[%n${symbol}$ipaddr:%~]%(#.#.$)${ENDCOLOR}"
+            PROMPT="${BGCOLOR}${FGCOLOR}[%n${symbol}$ipaddr:%~]%(#.#.$)${ENDCOLOR} "
             ;;
         ipdir)
             local ipaddr=$(get_ipaddr)
-            PROMPT="${BGCOLOR}${FGCOLOR}[$ipaddr:%~]%(#.#.$)${ENDCOLOR}"
+            PROMPT="${BGCOLOR}${FGCOLOR}[$ipaddr:%~]%(#.#.$)${ENDCOLOR} "
             ;;
         dir)
-            PROMPT="${BGCOLOR}${FGCOLOR}[%~]%(#.#.$)${ENDCOLOR}"
+            PROMPT="${BGCOLOR}${FGCOLOR}[%~]%(#.#.$)${ENDCOLOR} "
             ;;
         minimal)
-            PROMPT="${BGCOLOR}${FGCOLOR}%(#.#.$)${ENDCOLOR}"
+            PROMPT="${BGCOLOR}${FGCOLOR}%(#.#.$)${ENDCOLOR} "
             ;;
     esac
 }
