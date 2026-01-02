@@ -48,17 +48,17 @@ def on_release(key):
 def print_status():
     output = ""
     if caps_on:
-        output += "%{B#FFFFFF}%{F#000000} 󰌎 %{F-}%{B-}"
+        output += "%{F#FFFFFF} 󰌎 %{F-}%{B-}"
     elif tab_pressed:
-        output += "%{B#FFFFFF}%{F#000000} 󰌒 %{F-}%{B-}"
+        output += "%{F#FFFFFF} 󰌒 %{F-}%{B-}"
     elif shift_pressed:
-        output += "%{B#FFFFFF}%{F#000000} 󰜷 %{F-}%{B-}"
+        output += "%{F#FFFFFF} 󰜷 %{F-}%{B-}"
     elif ctrl_pressed:
-        output += "%{B#FFFFFF}%{F#000000} 󰘴 %{F-}%{B-}"
+        output += "%{F#FFFFFF} 󰘴 %{F-}%{B-}"
     elif alt_pressed:
-        output += "%{B#FFFFFF}%{F#000000} 󰘵 %{F-}%{B-}"
+        output += "%{F#FFFFFF} 󰘵 %{F-}%{B-}"
     elif super_pressed:
-        output += "%{B#FFFFFF}%{F#000000} 󰘳 %{F-}%{B-}"
+        output += "%{F#FFFFFF} 󰘳 %{F-}%{B-}"
     else:
         output += "%{F#7c8fa5} 󰌌 %{F-}"
     print(output, flush=True)

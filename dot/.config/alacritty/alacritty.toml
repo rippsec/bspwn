@@ -8,8 +8,8 @@ title = "Alacritty"
 dynamic_title = true
 
 [window.padding]
-x = 5
-y = 0
+x = 15
+y = 15
 
 [scrolling]
 history = 10000
@@ -20,19 +20,19 @@ size = 10
 builtin_box_drawing = true
 
 [font.normal]
-family = "AdwaitaMono Nerd Font Mono"
+family = "Hack Nerd Font Mono"
 style = "Bold"
 
 [font.bold]
-family = "AdwaitaMono Nerd Font Mono"
+family = "Hack Nerd Font Mono"
 style = "Bold"
 
 [font.italic]
-family = "AdwaitaMono Nerd Font Mono"
+family = "Hack Nerd Font Mono"
 style = "Bold"
 
 [font.bold_italic]
-family = "AdwaitaMono Nerd Font Mono"
+family = "Hack Nerd Font Mono"
 style = "Bold"
 
 [font.offset]
