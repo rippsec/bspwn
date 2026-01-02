@@ -40,7 +40,7 @@ shorten_path() {
 update_prompt() {
     # Determine symbol & prompt based on user
     local symbol='@'
-    local FGCOLOR='%{%B%F{white}%}'
+    local FGCOLOR='%{%B%F{red}%}'
     local BGCOLOR='' #'%{%B%K{white}%}'
     local ENDCOLOR='%{%b%f%k%}'
     # ROOT INDICATOR

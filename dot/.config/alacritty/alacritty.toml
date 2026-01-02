@@ -21,19 +21,19 @@ builtin_box_drawing = true
 
 [font.normal]
 family = "AdwaitaMono Nerd Font Mono"
-style = "Regular"
+style = "Bold"
 
 [font.bold]
 family = "AdwaitaMono Nerd Font Mono"
-style = "Regular"
+style = "Bold"
 
 [font.italic]
 family = "AdwaitaMono Nerd Font Mono"
-style = "Regular"
+style = "Bold"
 
 [font.bold_italic]
 family = "AdwaitaMono Nerd Font Mono"
-style = "Regular"
+style = "Bold"
 
 [font.offset]
 x = 0
@@ -47,28 +47,28 @@ y = 0
 text = "#000000"
 
 [colors.primary]
-background = "#121212"
-foreground = "#CDD6F4"
+background = "#000000"
+foreground = "#FDFDFD"
 
 [colors.normal]
-black = "#45475A"
-red = "#F38BA8"
-green = "#A6E3A1"
-yellow = "#F9E2AF"
-blue = "#89B4FA"
-magenta = "#F5C2E7"
-cyan = "#94E2D5"
-white = "#BAC2DE"
+black = "#222222"
+red = "#F01818"
+green = "#24D830"
+yellow = "#F0D824"
+blue = "#7890F0"
+magenta = "#F078D8"
+cyan = "#54E4E4"
+white = "#A5A5A5"
 
 [colors.bright]
-black = "#585B70"
-red = "#F38BA8"
-green = "#A6E3A1"
-yellow = "#F9E2AF"
-blue = "#89B4FA"
-magenta = "#F5C2E7"
-cyan = "#94E2D5"
-white = "#A6ADC8"
+black = "#888888"
+red = "#EF8383"
+green = "#7ED684"
+yellow = "#EFE28B"
+blue = "#B3BFEF"
+magenta = "#EFB3E3"
+cyan = "#9CE2E2"
+white = "#FFFFFF"
 
 [bell]
 animation = "Linear"
