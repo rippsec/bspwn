@@ -48,7 +48,7 @@ text = "#000000"
 
 [colors.primary]
 background = "#000000"
-foreground = "#FDFDFD"
+foreground = "#808080"
 
 [colors.normal]
 black = "#000000"
