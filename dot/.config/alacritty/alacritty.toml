@@ -45,10 +45,11 @@ y = 0
 
 [colors.cursor]
 text = "#000000"
+cursor = "#9a9a9a"
 
 [colors.primary]
 background = "#000000"
-foreground = "#9a9a9a"
+foreground = "#d8dee9"
 
 [colors.normal]
 black = "#000000"
@@ -70,6 +71,11 @@ magenta = "#A020F0"
 cyan = "#AEEEEE"
 white = "#FFFFFF"
 
+
+[colors.selection]
+text = "#7aa2f7"
+background = "#28344a"
+
 [bell]
 animation = "Linear"
 duration = 0
@@ -79,6 +85,9 @@ command = "None"
 [selection]
 semantic_escape_chars = ",│`|:\"' ()[]{}<>	"
 save_to_clipboard = true
+
+
+
 
 [cursor]
 blink_interval = 750
