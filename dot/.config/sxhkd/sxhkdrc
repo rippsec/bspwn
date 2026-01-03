@@ -57,7 +57,7 @@ super + {d,r}
 
 #switch between window
 super + Tab
-  rofi -show window -theme "$HOME/.config/rofi/window.rasi"
+ rofi -show window -selected-row 1 -theme "$HOME/.config/rofi/window.rasi"
 
 # file explorer (rofi)
 #super + f
@@ -95,7 +95,7 @@ super + p
         notify-send -u low "Focus Follows Pointer: ON"; \
     fi
 
-super + shift + escape
+super + shift + Escape
   process_name="dbus-daemon"; \
   if pgrep -x "$process_name" > /dev/null; then \
     echo "Restarting $process_name..."; \
@@ -256,9 +256,10 @@ super + bracket{left,right}
 
 # focus the older or newer node in the focus history
 super + {o,i}
-	bspc wm -h off; \
-	bspc node {older,newer} -f; \
-	bspc wm -h on
+  bspc wm -h off; \
+  bspc node {older,newer} -f; \
+  bspc wm -h on
+
 
 # focus or send to the given desktop
 super + {_,shift + }{1-9,0}
