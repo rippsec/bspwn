@@ -261,5 +261,9 @@ UXTerm*VT100.Translations: #override \n\
     Ctrl Shift <Key>Q: quit()
 
 
+Sxiv.foreground: #000000
+Sxiv.background: #000000
+
+
 
 ! Apply changes with: xrdb -merge ~/.Xresources

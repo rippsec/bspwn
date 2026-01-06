@@ -114,11 +114,11 @@ super + shift + s
 
 #selects a region & copies it to clipboard
 ctrl + Print
-	$HOME/.config/sxhkd/scripts/scc.sh -r -c ; notify-send -u low 'screenshot: copied region to clipboard' -t 777
+	$HOME/.config/sxhkd/scripts/scc -r -c ; notify-send -u low 'screenshot: copied region to clipboard' -t 777
 
 #takes a full screenshot & saves
 alt + Print
-	$HOME/.config/sxhkd/scripts/scc.sh $HOME/Pictures/Screenshots/ ; notify-send -u low 'screenshot: saved desktop' -t 777
+	$HOME/.config/sxhkd/scripts/scc $HOME/Pictures/Screenshots/ ; notify-send -u low 'screenshot: saved desktop' -t 777
 
 
 #next prev desktop workspace
@@ -155,7 +155,7 @@ super + x
 #         brightnessctl s 1%-
 
 XF86AudioMicMute
-	$HOME/.config/sxhkd/scripts/micvol.sh toggle
+	$HOME/.config/sxhkd/scripts/micvol toggle
 #	pactl set-source-mute 1 toggle
 
 
@@ -225,7 +225,7 @@ super + {t,shift + t,f}
 	bspc node -t {tiled,pseudo_tiled,fullscreen}
 
 super + s 
-  "$HOME/.config/sxhkd/scripts/floating.sh"
+  "$HOME/.config/sxhkd/scripts/floating"
 
 super + ctrl + {x,y,z}
 	bspc node -g {locked,sticky,private}
