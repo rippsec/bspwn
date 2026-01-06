@@ -137,7 +137,7 @@ install_gtk_theme() {
 }
 
 install_fonts() {
-  local fonts=("FiraCode" "Hack" "Terminus" "0xProto" "Gohu")
+  local fonts=("FiraCode" "AdwaitaMono" "Symbols" "Hack" "Terminus" "0xProto" "Gohu")
   local tmp_dir="/dev/shm/nerd-fonts"
 
   mkdir -p "$tmp_dir"
