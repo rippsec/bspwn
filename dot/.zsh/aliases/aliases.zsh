@@ -24,9 +24,9 @@ alias acs="apt-cache search"
 alias del="/bin/rm -rfv"
 alias which="which -a"
 
-alias yp3="youtube-dl -x --audio-format mp3 --audio-quality 128K  --output '%(title)s.%(ext)s'"
-alias yp4="youtube-dl --format mp4  --output '%(title)s.%(ext)s'"
-alias ydl="youtube-dl"
+alias yp3="yt-dlp -x --audio-format mp3 --audio-quality 128K  --output '%(title)s.%(ext)s'"
+alias yp4="yt-dlp --format mp4  --output '%(title)s.%(ext)s'"
+alias ydl="yt-dlp"
 alias python='python -W "ignore"'
 alias smbmap='smbmap --no-banner'
 alias verse="verse | tr -s ' '| tr -d '' | sed 's/^ //'"

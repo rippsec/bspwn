@@ -6,18 +6,20 @@ wallpape="$HOME/.config/bspwm/img/kali.png"
 feh --bg-fill "$wallpape" || hsetroot -solid '#121212'
 
 ### Mouse and Touchpad Settings
-# TrackPoint settings
-xinput set-prop 'TPPS/2 IBM TrackPoint' 'libinput Accel Speed' -0.6 &
+# TrackPoint settings, (keyboard model update)
+xinput set-prop 'TPPS/2 IBM TrackPoint' 'libinput Accel Speed' -0.3 &
 
-# Touchpad settings for T450
-xinput set-prop 'SynPS/2 Synaptics TouchPad' 'libinput Accel Speed' -0.1 &
-xinput set-prop 'SynPS/2 Synaptics TouchPad' 'libinput Scroll Method Enabled' 0 1 0 &
-xinput set-prop 'SynPS/2 Synaptics TouchPad' 'libinput Horizontal Scroll Enabled' 1 &
-xinput set-prop 'SynPS/2 Synaptics TouchPad' 'libinput Natural Scrolling Enabled' 0 &
-xinput set-prop 'SynPS/2 Synaptics TouchPad' 'libinput Tapping Enabled' 1 &
+# Touchpad settings, using the id instead of name, preferably use the name
+# change this id in the ~/.config/sxhkd/sxhkdrc file for the on/off touchpad shortcut
+xinput set-prop '11' 'libinput Accel Speed' -0.1 &
+xinput set-prop '11' 'libinput Scroll Method Enabled' 0 1 0 &
+xinput set-prop '11' 'libinput Horizontal Scroll Enabled' 1 &
+xinput set-prop '11' 'libinput Natural Scrolling Enabled' 0 &
+xinput set-prop '11' 'libinput Tapping Enabled' 1 &
 
 # Disable touchpad while typing
-xinput set-prop 'SynPS/2 Synaptics TouchPad' "libinput Disable While Typing Enabled" 1 &
+xinput set-prop '11' "libinput Disable While Typing Enabled" 1 &
+
 #syndaemon -i 2.0 -d
 
 ### System Settings
@@ -62,7 +64,7 @@ process_list=(
   "lxde-settings-daemon"
   "xss-lock --ignore-sleep -- slock" # Add --ignore-sleep for robustness
   "xfce4-notes"
-#  "picom"
+  #  "picom"
   "xbindkeys"
 )
 
@@ -71,4 +73,5 @@ for process in "${process_list[@]}"; do
   restart_process $process
 done
 
-redshift -x ; redshift -P -O 2500
+redshift -x
+redshift -P -O 4500

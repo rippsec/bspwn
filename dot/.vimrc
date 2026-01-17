@@ -1,58 +1,56 @@
+" Must be first: disables vi compatibility and enables Vim features
+set nocompatible
+
+" Create central directories if they don't exist (run once or keep in vimrc)
+silent !mkdir -p ~/.vimtmp/backup ~/.vimtmp/swap ~/.vimtmp/undo > /dev/null 2>&1
+
+" Centralize backup, swap, and undo files
 set backupdir=~/.vimtmp/backup//
 set directory=~/.vimtmp/swap//
 set undodir=~/.vimtmp/undo//
+set undofile                " Enable persistent undo
 
-set ignorecase
-set ruler
-set list
-filetype on
-set mouse=a
-
-"set foldmethod=indent
-set nocompatible
+" Basic UI and editing
 syntax on
-set modelines=0
+filetype plugin indent on   " Better than just 'on'
 set number
+set ruler
+set showcmd
+set wildmenu                " Better command-line completion
 set encoding=utf-8
-set wrap
+set background=dark
+set t_Co=256                " 256-color support
+set mouse=a                 " Mouse support in all modes
+set hidden                  " Allow hidden buffers with unsaved changes
+set ttyfast                 " Faster terminal redraw
+set laststatus=2            " Always show status line
+set backspace=indent,eol,start  " Modern backspace behavior
 
+" Search
+set ignorecase smartcase
+set incsearch
+set hlsearch
+set showmatch
+
+" Indentation (2-space soft tabs)
 set tabstop=2
 set shiftwidth=2
 set softtabstop=2
+set expandtab
 set autoindent
 set copyindent
-set expandtab
-set noshiftround
 
-set hlsearch
-set incsearch
-set showmatch
-set smartcase
+" Display
+set wrap
+set list                    " Show invisible chars
+set listchars=tab:>\ ,trail:~,extends:>,precedes:<  " Common visible chars
 
-set hidden
-set ttyfast
-set laststatus=2
+" Clipboard: Use system clipboard for all yank/delete/change by default
+set clipboard=unnamedplus   " On Linux (requires +clipboard build); works like * and + registers
 
-set showcmd
-set background=dark
+" Simplified autosave: Save on focus loss and after 4s idle (common modern value)
+set updatetime=4000
+autocmd FocusLost,CursorHold,CursorHoldI * silent! update   " Save current buffer if modified
 
-" Copy to system clipboard
-vnoremap <leader>y "+y
-nnoremap <leader>Y "+yg_
-
-" Paste from system clipboard
-nnoremap <leader>p "+p
-nnoremap <leader>P "+P
-
-set clipboard=unnamedplus
-set t_Co=256
-
-" autosave
-:au FocusLost * silent! wa
-set updatetime=15000  " 15 second
-:au CursorHold * silent! update
-
-" Autosave when switching buffers or when focus is lost
-:set autowrite
-:set autowriteall
-
+" Optional: Clear search highlight with <C-l>
+nnoremap <silent> <C-l> :nohlsearch<CR><C-l>
