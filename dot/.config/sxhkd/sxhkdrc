@@ -12,12 +12,12 @@
 
 # Toggle Touchpad
 super + e
-    enabled=$(xinput list-props '11'  | grep 'Device Enabled'|tr -d "\t"|cut -d ":" -f2); \
+    enabled=$(xinput list-props 'SynPS/2 Synaptics TouchPad'  | grep 'Device Enabled'|tr -d "\t"|cut -d ":" -f2); \
     if [ "$enabled" -eq 1 ]; then \
-        xinput disable '11' ; \
+        xinput disable 'SynPS/2 Synaptics TouchPad' ; \
         notify-send -u low "Touchpad: DISABLED"; \
     else \
-        xinput enable '11'; \
+        xinput enable 'SynPS/2 Synaptics TouchPad'; \
         notify-send -u low "Touchpad: ENABLED"; \
     fi
 
@@ -57,7 +57,8 @@ super + {d,r}
 
 #switch between window
 super + Tab
- rofi -show window -selected-row 1 -theme "$HOME/.config/rofi/window.rasi"
+# rofi -show window -selected-row 1 -theme "$HOME/.config/rofi/window.rasi"
+  skippy-xd --paging
 
 # file explorer (rofi)
 #super + f
@@ -260,18 +261,19 @@ super + {o,i}
   bspc node {older,newer} -f; \
   bspc wm -h on
 
-alt + {o,i}
-  bspc wm -h off; \
-  bspc node {older,newer} -f; \
-  bspc wm -h on
-
-
 # focus or send to the given desktop
-super + {_,shift + }{1-9,0}
-	bspc {desktop -f,node -d} '^{1-9,10}'
+#super + {_,shift + }{1-9,0}
+#	bspc {desktop -f,node -d} '^{1-9,10}'
+
+
+# focus desktop
+super + {1-9,0}
+	bspc desktop -f '^{1-9,10}'
+# send node to desktop AND follow it
+super + shift + {1-9,0}
+	bspc node -d '^{1-9,10}' --follow
 
 #==============PRESELECT THE WINDOW================
-
 
 # preselect the direction
 super + ctrl + {h,j,k,l}
@@ -290,7 +292,6 @@ super + ctrl + shift + space
 	bspc query -N -d | xargs -I id -n 1 bspc node id -p cancel
 
 #=================== MOVE / RESIZE ========================
-
 
 # expand a window by moving one of its side outward
 super + alt + {h,j,k,l}

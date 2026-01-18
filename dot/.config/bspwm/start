@@ -5,20 +5,20 @@
 wallpape="$HOME/.config/bspwm/img/kali.png"
 feh --bg-fill "$wallpape" || hsetroot -solid '#121212'
 
-### Mouse and Touchpad Settings
+### Mouse and TouchPad Settings
 # TrackPoint settings, (keyboard model update)
-xinput set-prop 'TPPS/2 IBM TrackPoint' 'libinput Accel Speed' -0.3 &
+xinput set-prop 'TPPS/2 IBM TrackPoint' 'libinput Accel Speed' -0.7 &
 
-# Touchpad settings, using the id instead of name, preferably use the name
+# TouchPad settings, using the id instead of name, preferably use the name
 # change this id in the ~/.config/sxhkd/sxhkdrc file for the on/off touchpad shortcut
-xinput set-prop '11' 'libinput Accel Speed' -0.1 &
-xinput set-prop '11' 'libinput Scroll Method Enabled' 0 1 0 &
-xinput set-prop '11' 'libinput Horizontal Scroll Enabled' 1 &
-xinput set-prop '11' 'libinput Natural Scrolling Enabled' 0 &
-xinput set-prop '11' 'libinput Tapping Enabled' 1 &
+xinput set-prop 'SynPS/2 Synaptics TouchPad' 'libinput Accel Speed' -0.1 &
+xinput set-prop 'SynPS/2 Synaptics TouchPad' 'libinput Scroll Method Enabled' 0 1 0 &
+xinput set-prop 'SynPS/2 Synaptics TouchPad' 'libinput Horizontal Scroll Enabled' 1 &
+xinput set-prop 'SynPS/2 Synaptics TouchPad' 'libinput Natural Scrolling Enabled' 0 &
+xinput set-prop 'SynPS/2 Synaptics TouchPad' 'libinput Tapping Enabled' 1 &
 
 # Disable touchpad while typing
-xinput set-prop '11' "libinput Disable While Typing Enabled" 1 &
+xinput set-prop 'SynPS/2 Synaptics TouchPad' "libinput Disable While Typing Enabled" 1 &
 
 #syndaemon -i 2.0 -d
 
@@ -72,6 +72,11 @@ Restart each process
 for process in "${process_list[@]}"; do
   restart_process $process
 done
+
+if pgrep -f "skippy-xd --start-daemon" > /dev/null; then
+  pkill -USR1 skippy-xd
+fi
+ skippy-xd --start-daemon
 
 redshift -x
 redshift -P -O 4500
