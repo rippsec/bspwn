@@ -1,186 +1,146 @@
-# Alacritty Configuration
-# Place this file at ~/.config/alacritty/alacritty.toml
-
 [env]
 TERM = "xterm-256color"
 
 [window]
-# Window dimensions (columns x lines)
-# dimensions = { columns = 123, lines = 40 }
-
-# Window padding
-padding = { x = 15, y = 10 }
-
-# Disable window decorations
 decorations = "full"
-
-# Startup mode
 startup_mode = "Windowed"
-
-# Window title
 title = "Alacritty"
-
-# Dynamic title
 dynamic_title = true
 
-[scrolling]
-# Maximum number of lines in the scrollback buffer
-history = 10000
+[window.padding]
+x = 15
+y = 15
 
-# Scrolling multiplier
+[scrolling]
+history = 10000
 multiplier = 3
 
 [font]
-# Normal font
-normal = { family = "AdwaitaMono Nerd Font Mono", style = "Bold" }
-
-# Bold font
-bold = { family = "AdwaitaMono Nerd Font Mono", style = "Bold" }
-
-# Italic font
-italic = { family = "AdwaitaMono Nerd Font Mono", style = "Italic" }
-
-# Bold italic font
-bold_italic = { family = "AdwaitaMono Nerd Font Mono", style = "Italic" }
-
-# Font size
-size = 12.0
-
-# Offset adjustments
-offset = { x = 0, y = 0 }
-
-# Glyph offset
-glyph_offset = { x = 0, y = 0 }
-
-# Use built-in font for box drawing characters
+size = 12
 builtin_box_drawing = true
 
-[colors]
+[font.normal]
+family = "AdwaitaMono Nerd Font Mono"
+style = "Regular"
+
+[font.bold]
+family = "AdwaitaMono Nerd Font Mono"
+style = "Regular"
+
+[font.italic]
+family = "AdwaitaMono Nerd Font Mono"
+style = "Regular"
+
+[font.bold_italic]
+family = "AdwaitaMono Nerd Font Mono"
+style = "Regular"
+
+[font.offset]
+x = 0
+y = 0
+
+[font.glyph_offset]
+x = 0
+y = 0
 
 [colors.cursor]
 text = "#000000"
-cursor = "#ff3333"
+cursor = "#9a9a9a"
 
 [colors.primary]
-background = '#272a34'
-foreground = '#FFFFFF'
+background = "#151515"
+foreground = "#d8dee9"
 
 [colors.normal]
-black   = '#1F2229'
-red     = '#EC0101'
-green   = '#47D4B9'
-yellow  = '#FF8A18'
-blue    = '#277FFF'
-magenta = '#D71655'
-cyan    = '#05A1F7'
-white   = '#FFFFFF'
+black = "#000000"
+red = "#FF0000"
+green = "#00FF00"
+yellow = "#FFFF00"
+blue = "#00BFFF"
+magenta = "#FFC0CB"
+cyan = "#40E0D0"
+white = "#BEBEBE"
 
 [colors.bright]
-black   = '#1F2229'
-red     = '#D41919'
-green   = '#5EBDAB'
-yellow  = '#FEA44C'
-blue    = '#367bf0'
-magenta = '#BF2E5D'
-cyan    = '#49AEE6'
-white   = '#FFFFFF'
+black = "#414141"
+red = "#FFA500"
+green = "#98FB98"
+yellow = "#FFFF00"
+blue = "#0000CD"
+magenta = "#A020F0"
+cyan = "#AEEEEE"
+white = "#FFFFFF"
 
 
-
-
-
+[colors.selection]
+text = "#7aa2f7"
+background = "#28344a"
 
 [bell]
-# Visual bell animation
 animation = "Linear"
 duration = 0
 color = "#171717"
-
-# Command executed on bell
 command = "None"
 
 [selection]
-# Characters that are used as separators for "semantic words"
-semantic_escape_chars = ",│`|:\"' ()[]{}<>\t"
-
-# When set to true, selected text will be copied to the primary clipboard
+semantic_escape_chars = ",│`|:\"' ()[]{}<>	"
 save_to_clipboard = true
 
+
+
+
 [cursor]
-# Cursor style
-style = { shape = "Beam", blinking = "Off" }
-
-# Cursor blinking interval in milliseconds
 blink_interval = 750
-
-# If true, the cursor will be rendered as a hollow box when unfocused
 unfocused_hollow = true
-
-# Thickness of the cursor relative to cell width
 thickness = 0.15
 
-[terminal]
+[cursor.style]
+shape = "Beam"
+blinking = "Off"
 
-# Controls the OSC 52 behavior for clipboard interactions
+[terminal]
 osc52 = "CopyPaste"
 
 [mouse]
-# Hide mouse cursor when typing
 hide_when_typing = false
+bindings = [
+    { mouse = "Middle", action = "PasteSelection" },
+]
 
-# Mouse bindings
-[[mouse.bindings]]
-mouse = "Middle"
-action = "PasteSelection"
-
-[hints]
-# Hints can be used to find text or hyperlinks in the visible part of the terminal
 [[hints.enabled]]
 command = "xdg-open"
 hyperlinks = true
 post_processing = true
 persist = false
-mouse.enabled = true
-binding = { key = "U", mods = "Control|Shift" }
-regex = "(ipfs:|ipns:|magnet:|mailto:|gemini://|gopher://|https://|http://|news:|file:|git://|ssh:|ftp://)[^\u0000-\u001F\u007F-\u009F<>\"\\s{-}\\^⟨⟩`]+"
+regex = "(ipfs:|ipns:|magnet:|mailto:|gemini://|gopher://|https://|http://|news:|file:|git://|ssh:|ftp://)[^\u0000-\u001f\u007f-<>\"\\s{-}\\^⟨⟩`]+"
+
+[hints.enabled.mouse]
+enabled = true
+
+[hints.enabled.binding]
+key = "U"
+mods = "Control|Shift"
 
 [keyboard]
-# Keyboard bindings
 bindings = [
-    # Copy/Paste
     { key = "C", mods = "Control|Shift", action = "Copy" },
     { key = "V", mods = "Control|Shift", action = "Paste" },
     { key = "Insert", mods = "Shift", action = "PasteSelection" },
-    
-    # Scrolling
     { key = "Up", mods = "Control|Shift", action = "ScrollLineUp" },
     { key = "Down", mods = "Control|Shift", action = "ScrollLineDown" },
     { key = "PageUp", mods = "Control|Shift", action = "ScrollPageUp" },
     { key = "PageDown", mods = "Control|Shift", action = "ScrollPageDown" },
     { key = "Home", mods = "Control|Shift", action = "ScrollToTop" },
     { key = "End", mods = "Control|Shift", action = "ScrollToBottom" },
-    
-    # Font size adjustment
     { key = "Minus", mods = "Control|Shift", action = "DecreaseFontSize" },
     { key = "Plus", mods = "Control|Shift", action = "IncreaseFontSize" },
     { key = "Key0", mods = "Control|Shift", action = "ResetFontSize" },
-    
-    # Quit
     { key = "Q", mods = "Control|Shift", action = "Quit" },
-    
-    # Clear screen and scrollback
     { key = "L", mods = "Control", chars = "\f" },
 ]
 
 [debug]
-# Display the time it takes to draw each frame
 render_timer = false
-
-# Keep the log file after quitting
 persistent_logging = false
-
-# Log level
 log_level = "Warn"
-
-# Print all received window events
 print_events = false

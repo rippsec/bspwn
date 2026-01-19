@@ -48,13 +48,13 @@ restart_process() {
 }
 
 # In your autostart script, before restarting processes:
-pkill -f "xss-lock.*slock" || true # Force-kill existing instances
+#pkill -f "xss-lock.*slock" || true # Force-kill existing instances
 pkill -f xfce4-notifyd || true#
 
 # Define processes (use quotes for commands with arguments)
 process_list=(
-  #  "kdeconnectd"
-  #  "kdeconnect-indicator"
+  "kdeconnectd"
+  "kdeconnect-indicator"
   "lxpolkit"
   "xfce4-clipman"
   "nm-applet"
@@ -72,11 +72,13 @@ Restart each process
 for process in "${process_list[@]}"; do
   restart_process $process
 done
+redshift -x
+redshift -P -O 4500
+
 
 if pgrep -f "skippy-xd --start-daemon" > /dev/null; then
   pkill -USR1 skippy-xd
 fi
- skippy-xd --start-daemon
+skippy-xd --start-daemon
 
-redshift -x
-redshift -P -O 4500
+

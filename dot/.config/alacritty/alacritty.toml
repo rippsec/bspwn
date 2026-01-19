@@ -21,19 +21,19 @@ builtin_box_drawing = true
 
 [font.normal]
 family = "AdwaitaMono Nerd Font Mono"
-style = "Bold"
+style = "Regular"
 
 [font.bold]
 family = "AdwaitaMono Nerd Font Mono"
-style = "Bold"
+style = "Regular"
 
 [font.italic]
 family = "AdwaitaMono Nerd Font Mono"
-style = "Bold"
+style = "Regular"
 
 [font.bold_italic]
 family = "AdwaitaMono Nerd Font Mono"
-style = "Bold"
+style = "Regular"
 
 [font.offset]
 x = 0
@@ -48,7 +48,7 @@ text = "#000000"
 cursor = "#9a9a9a"
 
 [colors.primary]
-background = "#000000"
+background = "#151515"
 foreground = "#d8dee9"
 
 [colors.normal]

@@ -118,8 +118,8 @@ ctrl + Print
 	$HOME/.config/sxhkd/scripts/scc -r -c ; notify-send -u low 'screenshot: copied region to clipboard' -t 777
 
 #takes a full screenshot & saves
-alt + Print
-	$HOME/.config/sxhkd/scripts/scc $HOME/Pictures/Screenshots/ ; notify-send -u low 'screenshot: saved desktop' -t 777
+super + shift + w
+	$HOME/.config/sxhkd/scripts/scc $HOME/Pictures/ && notify-send -u low 'screenshot: saved desktop' -t 777
 
 
 #next prev desktop workspace
