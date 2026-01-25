@@ -68,6 +68,9 @@ process_list=(
   "xbindkeys"
 )
 
+# Wake up audio system to ensure volume controls work immediately
+$HOME/.config/bspwm/scripts/audio-wakeup.sh &
+
 Restart each process
 for process in "${process_list[@]}"; do
   restart_process $process

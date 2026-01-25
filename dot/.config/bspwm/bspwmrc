@@ -50,10 +50,6 @@ bspc rule -a "burp-StartBurp" title="Settings" state=floating #rectangle=1286x70
 bspc rule -a "Color_picker_gui.py" state=floating rectangle=400x400
 bspc rule -a "Xfce4-notes" state=floating sticky=on rectangle=400x400
 
-#scripts
-$HOME/.config/bspwm/start
-# $HOME/.config/bspwm/custom/touchgrass daemon
-
 #(cursor theme is in ~/.icons and you "select it" in the ~/.Xresources file)
 xsetroot -cursor_name left_ptr -xcf /usr/share/icons/Adwaita/cursors/left_ptr 32
 xrdb -merge ~/.Xresources
@@ -61,3 +57,9 @@ export XCURSOR_SIZE=32
 export XCURSOR_THEME=Adwaita
 
 vibrant-cli eDP-1 0.5
+
+#scripts
+$HOME/.config/bspwm/start
+# $HOME/.config/bspwm/custom/touchgrass daemon
+
+

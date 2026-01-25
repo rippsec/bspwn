@@ -40,15 +40,17 @@ super + shift + c
 
 # terminal emulator with tmux session
 super + Return
-# kitty
+  kitty -e bash -c "tmux attach-session -t x || tmux new-session -s x"
 # uxterm
 # uxterm -e "tmux attach-session -t uxterm || tmux new-session -s uxterm"
-  alacritty -e bash -c "tmux attach-session -t x || tmux new-session -s x"
+# alacritty -e bash -c "tmux attach-session -t x || tmux new-session -s x"
+#  ghostty -e bash -c "tmux attach-session -t x || tmux new-session -s x"
 
 # plain terminal
 super + shift + Return
-  alacritty
-
+#  alacritty
+#  ghostty
+  kitty
 
 
 # program launcher
@@ -161,14 +163,10 @@ XF86AudioMicMute
 
 
 XF86AudioRaiseVolume
-  pamixer -i 3 && \
-  VOL=$(pamixer --get-volume) && \
-  notify-send -u low -h string:x-canonical-private-synchronous:volume "Volume: $VOL%" -h int:value:$VOL -t 1000
+  $HOME/.config/sxhkd/scripts/volume_control.sh up
 
 XF86AudioLowerVolume
-  pamixer -d 3 && \
-  VOL=$(pamixer --get-volume) && \
-  notify-send -u low -h string:x-canonical-private-synchronous:volume "Volume: $VOL%" -h int:value:$VOL -t 1000
+  $HOME/.config/sxhkd/scripts/volume_control.sh down
 
 XF86AudioMute
   pamixer -t && \
