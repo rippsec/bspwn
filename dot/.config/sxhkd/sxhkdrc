@@ -1,6 +1,4 @@
 # sxhkdrc
-
-
 # wm independent hotkeys
 # --- custom bindings ---
 
@@ -22,19 +20,19 @@ super + e
     fi
 
 # chromium
-super + shift + g
+super + G
   chromium --disable-gpu --disable-accelerated-2d-canvas --disable-accelerated-video-decode --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-renderer-backgrounding --disable-features=VizDisplayCompositor --disable-gcm-client --enable-unsafe-swiftshader --disable-webrtc
 
 # firefox
-super + shift + f
-  firefox-esr
+super + F
+  firefox-esr --no-remote
 
 # brave
-super + shift + b
-  flatpak run com.brave.Browser
+# super + B
+#  flatpak run com.brave.Browser
 
 # caido
-super + shift + c
+super + C
   caido
 
 

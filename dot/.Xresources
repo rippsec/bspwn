@@ -51,16 +51,16 @@ UXTerm*vt100.alternateScroll: true
 ! --------------------------
 ! Font Settings
 ! --------------------------
-XTerm*faceName: 0xProto Nerd Font Mono
-UXTerm*faceName: 0xProto Nerd Font Mono
+XTerm*faceName: AdwaitaMono Nerd Font Mono
+UXTerm*faceName: AdwaitaMono Nerd Font Mono
 XTerm*faceSize: 14
 UXTerm*faceSize: 14
-XTerm*boldFont: 0xProto Nerd Font Mono Bold
-UXTerm*boldFont: 0xProto Nerd Font Mono Bold
-XTerm*wideFont: 0xProto Nerd Font Mono
-UXTerm*wideFont: 0xProto Nerd Font Mono
-XTerm*wideBoldFont: 0xProto Nerd Font Mono Bold
-UXTerm*wideBoldFont: 0xProto Nerd Font Mono Bold
+XTerm*boldFont: AdwaitaMono Nerd Font Mono Bold
+UXTerm*boldFont: AdwaitaMono Nerd Font Mono Bold
+XTerm*wideFont: AdwaitaMono Nerd Font Mono
+UXTerm*wideFont: AdwaitaMono Nerd Font Mono
+XTerm*wideBoldFont: AdwaitaMono Nerd Font Mono Bold
+UXTerm*wideBoldFont: AdwaitaMono Nerd Font Mono Bold
 XTerm*renderFont: true
 UXTerm*renderFont: true
 XTerm*forceBoxChars: false

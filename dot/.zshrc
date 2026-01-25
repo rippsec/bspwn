@@ -46,3 +46,5 @@ if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
     debian_chroot=$(cat /etc/debian_chroot)
 fi
 export lhost="$(get_ipaddr)"
+# Firefox optimized for older hardware
+alias firefox-fast='firefox-esr --no-remote'
