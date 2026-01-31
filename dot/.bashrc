@@ -84,7 +84,7 @@ if [ "$color_prompt" = yes ]; then
     bold=$(tput bold)
 
     local ipaddr=$(get_ipaddr)
-    PS1="${bold}${red}[\u@${ipaddr}\w]$ ${reset_color}"
+    PS1="\[${bold}${red}\][\u@${ipaddr}\w]\$ \[${reset_color}\]"
     # Determine symbol based on user
     local symbol='$'
     if [[ $EUID -eq 0 ]]; then

@@ -33,3 +33,7 @@ function w64(){
 function rsp(){
   sudo rsync -rhazc --info=progress2 $@
 }
+
+function realpath() {
+  command realpath "$@" | xsel -b
+}

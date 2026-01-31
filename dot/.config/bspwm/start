@@ -49,7 +49,7 @@ restart_process() {
 
 # In your autostart script, before restarting processes:
 #pkill -f "xss-lock.*slock" || true # Force-kill existing instances
-pkill -f xfce4-notifyd || true#
+pkill -f xfce4-notifyd || true  # Ensure dunst is used instead of xfce4-notifyd
 
 # Define processes (use quotes for commands with arguments)
 process_list=(
@@ -61,7 +61,8 @@ process_list=(
   "dunst"
   "sxhkd"
   "polybar -q -r main -c ~/.config/polybar/config.ini"
-  "lxde-settings-daemon"
+  #"lxde-settings-daemon"
+  "xsettingsd"
   "xss-lock --ignore-sleep -- slock" # Add --ignore-sleep for robustness
   "xfce4-notes"
   #  "picom"
@@ -71,7 +72,7 @@ process_list=(
 # Wake up audio system to ensure volume controls work immediately
 $HOME/.config/bspwm/scripts/audio-wakeup.sh &
 
-Restart each process
+# Restart each process
 for process in "${process_list[@]}"; do
   restart_process $process
 done

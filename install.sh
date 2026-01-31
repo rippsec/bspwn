@@ -1,260 +1,258 @@
 #!/bin/bash
+#
+# ██████╗ ███████╗██████╗ ██╗    ██╗███╗   ██╗
+# ██╔══██╗██╔════╝██╔══██╗██║    ██║████╗  ██║
+# ██████╔╝███████╗██████╔╝██║ █╗ ██║██╔██╗ ██║
+# ██╔══██╗╚════██║██╔═══╝ ██║███╗██║██║╚██╗██║
+# ██████╔╝███████║██║     ╚███╔███╔╝██║ ╚████║
+# ╚═════╝ ╚══════╝╚═╝      ╚══╝╚══╝ ╚═╝  ╚═══╝
+#
+# BSPWM Dotfiles Installation Script
+# A modular installer for bspwm rice configuration
+#
 
-# Global configuration
-CONFIG_DIR="$HOME/.bspwn/dot"
-BACKUP_DIR="$HOME/.dotfiles_backup_$(date +'%Y%m%d%H%M%S').tar.gz"
+set -e
+
+# Get script directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+INSTALL_DIR="$SCRIPT_DIR/install"
+
+# Source utilities
+source "$INSTALL_DIR/utils.sh"
+
+# Configuration
+BACKUP_DIR="$HOME/.dotfiles_backup_$(date +'%Y%m%d%H%M%S')"
 NVIM_VERSION="v0.11.0"
+OBSIDIAN_VERSION="1.8.9"
+
+# =============================================================================
+# INSTALLATION FUNCTIONS
+# =============================================================================
 
 # Ensure project is in $HOME/.bspwn
 setup_project_dir() {
-  if [[ "$PWD" != "$HOME/.bspwn" ]]; then
+  if [[ "$PWD" != "$HOME/.bspwn" && "$SCRIPT_DIR" != "$HOME/.bspwn" ]]; then
+    log "Moving project to $HOME/.bspwn..."
     mkdir -p "$HOME/.bspwn" || error_exit "Failed to create .bspwn directory"
-    mv -- * .[!.]* ..?* "$HOME/.bspwn/" 2>/dev/null
+    cp -r "$SCRIPT_DIR"/* "$HOME/.bspwn/" 2>/dev/null || true
+    cp -r "$SCRIPT_DIR"/.[!.]* "$HOME/.bspwn/" 2>/dev/null || true
     cd "$HOME/.bspwn" || error_exit "Failed to enter .bspwn directory"
+    SCRIPT_DIR="$HOME/.bspwn"
+    INSTALL_DIR="$SCRIPT_DIR/install"
     log "Project moved to $HOME/.bspwn"
   fi
 }
 
-# Enhanced logging
-log() {
-  printf "[%s] %s\n" "$(date +'%Y-%m-%d %H:%M:%S')" "$*"
-}
-
-# Error handling
-error_exit() {
-  log "ERROR: $1" >&2
-  exit 1
-}
-
-# Create compressed backup
+# Create compressed backup of existing configs
 create_backup() {
-  local backup_files=()
-
-  # Collect dotfiles
-  while IFS= read -r -d $'\0' file; do
-    backup_files+=("$file")
-  done < <(find "$CONFIG_DIR" -maxdepth 1 -type f -print0)
-
-  # Collect .config directories
-  while IFS= read -r -d $'\0' dir; do
-    backup_files+=("$dir")
-  done < <(find "$CONFIG_DIR/.config" -maxdepth 1 -type d -print0)
-
-  # Create compressed backup
-  tar -czf "$BACKUP_DIR" --ignore-failed-read "${backup_files[@]}" &&
-    log "Created compressed backup at $BACKUP_DIR"
-}
-
-# Safer symlink creation
-link_configs() {
-  # Handle dotfiles
-  find "$CONFIG_DIR" -maxdepth 1 -type f -exec bash -c '
-        for file do
-            base_file="${file##*/}"
-            ln -sfv "$file" "$HOME/$base_file"
-    done' bash {} +
-
-  # Handle .config directories
-  find "$CONFIG_DIR/.config" -maxdepth 1 -type d -exec bash -c '
-        for dir do
-            base_dir="${dir##*/}"
-            ln -sfnv "$dir" "$HOME/.config/$base_dir"
-    done' bash {} +
-
-  # vim
-  cp -rv "$CONFIG_DIR/.vim" "$HOME"
-
-}
-
-# Enhanced package installation
-install_packages() {
-  local required_packages=(
-    # System Utilities
-    btm btop htop iftop moreutils shellcheck scrub pcmanfm
-
-    # Desktop Environment & Window Manager
-    bspwm picom polybar rofi sxhkd xinput
-
-    # Terminal Utilities
-    bat fastfetch gping kitty lsd neovim xclip xsel
-
-    # Media & Graphics
-    feh flameshot gimp mpv timg ueberzug vlc sxiv nsxiv mirage
-
-    # Network & Connectivity
-    kdeconnect vnstat
-
-    # Security & Privacy
-    apg pwgen slock xss-lock
-
-    # Notifications & Appearance
-    dmenu dunst libnotify-bin lxappearance pavucontrol pamixer pasystray network-manager network-manager-gnome cbatticon
-
-    # Miscellaneous Utilities
-    xdotool brightnessctl calc chrony ncal ranger redshift translate-shell zathura xcalib wmctrl acpid xsettingsd pulseaudio-utils hsetroot pipewire pipewire-pulse pipewire-alsa wireplumber
-
-    # drive backup
-    rclone
-
-  )
-
-  log "Updating package list..."
-  sudo apt update || error_exit "Failed to update packages"
-
-  log "Installing required packages..."
-  sudo apt install -y "${required_packages[@]}" || error_exit "Package installation failed"
-
-  log "Removing existing NeoVim..."
-  sudo apt remove --purge -y neovim* || log "No existing NeoVim found"
-}
-
-# NeoVim installation
-install_neovim() {
-  local nvim_url="https://github.com/neovim/neovim/releases/download/${NVIM_VERSION}/nvim-linux-x86_64.tar.gz"
-  local temp_dir=$(mktemp -d)
-
-  log "Installing NeoVim ${NVIM_VERSION}..."
-  wget -q "$nvim_url" -O "$temp_dir/nvim.tar.gz" || error_exit "Failed to download NeoVim"
-  tar -xzf "$temp_dir/nvim.tar.gz" -C "$temp_dir" || error_exit "Failed to extract NeoVim"
-
-  sudo install -Dm755 "$temp_dir/nvim-linux-x86_64/bin/nvim" "/usr/local/bin/nvim"
-  sudo cp -rv "$temp_dir/nvim-linux-x86_64/share/man/man1/nvim.1" "/usr/local/share/man/man1/"
-  sudo cp -rv "$temp_dir/nvim-linux-x86_64/lib" "/lib"
-
-  rm -rf "$temp_dir"
-  log "NeoVim installed successfully"
-}
-
-install_obsidian() {
-  wget -q "https://github.com/obsidianmd/obsidian-releases/releases/download/v1.8.9/obsidian_1.8.9_amd64.deb" -O "/dev/shm/obsidian_1.8.9_amd64.deb"
-  sudo dpkg -i "/dev/shm/obsidian_1.8.9_amd64.deb"
-}
-
-install_gtk_theme() {
-  mkdir -p "$HOME/.local/share"
-  sudo cp -rv "$CONFIG_DIR/theme/themes" "$HOME/.local/share/themes"
-  sudo cp -rv "$CONFIG_DIR/theme/icons" "$HOME/.local/share/icons"
-}
-
-install_fonts() {
-  local fonts=("FiraCode" "AdwaitaMono" "Symbols" "Hack" "Terminus" "0xProto" "Gohu")
-  local tmp_dir="/dev/shm/nerd-fonts"
-
-  mkdir -p "$tmp_dir"
-
-  for font in "${fonts[@]}"; do
-    wget -q "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/$font.zip" -O "$tmp_dir/$font.zip" &&
-      unzip -q "$tmp_dir/$font.zip" -d "/usr/share/fonts/$font"
+  log "Creating backup..."
+  
+  local backup_items=()
+  local config_dirs=("bspwm" "sxhkd" "polybar" "kitty" "dunst" "picom" "rofi" "nvim")
+  
+  # Add existing config directories
+  for dir in "${config_dirs[@]}"; do
+    [[ -d "$HOME/.config/$dir" ]] && backup_items+=("$HOME/.config/$dir")
   done
-
-  fc-cache -fv # Refresh the font cache
-  rm -rf "$tmp_dir"
+  
+  # Add dotfiles
+  for file in .bashrc .zshrc .tmux.conf .vimrc .xinitrc .Xresources; do
+    [[ -f "$HOME/$file" ]] && backup_items+=("$HOME/$file")
+  done
+  
+  if [[ ${#backup_items[@]} -gt 0 ]]; then
+    tar -czf "$BACKUP_DIR.tar.gz" --ignore-failed-read "${backup_items[@]}" 2>/dev/null || true
+    log "Backup created at: $BACKUP_DIR.tar.gz"
+  else
+    log_info "No existing configs to backup"
+  fi
 }
 
-# Install NvChad configuration
-install_nvchad() {
-  log "Installing NvChad configuration..."
-  rm -rf ~/.config/nvim || log "Failed to remove ~/.config/nvim"
-  rm -rf ~/.local/state/nvim || log "Failed to remove ~/.local/state/nvim"
-  rm -rf ~/.local/share/nvim || log "Failed to remove ~/.local/share/nvim"
-  git clone https://github.com/NvChad/starter ~/.config/nvim && nvim
-  log "NvChad installed successfully."
+# Install Obsidian
+install_obsidian() {
+  log "Installing Obsidian ${OBSIDIAN_VERSION}..."
+  
+  local deb_url="https://github.com/obsidianmd/obsidian-releases/releases/download/v${OBSIDIAN_VERSION}/obsidian_${OBSIDIAN_VERSION}_amd64.deb"
+  local deb_file="/tmp/obsidian_${OBSIDIAN_VERSION}_amd64.deb"
+  
+  download_file "$deb_url" "$deb_file" || error_exit "Failed to download Obsidian"
+  sudo dpkg -i "$deb_file" || sudo apt-get install -f -y
+  rm -f "$deb_file"
+  
+  log "Obsidian installed successfully!"
 }
 
-# Parse command-line arguments and execute corresponding functions
+# =============================================================================
+# MODULAR SCRIPT WRAPPERS
+# =============================================================================
+
+run_packages() {
+  source "$INSTALL_DIR/packages.sh"
+  install_packages
+}
+
+run_fonts() {
+  source "$INSTALL_DIR/fonts.sh"
+  install_fonts
+}
+
+run_themes() {
+  source "$INSTALL_DIR/themes.sh"
+  install_themes
+}
+
+run_configs() {
+  source "$INSTALL_DIR/configs.sh"
+  link_configs
+}
+
+run_nvim() {
+  source "$INSTALL_DIR/nvim.sh"
+  install_nvim_full
+}
+
+# =============================================================================
+# FULL INSTALLATION
+# =============================================================================
+
+full_install() {
+  log "Starting full installation..."
+  echo ""
+  
+  setup_project_dir
+  create_backup
+  
+  log "=== Installing Packages ==="
+  run_packages
+  echo ""
+  
+  log "=== Installing Neovim ==="
+  run_nvim
+  echo ""
+  
+  log "=== Installing Fonts ==="
+  run_fonts
+  echo ""
+  
+  log "=== Linking Configurations ==="
+  run_configs
+  echo ""
+  
+  log "=== Installing Themes ==="
+  run_themes
+  echo ""
+  
+  log "Full installation completed!"
+  log_info "Backup available at: $BACKUP_DIR.tar.gz"
+  log_info ""
+  log_info "Next steps:"
+  log_info "  1. Log out and select 'bspwm' session"
+  log_info "  2. Run 'nvim' to complete plugin installation"
+  log_info "  3. Use 'lxappearance' to verify GTK theme"
+  log_info "  4. Use 'qt5ct'/'qt6ct' to verify Qt theme"
+}
+
+# =============================================================================
+# USAGE AND ARGUMENT PARSING
+# =============================================================================
+
+show_usage() {
+  cat << EOF
+BSPWM Dotfiles Installation Script
+
+Usage: $0 [OPTIONS]
+
+Options:
+  -full       Perform full installation (recommended for new setups)
+  -pkg        Install system packages only
+  -fonts      Install fonts only
+  -themes     Install GTK/Qt themes only
+  -config     Link configuration files only
+  -nvim       Install Neovim only
+  -obsidian   Install Obsidian only
+  -backup     Create backup of existing configs only
+  -h, --help  Show this help message
+
+Examples:
+  $0 -full              # Complete installation
+  $0 -pkg -fonts        # Install packages and fonts
+  $0 -config            # Just link configs (for updates)
+
+Modular Scripts (in ./install/):
+  packages.sh   - Package installation
+  fonts.sh      - Font installation  
+  themes.sh     - Theme setup
+  configs.sh    - Configuration linking
+  nvim.sh       - Neovim installation
+  utils.sh      - Shared utilities
+
+EOF
+}
+
 parse_arguments() {
-  local full=0 pkg=0 config=0 nvim=0 nvchad=0 fonts=0 theme=0 obsidian=0
   local has_options=0
+  local do_full=0 do_pkg=0 do_fonts=0 do_themes=0 do_config=0 do_nvim=0 do_obsidian=0 do_backup=0
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
-    -full)
-      full=1
-      has_options=1
-      ;;
-    -pkg)
-      pkg=1
-      has_options=1
-      ;;
-    -config)
-      config=1
-      has_options=1
-      ;;
-    -nvim)
-      nvim=1
-      has_options=1
-      ;;
-    -nvchad)
-      nvchad=1
-      has_options=1
-      ;;
-    -fonts)
-      fonts=1
-      has_options=1
-      ;;
-    -theme)
-      theme=1
-      has_options=1
-      ;;
-    -obsidian)
-      obsidian=1
-      has_options=1
-      ;;
-    *) error_exit "Unknown option: $1" ;;
+      -full)     do_full=1; has_options=1 ;;
+      -pkg)      do_pkg=1; has_options=1 ;;
+      -fonts)    do_fonts=1; has_options=1 ;;
+      -themes)   do_themes=1; has_options=1 ;;
+      -config)   do_config=1; has_options=1 ;;
+      -nvim)     do_nvim=1; has_options=1 ;;
+      -obsidian) do_obsidian=1; has_options=1 ;;
+      -backup)   do_backup=1; has_options=1 ;;
+      -h|--help) show_usage; exit 0 ;;
+      *) log_error "Unknown option: $1"; show_usage; exit 1 ;;
     esac
     shift
   done
 
-  # Print usage and exit if no options were provided
+  # Show usage if no options
   if [[ $has_options -eq 0 ]]; then
-    echo -e "Usage: $0 [OPTIONS]"
-    echo -e "Options:"
-    echo -e "\t-full      Perform full installation (includes all options below)"
-    echo -e "\t-pkg       Install system packages"
-    echo -e "\t-config    Link configuration files"
-    echo -e "\t-nvim      Install NeoVim"
-    echo -e "\t-nvchad    Install NvChad configuration"
-    echo -e "\t-fonts     Install fonts"
-    echo -e "\t-theme     Install GTK theme and icons"
-    echo -e "\t-obsidian  Install Obsidian"
+    show_usage
     exit 1
   fi
 
-  # Handle -full flag (overrides others)
-  if [[ $full -eq 1 ]]; then
-    log "Starting full installation..."
-    setup_project_dir
-    create_backup
-    install_packages
-    install_neovim
-    install_obsidian
-    install_fonts
-    link_configs
-    log "Full installation completed!"
-    log "Backup available at: $BACKUP_DIR"
+  # Full installation
+  if [[ $do_full -eq 1 ]]; then
+    full_install
     return 0
   fi
 
-  # Determine if setup and backup are needed
-  local need_setup=0 need_backup=0
-  [[ $config -eq 1 || $theme -eq 1 ]] && need_setup=1
-  [[ $config -eq 1 ]] && need_backup=1
+  # Setup project dir if needed
+  if [[ $do_config -eq 1 || $do_themes -eq 1 ]]; then
+    setup_project_dir
+  fi
 
-  # Execute pre-steps
-  [[ $need_setup -eq 1 ]] && setup_project_dir
-  [[ $need_backup -eq 1 ]] && create_backup
+  # Create backup if requested or before config changes
+  if [[ $do_backup -eq 1 || $do_config -eq 1 ]]; then
+    create_backup
+  fi
 
-  # Execute requested functions in order
-  [[ $pkg -eq 1 ]] && install_packages
-  [[ $nvim -eq 1 ]] && install_neovim
-  [[ $obsidian -eq 1 ]] && install_obsidian
-  [[ $fonts -eq 1 ]] && install_fonts
-  [[ $config -eq 1 ]] && link_configs
-  [[ $theme -eq 1 ]] && install_gtk_theme
-  [[ $nvchad -eq 1 ]] && install_nvchad
+  # Execute requested operations in order
+  [[ $do_pkg -eq 1 ]]      && run_packages
+  [[ $do_fonts -eq 1 ]]    && run_fonts
+  [[ $do_nvim -eq 1 ]]     && run_nvim
+  [[ $do_config -eq 1 ]]   && run_configs
+  [[ $do_themes -eq 1 ]]   && run_themes
+  [[ $do_obsidian -eq 1 ]] && install_obsidian
 
-  log "Selected operations completed."
+  log "Selected operations completed!"
 }
 
-# Start script execution
-parse_arguments "$@"
+# =============================================================================
+# MAIN
+# =============================================================================
+
+main() {
+  # Don't run as root
+  if [[ $EUID -eq 0 ]]; then
+    error_exit "This script should not be run as root. Use sudo when necessary."
+  fi
+  
+  parse_arguments "$@"
+}
+
+main "$@"
