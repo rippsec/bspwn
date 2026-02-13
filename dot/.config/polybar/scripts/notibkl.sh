@@ -11,11 +11,11 @@ show_brightness_notification() {
 # Handle different actions
 case "$1" in
   up)
-    brightnessctl s +10%
+    brightnessctl s +1%
     show_brightness_notification
     ;;
   down)
-    brightnessctl s 10%-
+    brightnessctl s 1%-
     show_brightness_notification
     ;;
   *)

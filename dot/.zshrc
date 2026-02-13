@@ -48,3 +48,4 @@ fi
 export lhost="$(get_ipaddr)"
 # Firefox optimized for older hardware
 alias firefox-fast='firefox-esr --no-remote'
+export rhost="10.129.244.81"

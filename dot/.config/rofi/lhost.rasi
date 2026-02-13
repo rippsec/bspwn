@@ -15,7 +15,7 @@
     lines:          6;  /* Increased for interface options */
     
     /* Typography */
-    font:           "Fira Code Nerd Font Mono Bold 20";
+    font:           "AdwaitaMono Nerd Font 18";
 }
 
 window {

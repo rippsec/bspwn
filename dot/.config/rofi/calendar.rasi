@@ -1,5 +1,5 @@
 configuration {
-    font: "Fira Code 12";
+    font: "AdwaitaMono Nerd Font 12";
     width: 20%;
     lines: 10;
     padding: 10;

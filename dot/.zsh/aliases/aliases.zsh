@@ -23,6 +23,7 @@ alias cal="ncal -bwyM"
 alias acs="apt-cache search"
 alias del="/bin/rm -rfv"
 alias which="which -a"
+alias docker="sudo docker"
 
 alias yp3="yt-dlp -x --audio-format mp3 --audio-quality 128K  --output '%(title)s.%(ext)s'"
 alias yp4="yt-dlp --format mp4  --output '%(title)s.%(ext)s'"
