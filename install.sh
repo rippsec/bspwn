@@ -111,6 +111,40 @@ run_nvim() {
   install_nvim_full
 }
 
+# Ly display manager (run last; requires logout to take effect)
+install_ly() {
+  log "=== Installing Ly display manager (last; logout required to use) ==="
+  local project_root="${SCRIPT_DIR}"
+  local system_ly="$project_root/system/etc/ly"
+  if [[ ! -d "$system_ly" ]]; then
+    log_warn "Ly config not found at $system_ly, skipping Ly setup"
+    return 0
+  fi
+  if command -v ly &>/dev/null; then
+    log "Ly is already installed"
+  else
+    log "Installing Ly display manager..."
+    if ! sudo apt-get install -y ly 2>/dev/null; then
+      log_warn "Package 'ly' not in repo (e.g. on Kali). Copying config anyway; install ly from source or another repo to use."
+    fi
+  fi
+  log "Installing Ly configuration to /etc/ly..."
+  sudo mkdir -p /etc/ly
+  sudo cp -r "$system_ly"/* /etc/ly/ 2>/dev/null || true
+  sudo chmod +x /etc/ly/setup.sh 2>/dev/null || true
+  if command -v ly &>/dev/null; then
+    log "Enabling Ly (active after next logout)..."
+    sudo systemctl enable ly 2>/dev/null || log_warn "Could not enable ly service"
+    log_info "Ly is enabled. Log out to use Ly; then select bspwm session."
+  else
+    log_info "Ly config is in /etc/ly. Install and enable ly when ready, then log out to use it."
+  fi
+}
+
+run_ly() {
+  install_ly
+}
+
 # =============================================================================
 # FULL INSTALLATION
 # =============================================================================
@@ -126,10 +160,6 @@ full_install() {
   run_packages
   echo ""
   
-  log "=== Installing Neovim ==="
-  run_nvim
-  echo ""
-  
   log "=== Installing Fonts ==="
   run_fonts
   echo ""
@@ -138,16 +168,24 @@ full_install() {
   run_configs
   echo ""
   
-  log "=== Installing Themes ==="
+  log "=== Installing Themes (GTK/Qt/cursor) ==="
   run_themes
+  echo ""
+  
+  log "=== Installing Neovim ==="
+  run_nvim
+  echo ""
+  
+  log "=== Ly display manager (last; logout to use) ==="
+  run_ly
   echo ""
   
   log "Full installation completed!"
   log_info "Backup available at: $BACKUP_DIR.tar.gz"
   log_info ""
   log_info "Next steps:"
-  log_info "  1. Log out and select 'bspwm' session"
-  log_info "  2. Run 'nvim' to complete plugin installation"
+  log_info "  1. Log out — Ly is enabled; select 'bspwm' at the login"
+  log_info "  2. Run 'nvim' once to complete plugin installation"
   log_info "  3. Use 'lxappearance' to verify GTK theme"
   log_info "  4. Use 'qt5ct'/'qt6ct' to verify Qt theme"
 }
@@ -171,6 +209,7 @@ Options:
   -nvim       Install Neovim only
   -obsidian   Install Obsidian only
   -backup     Create backup of existing configs only
+  -ly         Install Ly display manager only (do last; logout to use)
   -h, --help  Show this help message
 
 Examples:
@@ -191,7 +230,7 @@ EOF
 
 parse_arguments() {
   local has_options=0
-  local do_full=0 do_pkg=0 do_fonts=0 do_themes=0 do_config=0 do_nvim=0 do_obsidian=0 do_backup=0
+  local do_full=0 do_pkg=0 do_fonts=0 do_themes=0 do_config=0 do_nvim=0 do_obsidian=0 do_backup=0 do_ly=0
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -203,6 +242,7 @@ parse_arguments() {
       -nvim)     do_nvim=1; has_options=1 ;;
       -obsidian) do_obsidian=1; has_options=1 ;;
       -backup)   do_backup=1; has_options=1 ;;
+      -ly)       do_ly=1; has_options=1 ;;
       -h|--help) show_usage; exit 0 ;;
       *) log_error "Unknown option: $1"; show_usage; exit 1 ;;
     esac
@@ -231,13 +271,14 @@ parse_arguments() {
     create_backup
   fi
 
-  # Execute requested operations in order
+  # Execute requested operations in order (ly last when combined with others)
   [[ $do_pkg -eq 1 ]]      && run_packages
   [[ $do_fonts -eq 1 ]]    && run_fonts
-  [[ $do_nvim -eq 1 ]]     && run_nvim
   [[ $do_config -eq 1 ]]   && run_configs
   [[ $do_themes -eq 1 ]]   && run_themes
+  [[ $do_nvim -eq 1 ]]     && run_nvim
   [[ $do_obsidian -eq 1 ]] && install_obsidian
+  [[ $do_ly -eq 1 ]]       && run_ly
 
   log "Selected operations completed!"
 }

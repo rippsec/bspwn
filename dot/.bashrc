@@ -78,19 +78,19 @@ if [ "$color_prompt" = yes ]; then
   }
 
   # --- Red-Themed Prompt with IP ---
+  # Use $'\033' so the terminal gets real ESC (single-quoted \033 is literal = wrong width + no color reset).
+  # All non-printing chars in \[ \] so bash knows prompt length (stops long-line overwriting).
   set_bash_prompt() {
-    reset_color="$(tput sgr0)"
-    red="$(tput setaf 1)"
-    bold=$(tput bold)
-
+    local esc=$'\033'
     local ipaddr=$(get_ipaddr)
-    PS1="\[${bold}${red}\][\u@${ipaddr}\w]\$ \[${reset_color}\]"
-    # Determine symbol based on user
     local symbol='$'
-    if [[ $EUID -eq 0 ]]; then
-      symbol='#'
-    fi
-
+    [[ $EUID -eq 0 ]] && symbol='#'
+    # Red prompt, then reset so typed text is default color; \[ \] = zero width for line length
+    PS1="\[${esc}[1;31m\][\u@${ipaddr}\w]${symbol} \[${esc}[0m\]"
+    # Optional: set xterm/kitty window title (non-printing, so also in \[ \])
+    case "$TERM" in
+    xterm*|rxvt*|alacritty*|kitty*) PS1="\[${esc}]0;\u@${ipaddr}:\w\007\]${PS1}" ;;
+    esac
   }
   PROMPT_COMMAND="set_bash_prompt"
 
@@ -98,17 +98,9 @@ if [ "$color_prompt" = yes ]; then
   unset info_color
   unset prompt_symbol
 else
-  PS1="[\u@${ipaddr}:\w]${symbol}"
+  PS1='[\u@\h:\w]\$ '
 fi
 unset color_prompt force_color_prompt
-
-# If this is an xterm set the title to user@host:dir
-case "$TERM" in
-xterm* | rxvt* | Eterm | aterm | kterm | gnome* | alacritty)
-  PS1="[\u@${ipaddr}:\w]${symbol}"
-  ;;
-*) ;;
-esac
 
 [ "$NEWLINE_BEFORE_PROMPT" = yes ] && PROMPT_COMMAND="PROMPT_COMMAND=echo"
 
