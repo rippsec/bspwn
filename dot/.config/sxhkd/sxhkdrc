@@ -50,9 +50,13 @@ super + shift + Return
 #  ghostty
   kitty
 
+# menu
+
+super + d
+  jgmenu_run
 
 # program launcher
-super + {d,r}
+super + r 
 	rofi -show drun -theme "$HOME/.config/rofi/launch.rasi"
 
 #switch between window

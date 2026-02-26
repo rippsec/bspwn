@@ -61,6 +61,7 @@ link_config_dirs() {
     "fontconfig"
     "skippy-xd"
     "i3lock"
+    "jgmenu"
   )
   
   mkdir -p "$HOME/.config"

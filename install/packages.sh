@@ -14,7 +14,7 @@ install_packages() {
     btm btop htop iftop moreutils shellcheck scrub pcmanfm
 
     # Desktop Environment & Window Manager
-    bspwm picom polybar rofi sxhkd xinput suckless-tools wmctrl
+    bspwm picom polybar rofi sxhkd xinput suckless-tools wmctrl jgmenu
 
     # Terminal Utilities
     bat fastfetch gping kitty lsd xclip xsel tmux
