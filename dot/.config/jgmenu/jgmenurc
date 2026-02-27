@@ -2,11 +2,11 @@
 # Menu appears top-left, below polybar (margin_y = bar height)
 
 stay_alive = 1
-csv_cmd = python3 ~/.config/jgmenu/kali-menu.py
+csv_cmd = lx
 position_mode = fixed
 menu_margin_x = 0
 menu_margin_y = 38
-menu_width = 280
+menu_width = 320
 menu_height_min = 0
 menu_height_max = 0
 menu_height_mode = dynamic
@@ -27,7 +27,7 @@ item_radius = 2
 item_border = 0
 icon_size = 22
 icon_text_spacing = 10
-arrow_string = ▸
+arrow_string = >
 arrow_width = 14
 font = AdwaitaMono Nerd Font Mono 11
 font_fallback = xtg

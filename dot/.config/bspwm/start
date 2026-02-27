@@ -67,6 +67,7 @@ process_list=(
   "xfce4-notes"
   #  "picom"
   "xbindkeys"
+  "jgmenu"
 )
 
 # Wake up audio system to ensure volume controls work immediately
@@ -79,6 +80,7 @@ done
 redshift -x
 redshift -P -O 4500
 
+rm -rfv ~/.jgmenu-lockfile
 
 if pgrep -f "skippy-xd --start-daemon" > /dev/null; then
   pkill -USR1 skippy-xd
