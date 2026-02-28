@@ -2,7 +2,7 @@
 
 # additional settings
 
-wallpape="$HOME/.config/bspwm/img/kali.png"
+wallpape="$HOME/.config/bspwm/img/kali-light.png"
 feh --bg-fill "$wallpape" || hsetroot -solid '#121212'
 
 ### Mouse and TouchPad Settings
@@ -67,7 +67,6 @@ process_list=(
   "xfce4-notes"
   #  "picom"
   "xbindkeys"
-  "jgmenu"
 )
 
 # Wake up audio system to ensure volume controls work immediately
@@ -81,10 +80,10 @@ redshift -x
 redshift -P -O 4500
 
 rm -rfv ~/.jgmenu-lockfile
+jgmenu --hide-on-startup
+
 
 if pgrep -f "skippy-xd --start-daemon" > /dev/null; then
   pkill -USR1 skippy-xd
 fi
 skippy-xd --start-daemon
-
-
