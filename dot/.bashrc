@@ -86,7 +86,10 @@ if [ "$color_prompt" = yes ]; then
     local symbol='$'
     [[ $EUID -eq 0 ]] && symbol='#'
     # Red prompt, then reset so typed text is default color; \[ \] = zero width for line length
-    PS1="\[${esc}[1;31m\][\u@${ipaddr}\w]${symbol} \[${esc}[0m\]"
+    #PS1="\[${esc}[1;31m\][\u@${ipaddr}\w]${symbol} \[${esc}[0m\]"
+    PS1="\[${esc}[1;31m\][${ipaddr}:\W]${symbol} \[${esc}[0m\]"
+    
+
     # Optional: set xterm/kitty window title (non-printing, so also in \[ \])
     case "$TERM" in
     xterm*|rxvt*|alacritty*|kitty*) PS1="\[${esc}]0;\u@${ipaddr}:\w\007\]${PS1}" ;;
@@ -118,6 +121,9 @@ if [ -x /usr/bin/dircolors ]; then
   alias egrep='egrep --color=auto'
   alias diff='diff --color=auto'
   alias ip='ip --color=auto'
+  alias apt='sudo apt'
+  alias docker='sudo docker'
+
 
   export LESS_TERMCAP_mb=$'\E[1;31m'  # begin blink
   export LESS_TERMCAP_md=$'\E[1;36m'  # begin bold
@@ -149,6 +155,37 @@ alias smbmap='smbmap --no-banner'
 alias del='/bin/rm -rfv'
 
 # --- Functions ---
+
+realpath() {
+    if [ -z "$1" ]; then
+        echo "Usage: realpath <file>"
+        return 1
+    fi
+    local file
+    file=$(/usr/bin/realpath "$1") || return 1
+    if ! command -v xsel &> /dev/null; then
+        echo "Error: xsel is not installed."
+        return 1
+    fi
+    echo "$file" | tr -d "\n" | xsel --clipboard --input || { echo "Error: Failed to copy to clipboard."; return 2; }
+    echo "$file"
+}
+
+pwd() {
+    local dir
+    dir=$(/usr/bin/pwd)
+    if ! command -v xsel &> /dev/null; then
+        echo "Error: xsel is not installed. Please install it to use this function."
+        return 1
+    fi
+    echo "$dir" | tr -d "\n" | xsel --clipboard --input
+    if [ $? -ne 0 ]; then
+        echo "Error: Failed to copy the directory to clipboard."
+        return 2
+    fi
+    echo "$dir"
+}
+
 mkt() {
   if [ -z "$1" ]; then
     echo "Usage: mkt <foldername>"
