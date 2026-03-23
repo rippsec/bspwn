@@ -2,10 +2,6 @@
 # wm independent hotkeys
 # --- custom bindings ---
 
-# Thunar
-#super + F4
-#  thunar
-
 # toggle touchpad
 
 # Toggle Touchpad
@@ -144,21 +140,6 @@ super + x
 
 #brightness volume microphone etc...
 
-#XF86AudioRaiseVolume
-#  pamixer -i 5
-
-#XF86AudioLowerVolume
-#	pamixer -d 5	
-
-#XF86AudioMute
-#	pamixer -t
-
-#XF86MonBrightnessUp
-#         brightnessctl s +1%
-
-#XF86MonBrightnessDown
-#         brightnessctl s 1%-
-
 XF86AudioMicMute
 	$HOME/.config/sxhkd/scripts/micvol toggle
 #	pactl set-source-mute 1 toggle
@@ -251,20 +232,11 @@ super + {_,shift + }c
 super + bracket{left,right}
 	bspc desktop -f {prev,next}.local
 
-# focus the last node/desktop
-#super + {grave,Tab}
-#	bspc {node,desktop} -f last
-
 # focus the older or newer node in the focus history
 super + {o,i}
   bspc wm -h off; \
   bspc node {older,newer} -f; \
   bspc wm -h on
-
-# focus or send to the given desktop
-#super + {_,shift + }{1-9,0}
-#	bspc {desktop -f,node -d} '^{1-9,10}'
-
 
 # focus desktop
 super + {1-9,0}

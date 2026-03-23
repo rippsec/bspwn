@@ -1,7 +1,7 @@
 #!/bin/bash
 # Neovim installation script
 
-set -e
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/utils.sh"
@@ -10,12 +10,21 @@ source "$SCRIPT_DIR/utils.sh"
 NVIM_VERSION="${NVIM_VERSION:-v0.11.0}"
 
 install_neovim() {
-  local nvim_url="https://github.com/neovim/neovim/releases/download/${NVIM_VERSION}/nvim-linux-x86_64.tar.gz"
+  local arch
+  arch=$(uname -m)
+  case "$arch" in
+    x86_64)  arch="x86_64" ;;
+    aarch64) arch="arm64" ;;
+    *) error_exit "Unsupported architecture: $arch" ;;
+  esac
+
+  local tarball="nvim-linux-${arch}.tar.gz"
+  local nvim_url="https://github.com/neovim/neovim/releases/download/${NVIM_VERSION}/${tarball}"
   local temp_dir
   temp_dir=$(mktemp -d)
 
-  log "Installing Neovim ${NVIM_VERSION}..."
-  
+  log "Installing Neovim ${NVIM_VERSION} (${arch})..."
+
   # Remove existing apt neovim if present
   if dpkg -l neovim &>/dev/null; then
     log "Removing apt-installed Neovim..."
@@ -24,22 +33,29 @@ install_neovim() {
 
   log "Downloading Neovim..."
   download_file "$nvim_url" "$temp_dir/nvim.tar.gz" || error_exit "Failed to download Neovim"
-  
+
   log "Extracting Neovim..."
   extract_archive "$temp_dir/nvim.tar.gz" "$temp_dir" || error_exit "Failed to extract Neovim"
 
+  local nvim_dir="$temp_dir/nvim-linux-${arch}"
+
   log "Installing Neovim binary..."
-  sudo install -Dm755 "$temp_dir/nvim-linux-x86_64/bin/nvim" "/usr/local/bin/nvim"
-  
+  sudo install -Dm755 "$nvim_dir/bin/nvim" "/usr/local/bin/nvim"
+
   log "Installing Neovim runtime files..."
-  sudo cp -rv "$temp_dir/nvim-linux-x86_64/share/man/man1/nvim.1" "/usr/local/share/man/man1/" 2>/dev/null || true
-  sudo cp -rv "$temp_dir/nvim-linux-x86_64/lib/nvim" "/usr/local/lib/" 2>/dev/null || true
-  sudo cp -rv "$temp_dir/nvim-linux-x86_64/share/nvim" "/usr/local/share/" 2>/dev/null || true
+  sudo cp "$nvim_dir/share/man/man1/nvim.1" "/usr/local/share/man/man1/" 2>/dev/null || true
+  sudo cp -r "$nvim_dir/lib/nvim" "/usr/local/lib/" 2>/dev/null || true
+  sudo cp -r "$nvim_dir/share/nvim" "/usr/local/share/" 2>/dev/null || true
 
   log "Cleaning up..."
   rm -rf "$temp_dir"
 
-  log "Neovim ${NVIM_VERSION} installed successfully!"
+  # Verify installation
+  if nvim --version &>/dev/null; then
+    log "Neovim ${NVIM_VERSION} installed successfully! ($(nvim --version | head -1))"
+  else
+    error_exit "Neovim installation failed — binary not working"
+  fi
   log_info "Run 'nvim' to complete LazyVim plugin installation"
 }
 

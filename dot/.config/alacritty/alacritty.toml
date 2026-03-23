@@ -20,20 +20,20 @@ size = 12
 builtin_box_drawing = true
 
 [font.normal]
-family = "AdwaitaMono Nerd Font Mono"
-style = "Regular"
+family = "FiraCode Nerd Font Mono"
+style = "Medium"
 
 [font.bold]
-family = "AdwaitaMono Nerd Font Mono"
-style = "Regular"
+family = "FiraCode Nerd Font Mono"
+style = "Medium"
 
 [font.italic]
-family = "AdwaitaMono Nerd Font Mono"
-style = "Regular"
+family = "FiraCode Nerd Font Mono"
+style = "Medium"
 
 [font.bold_italic]
-family = "AdwaitaMono Nerd Font Mono"
-style = "Regular"
+family = "FiraCode Nerd Font Mono"
+style = "Medium"
 
 [font.offset]
 x = 0

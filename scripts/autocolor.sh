@@ -59,6 +59,12 @@ sed -i "s|^cursor #\([0-9A-Fa-f]\{6\}\)$|cursor $SECOND_COLOR|" "$CONFIG_DIR/kit
 # Replace third color lines
 sed -i "s|bg_color='%{%K{#\([0-9A-Fa-f]\{6\}\)}%}'|bg_color='%{%K{$THIRD_COLOR}%}'|" "$HOME/.zshrc"
 
+# Update dunst frame color (global urgency block only)
+sed -i "0,/frame_color = \"#[0-9A-Fa-f]\{6\}\"/s|frame_color = \"#[0-9A-Fa-f]\{6\}\"|frame_color = \"$SECOND_COLOR\"|" "$CONFIG_DIR/dunst/dunstrc"
+
+# Update rofi reddish color scheme
+sed -i "s|selected:[ \t]*#[0-9A-Fa-f]\{6\}D1;|selected:       ${FIRST_COLOR}D1;|" "$CONFIG_DIR/rofi/colors/reddish.rasi"
+sed -i "s|active:[ \t]*#[0-9A-Fa-f]\{6\}FF;|active:         ${SECOND_COLOR}FF;|" "$CONFIG_DIR/rofi/colors/reddish.rasi"
 
 # Completed message
 echo "Colors updated successfully!"
@@ -66,6 +72,9 @@ echo "First color ($FIRST_COLOR), Second color ($SECOND_COLOR), and Third color 
 
 # Reload bspwm colors and settings
 bspc wm -r
+
+# Reload dunst
+systemctl --user restart dunst 2>/dev/null || pkill -HUP dunst 2>/dev/null || true
 
 # Update kitty colors if running inside kitty
 if [ -n "$KITTY_PID" ] || [ "$TERM" = "xterm-kitty" ]; then

@@ -1,7 +1,7 @@
 #!/bin/bash
 # Theme and icon installation script
 
-set -e
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/utils.sh"
@@ -21,17 +21,17 @@ install_gtk_theme() {
   
   # Copy themes if they exist
   if [[ -d "$theme_source" ]]; then
-    cp -rv "$theme_source"/* "$theme_dest/" 2>/dev/null || true
+    cp -r "$theme_source"/* "$theme_dest/" 2>/dev/null || true
     log "GTK themes installed"
   else
     log_warn "Theme source not found: $theme_source"
     log_info "Install themes manually or use lxappearance to download"
-    log_info "Current theme: Adwaita-dark"
+    log_info "Current theme: Flat-Remix-GTK-Red-Darkest"
   fi
-  
+
   # Copy icons if they exist
   if [[ -d "$icon_source" ]]; then
-    cp -rv "$icon_source"/* "$icon_dest/" 2>/dev/null || true
+    cp -r "$icon_source"/* "$icon_dest/" 2>/dev/null || true
     log "Icons installed"
   else
     log_warn "Icon source not found: $icon_source"
@@ -59,16 +59,20 @@ EOF
 
 setup_qt_theme() {
   log "Setting up Qt theme environment..."
-  
-  # Ensure QT_QPA_PLATFORMTHEME is set
-  local profile_file="$HOME/.profile"
+
   local export_line='export QT_QPA_PLATFORMTHEME="qt5ct"'
-  
+
+  # Prefer ~/.zprofile for zsh; fall back to ~/.profile for other shells
+  local profile_file="$HOME/.zprofile"
+  [[ ! -f "$profile_file" && -f "$HOME/.profile" ]] && profile_file="$HOME/.profile"
+
   if ! grep -q 'QT_QPA_PLATFORMTHEME' "$profile_file" 2>/dev/null; then
     echo "$export_line" >> "$profile_file"
-    log "Added QT_QPA_PLATFORMTHEME to ~/.profile"
+    log "Added QT_QPA_PLATFORMTHEME to $profile_file"
+  else
+    log "QT_QPA_PLATFORMTHEME already set in $profile_file"
   fi
-  
+
   log_info "Qt5/Qt6 theme config is in ~/.config/qt5ct and ~/.config/qt6ct"
   log_info "Use qt5ct or qt6ct to modify if needed"
 }
@@ -80,10 +84,10 @@ install_themes() {
   
   log "Theme installation completed!"
   log_info "Current configuration:"
-  log_info "  GTK Theme: Adwaita-dark"
+  log_info "  GTK Theme: Flat-Remix-GTK-Red-Darkest"
   log_info "  Icon Theme: Flat-Remix-Red-Dark"
   log_info "  Cursor Theme: Adwaita"
-  log_info "  Font: AdwaitaMono Nerd Font Mono 11"
+  log_info "  Font: FiraCode Nerd Font Mono Medium 11"
 }
 
 # Run if executed directly

@@ -43,17 +43,10 @@ command_exists() {
   command -v "$1" &>/dev/null
 }
 
-# Get the script's directory
-get_script_dir() {
-  local script_path="${BASH_SOURCE[1]}"
-  cd "$(dirname "$script_path")" && pwd
-}
-
 # Get the project root (.bspwn directory)
+# BASH_SOURCE[0] is always utils.sh (in install/), so dirname twice = project root.
 get_project_root() {
-  local install_dir
-  install_dir="$(get_script_dir)"
-  dirname "$install_dir"
+  dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 }
 
 # Create backup of existing file/directory

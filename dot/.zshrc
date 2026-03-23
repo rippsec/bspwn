@@ -48,4 +48,10 @@ fi
 export lhost="$(get_ipaddr)"
 # Firefox optimized for older hardware
 alias firefox-fast='firefox-esr --no-remote'
-export rhost="10.129.244.81"
+
+# fnm
+FNM_PATH="/home/rip/.local/share/fnm"
+if [ -d "$FNM_PATH" ]; then
+  export PATH="$FNM_PATH:$PATH"
+  eval "$(fnm env --shell zsh)"
+fi

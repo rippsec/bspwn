@@ -11,7 +11,7 @@
 # A modular installer for bspwm rice configuration
 #
 
-set -e
+set -euo pipefail
 
 # Get script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -22,7 +22,6 @@ source "$INSTALL_DIR/utils.sh"
 
 # Configuration
 BACKUP_DIR="$HOME/.dotfiles_backup_$(date +'%Y%m%d%H%M%S')"
-NVIM_VERSION="v0.11.0"
 OBSIDIAN_VERSION="1.8.9"
 
 # =============================================================================
@@ -31,15 +30,19 @@ OBSIDIAN_VERSION="1.8.9"
 
 # Ensure project is in $HOME/.bspwn
 setup_project_dir() {
-  if [[ "$PWD" != "$HOME/.bspwn" && "$SCRIPT_DIR" != "$HOME/.bspwn" ]]; then
-    log "Moving project to $HOME/.bspwn..."
+  if [[ "$SCRIPT_DIR" != "$HOME/.bspwn" ]]; then
+    log "Copying project to $HOME/.bspwn (excluding .git)..."
     mkdir -p "$HOME/.bspwn" || error_exit "Failed to create .bspwn directory"
-    cp -r "$SCRIPT_DIR"/* "$HOME/.bspwn/" 2>/dev/null || true
-    cp -r "$SCRIPT_DIR"/.[!.]* "$HOME/.bspwn/" 2>/dev/null || true
-    cd "$HOME/.bspwn" || error_exit "Failed to enter .bspwn directory"
+    if command -v rsync &>/dev/null; then
+      rsync -a --exclude='.git' "$SCRIPT_DIR/" "$HOME/.bspwn/"
+    else
+      # rsync not available — fall back to cp but skip .git
+      find "$SCRIPT_DIR" -mindepth 1 -maxdepth 1 ! -name '.git' \
+        -exec cp -r {} "$HOME/.bspwn/" \;
+    fi
     SCRIPT_DIR="$HOME/.bspwn"
     INSTALL_DIR="$SCRIPT_DIR/install"
-    log "Project moved to $HOME/.bspwn"
+    log "Project copied to $HOME/.bspwn"
   fi
 }
 
@@ -182,7 +185,7 @@ full_install() {
   
   log "Full installation completed!"
   log_info "Backup available at: $BACKUP_DIR.tar.gz"
-  log_info ""
+  echo ""
   log_info "Next steps:"
   log_info "  1. Log out — Ly is enabled; select 'bspwm' at the login"
   log_info "  2. Run 'nvim' once to complete plugin installation"
