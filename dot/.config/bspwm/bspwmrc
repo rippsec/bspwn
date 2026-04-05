@@ -9,6 +9,11 @@ export XDG_DATA_DIRS="/usr/share:/usr/local/share:$HOME/.local/share"
 export QT_QPA_PLATFORMTHEME="qt5ct"
 export GTK_THEME=Flat-Remix-GTK-Red-Darkest
 
+# VA-API hardware video decode (Intel iHD driver)
+# Ensures Firefox and Chromium use GPU decode instead of CPU
+export LIBVA_DRIVER_NAME=iHD
+export LIBVA_DRI3_DISABLE=0
+
 # apt without dialogs
 export DEBIAN_FRONTEND=noninteractive
 

@@ -64,7 +64,7 @@ if [ "$color_prompt" = yes ]; then
 
   # --- IP Detection Function ---
   get_ipaddr() {
-    local interfaces=("tun0" "tap0" "eth0" "wlan0" "wlan1")
+    local interfaces=("tun0" "tap0" "eth0" "wlan0" "enp0s25" "wlp3s0")
     for iface in "${interfaces[@]}"; do
       if ip link show "$iface" &>/dev/null; then
         local ipaddr=$(ip -4 addr show "$iface" 2>/dev/null | grep -Po 'inet \K\d{1,3}(\.\d{1,3}){3}' | head -n1)
@@ -242,6 +242,11 @@ if ! shopt -oq posix; then
 fi
 
 export TERM=xterm-256color
+export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+export GOPATH="$HOME/go"                     
+export PATH="$PATH:$HOME/go/bin:$HOME/.pdtm/go/bin:$HOME/.local/bin:/usr/local/bin:/opt/pentest/bin/linux:$HOME/.cargo/bin"
+
 
 # Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
 export PATH="$PATH:$HOME/.rvm/bin"
+source /etc/profile.d/pentest-path.sh  # Added by pentest setup

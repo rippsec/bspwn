@@ -123,11 +123,11 @@ lock_screen() {
       --noinput-text="No Input" \
       --lock-text="Locking..." \
       --lockfailed-text="Lock Failed" \
-      --time-font="FiraCode Nerd Font" \
-      --date-font="FiraCode Nerd Font" \
-      --layout-font="FiraCode Nerd Font" \
-      --verif-font="FiraCode Nerd Font" \
-      --wrong-font="FiraCode Nerd Font" \
+      --time-font="AdwaitaMono Nerd Font Mono" \
+      --date-font="AdwaitaMono Nerd Font Mono" \
+      --layout-font="AdwaitaMono Nerd Font Mono" \
+      --verif-font="AdwaitaMono Nerd Font Mono" \
+      --wrong-font="AdwaitaMono Nerd Font Mono" \
       --ind-pos="x+w/2:y+h/2" \
       --time-pos="ix:iy-100" \
       --date-pos="tx:ty+30" \

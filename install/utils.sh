@@ -121,11 +121,16 @@ extract_archive() {
   esac
 }
 
-# Confirm action
+# Confirm action — auto-accepts the default when stdin is not a TTY
 confirm() {
   local prompt="${1:-Continue?}"
   local default="${2:-n}"
-  
+
+  # Non-interactive: use the default immediately
+  if [[ ! -t 0 ]]; then
+    [[ "$default" == "y" ]] && return 0 || return 1
+  fi
+
   local yn
   if [[ "$default" == "y" ]]; then
     read -rp "$prompt [Y/n] " yn
@@ -134,7 +139,7 @@ confirm() {
     read -rp "$prompt [y/N] " yn
     yn=${yn:-n}
   fi
-  
+
   case "$yn" in
     [Yy]*) return 0 ;;
     *) return 1 ;;

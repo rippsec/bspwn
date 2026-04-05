@@ -55,3 +55,8 @@ if [ -d "$FNM_PATH" ]; then
   export PATH="$FNM_PATH:$PATH"
   eval "$(fnm env --shell zsh)"
 fi
+
+
+# Generated for pdtm. Do not edit.
+export PATH=$PATH:/home/rip/.pdtm/go/bin
+

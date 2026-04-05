@@ -1,9 +1,7 @@
 #!/bin/bash
 
 # additional settings
-
-wallpape="$HOME/.config/bspwm/img/kali.png"
-feh --bg-fill "$wallpape" || hsetroot -solid '#121212'
+hsetroot -solid '#151515'
 
 ### Mouse and TouchPad Settings
 # TrackPoint settings, (keyboard model update)
@@ -68,6 +66,13 @@ process_list=(
   #  "picom"
   "xbindkeys"
 )
+
+# Gnome Keyring — must start before nm-applet/chromium/kdeconnect or they
+# will pop up a "create keyring" dialog on every launch
+if command -v gnome-keyring-daemon &>/dev/null; then
+  eval $(gnome-keyring-daemon --start --daemonize --components=pkcs11,secrets,ssh 2>/dev/null)
+  export GNOME_KEYRING_CONTROL GNOME_KEYRING_PID SSH_AUTH_SOCK
+fi
 
 # Wake up audio system to ensure volume controls work immediately
 $HOME/.config/bspwm/scripts/audio-wakeup.sh &

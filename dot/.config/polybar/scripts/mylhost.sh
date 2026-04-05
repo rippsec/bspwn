@@ -53,7 +53,7 @@ get_ipaddr() {
     fi
     
     # Auto mode - check interfaces in priority order
-    local interfaces=("tun0" "tap0" "eth0" "wlan0" "wlan1" "wlan2" "lo")
+    local interfaces=("tun0" "tap0" "wlp3s0" "enp0s25" "wlan0" "eth0" "lo")
     for iface in "${interfaces[@]}"; do
         if ip link show "$iface" &>/dev/null; then
             local ipaddr=$(ip -4 addr show "$iface" 2>/dev/null | grep -Po 'inet \K\d{1,3}(\.\d{1,3}){3}' | head -n1)

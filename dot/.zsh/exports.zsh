@@ -9,6 +9,9 @@ export _JAVA_AWT_WM_NONREPARENTING=1
 export TERM=xterm-256color
 export PATH="$PATH:/usr/local/zig"
 export PATH="$PATH:/snap/bin"
+export PATH="$PATH:$HOME/go/bin:$HOME/.pdtm/go/bin:$HOME/.local/bin:/usr/local/bin:/opt/pentest/bin/linux:$HOME/.cargo/bin"
+
+
 
 ### capture the flag variables ###
 export lhost="$(get_ipaddr)"
