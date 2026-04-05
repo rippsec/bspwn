@@ -84,6 +84,16 @@ done
 redshift -x
 redshift -P -O 4500
 
+# Pre-warm browser libraries into page cache in background.
+# vmtouch -qt: maps files into RAM silently. libxul.so (~160MB) is the main
+# Firefox startup bottleneck — after this runs, cold-start drops from ~3s to <1s.
+# Runs async so it never blocks the session startup sequence.
+(vmtouch -qt \
+  /usr/lib/firefox-esr/libxul.so \
+  /usr/lib/firefox-esr/firefox-esr \
+  /usr/lib/chromium/chromium \
+  2>/dev/null) &
+
 rm -rfv ~/.jgmenu-lockfile
 jgmenu --hide-on-startup
 

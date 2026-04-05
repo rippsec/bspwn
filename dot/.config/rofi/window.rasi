@@ -162,7 +162,7 @@ element-text {
     cursor:                    inherit;
     vertical-align:            0.5;
     horizontal-align:          0.5;
-    font:                     "AdwaitaMono Nerd Font Mono Regular 9";
+    font:                     "Fira Code Nerd Font Mono Regular 9";
     width:                    180px;               /* Fixed width */
     max-chars:                20;                  /* Maximum characters before trimming */
     wrap:                     false;               /* Prevent text wrapping */

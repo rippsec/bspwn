@@ -34,17 +34,17 @@ super + C
 
 # terminal emulator with tmux session
 super + Return
-  kitty -e bash -c "tmux attach-session -t x || tmux new-session -s x"
+# kitty -e bash -c "tmux attach-session -t x || tmux new-session -s x"
 # uxterm
 # uxterm -e "tmux attach-session -t uxterm || tmux new-session -s uxterm"
-# alacritty -e bash -c "tmux attach-session -t x || tmux new-session -s x"
-#  ghostty -e bash -c "tmux attach-session -t x || tmux new-session -s x"
+  alacritty -e bash -c "tmux attach-session -t x || tmux new-session -s x"
+# ghostty -e bash -c "tmux attach-session -t x || tmux new-session -s x"
 
 # plain terminal
 super + shift + Return
-#  alacritty
+  alacritty
 #  ghostty
-  kitty
+#  kitty
 
 # menu
 
