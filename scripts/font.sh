@@ -95,6 +95,9 @@ pick_size() {
         --query="$cur"
 }
 
+# ── Sed escape: escapes \ | & for use in sed replacement strings ─────────────
+sed_esc() { printf '%s' "$1" | sed 's/[\\|&]/\\&/g'; }
+
 # ── Patch helper ──────────────────────────────────────────────────────────────
 patch() {
     local file="$1" expr="$2" label="$3"
@@ -114,6 +117,7 @@ patch2() {
 # ── Apply to dotfiles ─────────────────────────────────────────────────────────
 apply_dotfiles() {
     local font="$1" size="$2" d="$DOTS_DIR"
+    local ef; ef=$(sed_esc "$font")
 
     echo -e "\n  ${B}dotfiles${N}"
     echo -e "  ────────────────────────────────\n"
@@ -122,7 +126,7 @@ apply_dotfiles() {
     local kitty="$d/.config/kitty/kitty.conf"
     if [[ -f "$kitty" ]]; then
         sed -i 's|^font_size .*|font_size '"$size"'|' "$kitty"
-        sed -i '/# BEGIN_KITTY_FONTS/,/# END_KITTY_FONTS/ s|family="[^"]*"|family="'"$font"'"|' "$kitty"
+        sed -i '/# BEGIN_KITTY_FONTS/,/# END_KITTY_FONTS/ s|family="[^"]*"|family="'"$ef"'"|' "$kitty"
         ok "kitty"
     else
         skip "kitty"
@@ -132,7 +136,7 @@ apply_dotfiles() {
     local alacritty="$d/.config/alacritty/alacritty.toml"
     if [[ -f "$alacritty" ]]; then
         sed -i 's|^size = .*|size = '"$size"'|' "$alacritty"
-        sed -i 's|^family = ".*"|family = "'"$font"'"|' "$alacritty"
+        sed -i 's|^family = ".*"|family = "'"$ef"'"|' "$alacritty"
         ok "alacritty"
     else
         skip "alacritty"
@@ -141,7 +145,7 @@ apply_dotfiles() {
     # polybar — font-0 only; symbol fonts (font-1 through font-9) untouched
     local polybar="$d/.config/polybar/config.ini"
     if [[ -f "$polybar" ]]; then
-        sed -i 's|^font-0 = .*|font-0 = "'"$font"':pixelsize='"$size"':style=Regular:antialias=true;3"|' "$polybar"
+        sed -i 's|^font-0 = .*|font-0 = "'"$ef"':pixelsize='"$size"':style=Regular:antialias=true;3"|' "$polybar"
         ok "polybar  ${D}(font-0; symbols preserved)${N}"
     else
         skip "polybar"
@@ -149,74 +153,74 @@ apply_dotfiles() {
 
     # rofi — shared font (imported by launch / pwmenu / window)
     patch "$d/.config/rofi/shared/fonts.rasi" \
-        's|font: "[^"]*";|font: "'"$font Regular $size"'";|' \
+        's|font: "[^"]*";|font: "'"$ef Regular $size"'";|' \
         "rofi/shared/fonts.rasi"
 
     # rofi window.rasi — inline label override
     patch "$d/.config/rofi/window.rasi" \
-        's|font: *"[^"]*";|font:                     "'"$font Regular $size"'";|' \
+        's|font: *"[^"]*";|font:                     "'"$ef Regular $size"'";|' \
         "rofi/window.rasi"
 
     # rofi calendar.rasi
     patch "$d/.config/rofi/calendar.rasi" \
-        's|font: "[^"]*";|font: "'"$font Regular $size"'";|' \
+        's|font: "[^"]*";|font: "'"$ef Regular $size"'";|' \
         "rofi/calendar.rasi"
 
     # rofi pentest-input.rasi
     patch "$d/.config/rofi/shared/pentest-input.rasi" \
-        's|font: *"[^"]*";|font:           "'"$font Regular $size"'";|' \
+        's|font: *"[^"]*";|font:           "'"$ef Regular $size"'";|' \
         "rofi/shared/pentest-input.rasi"
 
     # dunst
     patch "$d/.config/dunst/dunstrc" \
-        's|^\( *\)font = .*|\1font = '"$font Regular $size"'|' \
+        's|^\( *\)font = .*|\1font = '"$ef Regular $size"'|' \
         "dunst"
 
     # jgmenu
     patch "$d/.config/jgmenu/jgmenurc" \
-        's|^font = .*|font = '"$font Bold $size"'|' \
+        's|^font = .*|font = '"$ef Bold $size"'|' \
         "jgmenu"
 
     # gtk2
     patch "$d/.gtkrc-2.0" \
-        's|^gtk-font-name=.*|gtk-font-name="'"$font $size"'"|' \
+        's|^gtk-font-name=.*|gtk-font-name="'"$ef $size"'"|' \
         "gtk2"
 
     # gtk3
     patch "$d/.config/gtk-3.0/settings.ini" \
-        's|^gtk-font-name=.*|gtk-font-name='"$font Regular $size"'|' \
+        's|^gtk-font-name=.*|gtk-font-name='"$ef Regular $size"'|' \
         "gtk3"
 
     # gtk4
     patch "$d/.config/gtk-4.0/settings.ini" \
-        's|^gtk-font-name=.*|gtk-font-name='"$font Regular $size"'|' \
+        's|^gtk-font-name=.*|gtk-font-name='"$ef Regular $size"'|' \
         "gtk4"
 
     # qt5ct
     patch2 "$d/.config/qt5ct/qt5ct.conf" \
-        's|^fixed=.*|fixed="'"$font,$size"',-1,5,400,0,0,0,0,0"|' \
-        's|^general=.*|general="'"$font,$size"',-1,5,400,0,0,0,0,0"|' \
+        's|^fixed=.*|fixed="'"$ef,$size"',-1,5,400,0,0,0,0,0"|' \
+        's|^general=.*|general="'"$ef,$size"',-1,5,400,0,0,0,0,0"|' \
         "qt5ct"
 
     # qt6ct
     patch2 "$d/.config/qt6ct/qt6ct.conf" \
-        's|^fixed=.*|fixed="'"$font,$size"',-1,5,400,0,0,0,0,0,0,0,0,0,0,1"|' \
-        's|^general=.*|general="'"$font,$size"',-1,5,400,0,0,0,0,0,0,0,0,0,0,1"|' \
+        's|^fixed=.*|fixed="'"$ef,$size"',-1,5,400,0,0,0,0,0,0,0,0,0,0,1"|' \
+        's|^general=.*|general="'"$ef,$size"',-1,5,400,0,0,0,0,0,0,0,0,0,0,1"|' \
         "qt6ct"
 
     # xresources
     local xres="$d/.Xresources"
     if [[ -f "$xres" ]]; then
-        sed -i 's|^XTerm\*faceName:.*|XTerm*faceName: '"$font"'|'        "$xres"
-        sed -i 's|^UXTerm\*faceName:.*|UXTerm*faceName: '"$font"'|'      "$xres"
+        sed -i 's|^XTerm\*faceName:.*|XTerm*faceName: '"$ef"'|'        "$xres"
+        sed -i 's|^UXTerm\*faceName:.*|UXTerm*faceName: '"$ef"'|'      "$xres"
         sed -i 's|^XTerm\*faceSize:.*|XTerm*faceSize: '"$size"'|'        "$xres"
         sed -i 's|^UXTerm\*faceSize:.*|UXTerm*faceSize: '"$size"'|'      "$xres"
-        sed -i 's|^XTerm\*boldFont:.*|XTerm*boldFont: '"$font Bold"'|'   "$xres"
-        sed -i 's|^UXTerm\*boldFont:.*|UXTerm*boldFont: '"$font Bold"'|' "$xres"
-        sed -i 's|^XTerm\*wideFont:.*|XTerm*wideFont: '"$font"'|'        "$xres"
-        sed -i 's|^UXTerm\*wideFont:.*|UXTerm*wideFont: '"$font"'|'      "$xres"
-        sed -i 's|^XTerm\*wideBoldFont:.*|XTerm*wideBoldFont: '"$font Bold"'|'   "$xres"
-        sed -i 's|^UXTerm\*wideBoldFont:.*|UXTerm*wideBoldFont: '"$font Bold"'|' "$xres"
+        sed -i 's|^XTerm\*boldFont:.*|XTerm*boldFont: '"$ef Bold"'|'   "$xres"
+        sed -i 's|^UXTerm\*boldFont:.*|UXTerm*boldFont: '"$ef Bold"'|' "$xres"
+        sed -i 's|^XTerm\*wideFont:.*|XTerm*wideFont: '"$ef"'|'        "$xres"
+        sed -i 's|^UXTerm\*wideFont:.*|UXTerm*wideFont: '"$ef"'|'      "$xres"
+        sed -i 's|^XTerm\*wideBoldFont:.*|XTerm*wideBoldFont: '"$ef Bold"'|'   "$xres"
+        sed -i 's|^UXTerm\*wideBoldFont:.*|UXTerm*wideBoldFont: '"$ef Bold"'|' "$xres"
         ok "xresources"
     else
         skip ".Xresources"
@@ -225,7 +229,7 @@ apply_dotfiles() {
     # fontconfig — font inside each <prefer> block
     local fc="$d/.config/fontconfig/fonts.conf"
     if [[ -f "$fc" ]]; then
-        sed -i '/<prefer>/,/<\/prefer>/ s|<family>[^<]*</family>|<family>'"$font"'</family>|' "$fc"
+        sed -i '/<prefer>/,/<\/prefer>/ s|<family>[^<]*</family>|<family>'"$ef"'</family>|' "$fc"
         ok "fontconfig"
     else
         skip "fontconfig"
