@@ -55,6 +55,8 @@ bspc rule -a "Burp Suite Community Edition" state=floating    #rectangle=1280x80
 bspc rule -a "burp-StartBurp" title="Settings" state=floating #rectangle=1286x700+155+112
 bspc rule -a "Color_picker_gui.py" state=floating rectangle=400x400
 bspc rule -a "Xfce4-notes" state=floating sticky=on rectangle=400x400
+bspc rule -a "Sxiv" state=floating
+bspc rule -a "xxiv" state=floating
 
 #(cursor theme is in ~/.icons and you "select it" in the ~/.Xresources file)
 xsetroot -cursor_name left_ptr -xcf /usr/share/icons/Adwaita/cursors/left_ptr 32
