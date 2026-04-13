@@ -77,7 +77,7 @@ if [ "$color_prompt" = yes ]; then
     echo "offline"
   }
 
-  # --- Red-Themed Prompt with IP ---
+  # --- Prompt with IP ---
   # Use $'\033' so the terminal gets real ESC (single-quoted \033 is literal = wrong width + no color reset).
   # All non-printing chars in \[ \] so bash knows prompt length (stops long-line overwriting).
   set_bash_prompt() {
@@ -87,8 +87,8 @@ if [ "$color_prompt" = yes ]; then
     [[ $EUID -eq 0 ]] && symbol='#'
     # Red prompt, then reset so typed text is default color; \[ \] = zero width for line length
     #PS1="\[${esc}[1;31m\][\u@${ipaddr}\w]${symbol} \[${esc}[0m\]"
-    PS1="\[${esc}[1;31m\][${ipaddr}:\W]${symbol} \[${esc}[0m\]"
-    
+    #PS1="\[${esc}[1;31m\][${ipaddr}:\W]${symbol} \[${esc}[0m\]"
+    PS1="\[${esc}[1;31m\]${ipaddr}\[${esc}[1;37m\]:\[${esc}[1;34m\]$PWD\[${esc}[1;37m\]${symbol} \[${esc}[0m\]"
 
     # Optional: set xterm/kitty window title (non-printing, so also in \[ \])
     case "$TERM" in
@@ -243,10 +243,10 @@ fi
 
 export TERM=xterm-256color
 export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-export GOPATH="$HOME/go"                     
+export GOPATH="$HOME/go"
 export PATH="$PATH:$HOME/go/bin:$HOME/.pdtm/go/bin:$HOME/.local/bin:/usr/local/bin:/opt/pentest/bin/linux:$HOME/.cargo/bin"
 
 
 # Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
 export PATH="$PATH:$HOME/.rvm/bin"
-source /etc/profile.d/pentest-path.sh  # Added by pentest setup
+#source /etc/profile.d/pentest-path.sh  # Added by pentest setup

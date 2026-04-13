@@ -43,6 +43,11 @@ update_prompt() {
     local FGCOLOR='%{%B%F{red}%}'
     local BGCOLOR='' #'%{%B%K{white}%}'
     local ENDCOLOR='%{%b%f%k%}'
+    
+    local WHITE='%{%B%F{white}%}'
+    local BLUE='%{%B%F{blue}%}'
+    local RED='%{%B%F{red}%}'
+
     # ROOT INDICATOR
     if [[ $EUID -eq 0 ]]; then
         symbol='󰚌'
@@ -54,16 +59,20 @@ update_prompt() {
     case $PROMPT_STYLE in
         detailed)
             local ipaddr=$(get_ipaddr)
-            PROMPT="${BGCOLOR}${FGCOLOR}[%n${symbol}$ipaddr:%~]%(#.#.$)${ENDCOLOR} "
+            #PROMPT="${BGCOLOR}${FGCOLOR}[%n${symbol}$ipaddr:%~]%(#.#.$)${ENDCOLOR} "
+            PROMPT="${BGCOLOR}${FGCOLOR}${RED}%n${symbol}$ipaddr${WHITE}:${BLUE}%d${WHITE}%(#.#.$)${ENDCOLOR} "
             ;;
         ipdir)
             local ipaddr=$(get_ipaddr)
-            PROMPT="${BGCOLOR}${FGCOLOR}[$ipaddr:%~]%(#.#.$)${ENDCOLOR} "
+            #PROMPT="${BGCOLOR}${FGCOLOR}[$ipaddr:%~]%(#.#.$)${ENDCOLOR} "
+            PROMPT="${BGCOLOR}${RED}$ipaddr${WHITE}:${BLUE}%d${RED}${WHITE}%(#.#.$)${ENDCOLOR} "
             ;;
         dir)
-            PROMPT="${BGCOLOR}${FGCOLOR}[%~]%(#.#.$)${ENDCOLOR} "
+            #PROMPT="${BGCOLOR}${FGCOLOR}[%~]%(#.#.$)${ENDCOLOR} "
+            PROMPT="${BGCOLOR}${FGCOLOR}%d%(#.#.$)${ENDCOLOR} "
             ;;
         minimal)
+            #PROMPT="${BGCOLOR}${FGCOLOR}%(#.#.$)${ENDCOLOR} "
             PROMPT="${BGCOLOR}${FGCOLOR}%(#.#.$)${ENDCOLOR} "
             ;;
     esac

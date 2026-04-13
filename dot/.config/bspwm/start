@@ -63,7 +63,8 @@ process_list=(
   "xsettingsd"
   # "xss-lock --ignore-sleep -- slock" # Add --ignore-sleep for robustness
   "xfce4-notes"
-  #  "picom"
+  # "picom"
+  # "cbatticon"
   "xbindkeys"
 )
 
