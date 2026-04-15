@@ -59,21 +59,21 @@ update_prompt() {
     case $PROMPT_STYLE in
         detailed)
             local ipaddr=$(get_ipaddr)
-            #PROMPT="${BGCOLOR}${FGCOLOR}[%n${symbol}$ipaddr:%~]%(#.#.$)${ENDCOLOR} "
-            PROMPT="${BGCOLOR}${FGCOLOR}${RED}%n${symbol}$ipaddr${WHITE}:${BLUE}%d${WHITE}%(#.#.$)${ENDCOLOR} "
+            PROMPT="${BGCOLOR}${FGCOLOR}[%n${symbol}$ipaddr:%~]%(#.#.$)${ENDCOLOR} "
+            #PROMPT="${BGCOLOR}${FGCOLOR}${RED}%n${symbol}$ipaddr${WHITE}:${BLUE}%d${WHITE}%(#.#.$)${ENDCOLOR} "
             ;;
         ipdir)
             local ipaddr=$(get_ipaddr)
-            #PROMPT="${BGCOLOR}${FGCOLOR}[$ipaddr:%~]%(#.#.$)${ENDCOLOR} "
-            PROMPT="${BGCOLOR}${RED}$ipaddr${WHITE}:${BLUE}%d${RED}${WHITE}%(#.#.$)${ENDCOLOR} "
+            PROMPT="${BGCOLOR}${FGCOLOR}[$ipaddr:%~]%(#.#.$)${ENDCOLOR} "
+            #PROMPT="${BGCOLOR}${RED}$ipaddr${WHITE}:${BLUE}%d${RED}${WHITE}%(#.#.$)${ENDCOLOR} "
             ;;
         dir)
-            #PROMPT="${BGCOLOR}${FGCOLOR}[%~]%(#.#.$)${ENDCOLOR} "
-            PROMPT="${BGCOLOR}${FGCOLOR}%d%(#.#.$)${ENDCOLOR} "
+            PROMPT="${BGCOLOR}${FGCOLOR}[%~]%(#.#.$)${ENDCOLOR} "
+            #PROMPT="${BGCOLOR}${FGCOLOR}%d%(#.#.$)${ENDCOLOR} "
             ;;
         minimal)
-            #PROMPT="${BGCOLOR}${FGCOLOR}%(#.#.$)${ENDCOLOR} "
             PROMPT="${BGCOLOR}${FGCOLOR}%(#.#.$)${ENDCOLOR} "
+            #PROMPT="${BGCOLOR}${FGCOLOR}%(#.#.$)${ENDCOLOR} "
             ;;
     esac
 }

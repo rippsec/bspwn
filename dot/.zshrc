@@ -76,3 +76,4 @@ fi
 unset __conda_setup
 # <<< conda initialize <<<
 
+export rhost="192.168.137.187"
