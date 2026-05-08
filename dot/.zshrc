@@ -77,4 +77,3 @@ unset __conda_setup
 # <<< conda initialize <<<
 
 export RUSTICL_ENABLE=iris
-export rhost="192.168.206.46"
