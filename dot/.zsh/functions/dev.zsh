@@ -1,6 +1,6 @@
 function gip(){
   git add .
-  git commit -m x
+  git commit -m "$(date '+%Y-%m-%d_%H:%M:%S')"
   git push origin main --force
 }
 

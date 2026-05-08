@@ -158,6 +158,7 @@ disable_detailed_prompt() {
 zle-line-init() {
     emulate -L zsh
     [[ $CONTEXT == start ]] || return 0
+    bindkey -e
 
     local ret
     while true; do

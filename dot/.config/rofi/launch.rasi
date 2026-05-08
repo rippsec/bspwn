@@ -1,22 +1,32 @@
-/*****----- Configuration -----*****/
+/* launch.rasi -- top-bar application launcher */
+/* To change colors: edit shared/colors.rasi   */
+
 configuration {
-    terminal:             "alacritty";
-    run-shell-command:    "{terminal} -e {cmd}";
-    modi:                 "drun,run";
-    show-icons:           true;
-    display-drun:         "";
-    display-run:          "";
-    display-filebrowser:  "";
-    display-window:       "";
-    drun-display-format:  "{name}";
-    window-format:        "{w} · {c} · {t}";
+    terminal:            "alacritty";
+    run-shell-command:   "{terminal} -e {cmd}";
+    modi:                "drun,run";
+    show-icons:          true;
+    display-drun:        "";
+    display-run:         "";
+    display-filebrowser: "";
+    display-window:      "";
+    drun-display-format: "{name}";
+    window-format:       "{w} . {c} . {t}";
 }
 
-/*****----- Global Properties -----*****/
 @import "shared/colors.rasi"
-@import "shared/fonts.rasi"
 
 * {
+    /* ===================== User Config ===================== */
+    /* Bar row height                                         */
+    bar-height:  24px;
+    /* App icon size in pixels -- keep below bar-height      */
+    icon-size:   18px;
+    /* Font: "Family Style Size"                             */
+    font:        "Hack Nerd Font Mono Regular 12";
+    /* Width is set directly on the window block below       */
+    /* ======================================================= */
+
     border-colour:               var(selected);
     handle-colour:               var(foreground);
     background-colour:           var(background);
@@ -42,17 +52,18 @@ configuration {
     alternate-active-foreground: var(background);
 }
 
-/*****----- Main Window -----*****/
+/* To adjust width change the value below (px or %) */
 window {
     transparency:     "real";
     location:         north;
     anchor:           north;
     fullscreen:       false;
     width:            100%;
+    height:           var(bar-height);
     x-offset:         0px;
     y-offset:         0px;
     margin:           0px;
-    padding:          5px;
+    padding:          0px;
     border:           0px;
     border-radius:    0px;
     background-color: @background-colour;
@@ -60,17 +71,15 @@ window {
     children:         [ horibox ];
 }
 
-/*****----- Horizontal Box -----*****/
 horibox {
     orientation:      horizontal;
     spacing:          0px;
+    height:           var(bar-height);
     background-color: @background-colour;
     text-color:       @foreground-colour;
-    height:           @bar-height;
     children:         [ prompt, textbox-prompt-colon, entry, listview ];
 }
 
-/*****----- Inputbar elements -----*****/
 prompt {
     enabled:          true;
     padding:          0px 6px;
@@ -93,7 +102,7 @@ entry {
     enabled:           true;
     expand:            false;
     width:             5em;
-    padding:           0px 0px;
+    padding:           0px;
     background-color:  @background-colour;
     text-color:        @foreground-colour;
     cursor:            text;
@@ -102,27 +111,25 @@ entry {
     vertical-align:    0.5;
 }
 
-/*****----- Listview -----*****/
 listview {
-    enabled:       true;
-    columns:       1;
-    lines:         100;
-    cycle:         true;
-    dynamic:       true;
-    scrollbar:     false;
-    layout:        horizontal;
-    fixed-height:  false;
-    fixed-columns: true;
-    spacing:       0px;
-    margin:        0px;
-    padding:       0px;
-    border:        0px;
+    enabled:          true;
+    columns:          1;
+    lines:            100;
+    cycle:            true;
+    dynamic:          true;
+    scrollbar:        false;
+    layout:           horizontal;
+    fixed-height:     false;
+    fixed-columns:    true;
+    spacing:          0px;
+    margin:           0px;
+    padding:          0px;
+    border:           0px;
     background-color: transparent;
-    text-color:    @foreground-colour;
-    cursor:        "default";
+    text-color:       @foreground-colour;
+    cursor:           "default";
 }
 
-/*****----- Elements -----*****/
 element {
     enabled:          true;
     spacing:          6px;
@@ -133,12 +140,12 @@ element {
     background-color: transparent;
     text-color:       @foreground-colour;
     cursor:           pointer;
-    height:           @bar-height;
+    height:           var(bar-height);
 }
 
-element normal.normal  { background-color: @normal-background;          text-color: @normal-foreground;          }
-element normal.urgent  { background-color: @urgent-background;          text-color: @urgent-foreground;          }
-element normal.active  { background-color: @active-background;          text-color: @active-foreground;          }
+element normal.normal   { background-color: @normal-background;          text-color: @normal-foreground;          }
+element normal.urgent   { background-color: @urgent-background;          text-color: @urgent-foreground;          }
+element normal.active   { background-color: @active-background;          text-color: @active-foreground;          }
 element selected.normal { background-color: @selected-normal-background; text-color: @selected-normal-foreground; }
 element selected.urgent { background-color: @selected-urgent-background; text-color: @selected-urgent-foreground; }
 element selected.active { background-color: @selected-active-background; text-color: @selected-active-foreground; }
@@ -146,7 +153,7 @@ element selected.active { background-color: @selected-active-background; text-co
 element-icon {
     background-color: transparent;
     text-color:       inherit;
-    size:             22px;
+    size:             var(icon-size);
     cursor:           inherit;
 }
 

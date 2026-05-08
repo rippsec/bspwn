@@ -20,19 +20,19 @@ size = 12
 builtin_box_drawing = true
 
 [font.normal]
-family = "Fira Code Nerd Font Mono"
+family = "Hack Nerd Font Mono"
 style = "Regular"
 
 [font.bold]
-family = "Fira Code Nerd Font Mono"
+family = "Hack Nerd Font Mono"
 style = "Regular"
 
 [font.italic]
-family = "Fira Code Nerd Font Mono"
+family = "Hack Nerd Font Mono"
 style = "Regular"
 
 [font.bold_italic]
-family = "Fira Code Nerd Font Mono"
+family = "Hack Nerd Font Mono"
 style = "Regular"
 
 [font.offset]

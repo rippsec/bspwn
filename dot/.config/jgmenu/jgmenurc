@@ -29,7 +29,7 @@ icon_size = 22
 icon_text_spacing = 10
 arrow_string = >
 arrow_width = 14
-font = FiraCode Nerd Font Mono Bold 11
+font = Hack Nerd Font Mono Bold 11
 font_fallback = xtg
 
 # Colors: dark background, red accent (match polybar)
