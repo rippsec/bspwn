@@ -105,19 +105,19 @@ handle_edit() {
   while true; do
     # Determine initial text and prompt based on state
     if $invalid_attempt; then
-      message="Invalid IP! Enter a valid IPv4 address"
-      prompt="[+] Set target IP"
+      message="Enter a valid IPv4 address"
+      prompt=""
       initial_text="$last_invalid_ip"
       invalid_attempt=false  # Reset for next iteration
     elif [ -n "$last_action" ]; then
       initial_text="$last_action"
-      prompt="[+] Set target IP"
+      prompt=""
     else
       if [ "$current_target" = "none" ]; then
-        message="[+] Set target IP"
+        message="Type a target"
         initial_text=""
       else
-        message="Current $current_target"
+        message="RHOST: $current_target"
         initial_text="$current_target"
       fi
     fi

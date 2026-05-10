@@ -6,5 +6,5 @@
 }
 
 entry {
-    placeholder: "Enter valid IPv4 target address";
+    placeholder: "???.???.???.???";
 }

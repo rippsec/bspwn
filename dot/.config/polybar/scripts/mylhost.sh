@@ -212,7 +212,7 @@ handle_edit() {
   local current_ip=$(get_ipaddr)
   local current_mode=$(get_lhost_mode | cut -d':' -f1)
   local current_value=$(get_lhost_mode | cut -d':' -f2)
-  local prompt="[+] LHOST:"
+  local prompt=""
   local message=""
   local menu_options=""
   local invalid_attempt=false
@@ -222,7 +222,7 @@ handle_edit() {
     # Update message and prompt based on state
     if $invalid_attempt; then
       message="Invalid: '$last_invalid_input'. Current: $current_ip"
-      prompt="[+] LHOST (Invalid):"
+      prompt="(Invalid):"
       invalid_attempt=false
     else
       if [[ "$current_mode" == "custom" ]]; then
@@ -232,12 +232,12 @@ handle_edit() {
       else
         message="Current: $current_ip (auto)"
       fi
-      prompt="[+] LHOST:"
+      prompt=""
     fi
 
     # Generate menu options
     menu_options=$(get_interfaces_with_ips)
-    menu_options="[!] Clear lhost (resets to default)\n${menu_options}"
+    menu_options="Clear LHOST\n${menu_options}"
 
     # Show Rofi dialog
     selected=$(echo -e "$menu_options" | rofi_theme -dmenu -p "$prompt" -mesg "$message" -selected-row 1)

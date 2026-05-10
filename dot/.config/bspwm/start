@@ -103,3 +103,4 @@ if pgrep -f "skippy-xd --start-daemon" > /dev/null; then
   pkill -USR1 skippy-xd
 fi
 skippy-xd --start-daemon
+unclutter -idle 0.5

@@ -5,8 +5,8 @@
 ! --------------------------
 ! System Cursor Theme
 ! --------------------------
-Xcursor.theme: Adwaita
-Xcursor.size: 32
+Xcursor.theme:Adwaita
+Xcursor.size:9
 
 ! --------------------------
 ! General Settings

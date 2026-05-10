@@ -30,7 +30,7 @@ bspc config focused_border_color "#30302f"
 bspc config normal_border_color "#000000"
 
 #border width, gap, ratio etc...
-bspc config border_width 2
+bspc config border_width 1
 bspc config window_gap 0
 bspc config split_ratio 0.52
 bspc config borderless_monocle true
@@ -58,15 +58,20 @@ bspc rule -a "burp-StartBurp" title="Settings" state=floating #rectangle=1286x70
 bspc rule -a "Color_picker_gui.py" state=floating rectangle=400x400
 bspc rule -a "Xfce4-notes" state=floating sticky=on rectangle=400x400
 bspc rule -a "Sxiv" state=floating
-bspc rule -a "xxiv" state=floating
+bspc rule -a "sxiv" state=floating
 
 #(cursor theme is in ~/.icons and you "select it" in the ~/.Xresources file)
-xsetroot -cursor_name left_ptr -xcf /usr/share/icons/Adwaita/cursors/left_ptr 32
-xrdb -merge ~/.Xresources
-export XCURSOR_SIZE=32
-export XCURSOR_THEME=Adwaita
+#xsetroot -cursor_name dot -xcf /usr/share/icons/Adwaita/cursors/dot 32
 
-# vibrant-cli eDP-1 0.5
+xrdb -merge ~/.Xresources
+xsetroot -cursor_name left_ptr
+gsettings set org.gnome.desktop.interface cursor-theme 'Adwaita'
+gsettings set org.gnome.desktop.interface cursor-size 24
+
+#export XCURSOR_SIZE=24
+#export XCURSOR_THEME=Adwaita
+
+vibrant-cli eDP-1 0.5
 
 #scripts
 $HOME/.config/bspwm/start

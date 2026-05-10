@@ -6,5 +6,5 @@
 }
 
 entry {
-    placeholder: "Type ipv4 addr / interface here";
+    placeholder: "???.???.???.???";
 }
