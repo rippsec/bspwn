@@ -44,15 +44,15 @@ get_ipaddr() {
 
 set_bash_prompt() {
     local esc=$'\033'
-    local _red="${esc}[1;31m"
-    local _blue="${esc}[1;34m"
-    local _white="${esc}[1;37m"
-    local _reset="${esc}[0m"
+    local _red="\[${esc}[1;31m\]"
+    local _blue="\[${esc}[1;34m\]"
+    local _white="\[${esc}[1;37m\]"
+    local _reset="\[${esc}[0m\]"
     local ipaddr
     ipaddr=$(get_ipaddr)
     local symbol='$'
     [[ $EUID -eq 0 ]] && symbol='#'
-    PS1="${ipaddr}:\W${symbol} "
+    PS1="${_red}${ipaddr}${_white}:${_blue}\W${_white}${symbol}${_reset} "
     case "$TERM" in
         xterm*|rxvt*|alacritty*|kitty*)
             PS1="\[${esc}]0;\u@${ipaddr}:\w\007\]${PS1}" ;;
