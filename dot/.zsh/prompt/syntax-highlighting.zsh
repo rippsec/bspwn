@@ -4,14 +4,14 @@ if [ -f /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
     ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets pattern line regexp)
     ZSH_HIGHLIGHT_STYLES[default]=none
     ZSH_HIGHLIGHT_STYLES[line]=bold
-    ZSH_HIGHLIGHT_STYLES[unknown-token]=fg=red,underline
+    ZSH_HIGHLIGHT_STYLES[unknown-token]=fg=red
     ZSH_HIGHLIGHT_STYLES[reserved-word]=fg=cyan
-    ZSH_HIGHLIGHT_STYLES[suffix-alias]=fg=green,underline
+    ZSH_HIGHLIGHT_STYLES[suffix-alias]=fg=green
     ZSH_HIGHLIGHT_STYLES[global-alias]=fg=green
-    ZSH_HIGHLIGHT_STYLES[precommand]=fg=green,underline
+    ZSH_HIGHLIGHT_STYLES[precommand]=fg=green
     ZSH_HIGHLIGHT_STYLES[commandseparator]=fg=blue
-    ZSH_HIGHLIGHT_STYLES[autodirectory]=fg=green,underline
-    ZSH_HIGHLIGHT_STYLES[path]=bold,underline,fg=blue
+    ZSH_HIGHLIGHT_STYLES[autodirectory]=fg=green
+    ZSH_HIGHLIGHT_STYLES[path]=bold,fg=blue
     ZSH_HIGHLIGHT_STYLES[path_pathseparator]=
     ZSH_HIGHLIGHT_STYLES[path_prefix_pathseparator]=
     ZSH_HIGHLIGHT_STYLES[globbing]=fg=blue
