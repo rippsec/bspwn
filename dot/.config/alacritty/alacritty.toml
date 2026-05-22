@@ -8,8 +8,8 @@ title = "Alacritty"
 dynamic_title = true
 
 [window.padding]
-x = 0
-y = 0
+x = 10
+y = 10
 
 [scrolling]
 history = 10000
