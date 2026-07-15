@@ -1,0 +1,83 @@
+#!/bin/bash
+# ~/.config/sxhkd/scripts/float-all-toggle
+#
+# Global fullscreen/tile toggle for bspwm.
+#
+#   (no arg) / toggle   flip between "fullscreen everything" and "restore tiling"
+#   status              print a short label for polybar (does not change state)
+#
+# Behavior:
+#   - ON:  every currently tiled window (any desktop/monitor) is set to
+#          fullscreen, and a background watcher fullscreens any *new* window
+#          that would otherwise have spawned tiled.
+#   - OFF: only the windows THIS script touched are put back to tiled.
+#          Windows that are floating on their own (bspwmrc `bspc rule ...
+#          state=floating` dialogs: jadx-gui, Burp, Color_picker_gui.py,
+#          Xfce4-notes, Sxiv, Maltego, tk/Tk, ...) are never touched, so they
+#          stay floating the whole time.
+
+STATE_FILE="/tmp/bspwm_float_all_state"
+FORCED_FILE="/tmp/bspwm_float_all_forced"
+WATCHER_PID_FILE="/tmp/bspwm_float_all_watcher.pid"
+
+state=$(cat "$STATE_FILE" 2>/dev/null || echo "off")
+
+status() {
+    if [ "$state" = "on" ]; then
+        echo "󰊓 FULL"
+    else
+        echo "󰝘 TILE"
+    fi
+}
+
+stop_watcher() {
+    if [ -f "$WATCHER_PID_FILE" ]; then
+        pgid=$(cat "$WATCHER_PID_FILE")
+        kill -TERM "-$pgid" 2>/dev/null
+        rm -f "$WATCHER_PID_FILE"
+    fi
+}
+
+start_watcher() {
+    export FLOAT_ALL_FORCED_FILE="$FORCED_FILE"
+    setsid bash -c '
+        bspc subscribe node_add | while read -r _ _ _ _ node_id; do
+            st=$(bspc query -T -n "$node_id" 2>/dev/null | grep -oP "\"state\":\"\K[^\"]+")
+            if [ "$st" = "tiled" ]; then
+                bspc node "$node_id" -t fullscreen 2>/dev/null && \
+                    echo "$node_id" >> "$FLOAT_ALL_FORCED_FILE"
+            fi
+        done
+    ' &
+    echo $! > "$WATCHER_PID_FILE"
+    disown
+}
+
+toggle() {
+    if [ "$state" = "on" ]; then
+        # ---- restore: tile only the windows we forced fullscreen ----
+        stop_watcher
+        if [ -f "$FORCED_FILE" ]; then
+            while read -r id; do
+                bspc node "$id" -t tiled 2>/dev/null
+            done < "$FORCED_FILE"
+            rm -f "$FORCED_FILE"
+        fi
+        echo "off" > "$STATE_FILE"
+        notify-send -u low "bspwm" "Tiling restored"
+    else
+        # ---- fullscreen everything currently tiled, then watch for new windows ----
+        : > "$FORCED_FILE"
+        for id in $(bspc query -N -n .tiled.window); do
+            bspc node "$id" -t fullscreen 2>/dev/null && echo "$id" >> "$FORCED_FILE"
+        done
+        start_watcher
+        echo "on" > "$STATE_FILE"
+        notify-send -u low "bspwm" "Fullscreen mode: all windows fullscreen"
+    fi
+}
+
+case "$1" in
+    status) status ;;
+    *) toggle ;;
+esac

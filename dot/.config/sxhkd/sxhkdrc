@@ -206,8 +206,13 @@ super + g
 super + {t,shift + t,f}
 	bspc node -t {tiled,pseudo_tiled,fullscreen}
 
-super + s 
+super + s
   "$HOME/.config/sxhkd/scripts/floating"
+
+# toggle fullscreen for ALL current + future windows (dialogs already
+# floating via bspwmrc rules are left alone, see script header)
+super + shift + o
+  "$HOME/.config/sxhkd/scripts/float-all-toggle"
 
 super + ctrl + {x,y,z}
 	bspc node -g {locked,sticky,private}
