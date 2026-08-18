@@ -1,9 +1,10 @@
 #!/bin/bash
 
 # additional settings
-#hsetroot -solid '#151515'
-feh --bg-fill "/usr/share/backgrounds/kali-16x9/black-kali-2025-4-3840x2160.png"
-
+hsetroot -solid '#000000'
+#feh --bg-fill "/usr/share/backgrounds/kali-16x9/black-kali-2025-4-3840x2160.png"
+#feh --bg-fill /usr/share/backgrounds/kali-16x9/kali-layers.png
+# feh --bg-fill /usr/share/backgrounds/kali-16x9/kali-mesh.png
 
 
 ### Mouse and TouchPad Settings
@@ -67,7 +68,7 @@ process_list=(
   # "xss-lock --ignore-sleep -- slock" # Add --ignore-sleep for robustness
   "xfce4-notes"
   # "picom"
-  # "cbatticon"
+  "cbatticon"
   "xbindkeys"
 )
 
