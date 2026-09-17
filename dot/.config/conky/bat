@@ -1,0 +1,10 @@
+#!/bin/sh
+art='
+/\       /\
+/  \/\_/\/  \
+/ _-_\·_·/_-_ \
+/_ʻ    " "    `_\'
+
+printf '%s\n' "$art" | while IFS= read -r line; do
+    printf '${alignc}%s\n' "$line"
+done

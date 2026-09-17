@@ -1,0 +1,13 @@
+#!/bin/sh
+art='
+__  __
+\\\///
+\\//
+//\\
+//()\\
+‾‾  ‾‾
+'
+
+printf '%s\n' "$art" | while IFS= read -r line; do
+    printf '${alignc}%s\n' "$line"
+done

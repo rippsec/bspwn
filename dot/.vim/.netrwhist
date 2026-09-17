@@ -1,5 +1,6 @@
 let g:netrw_dirhistmax  =10
-let g:netrw_dirhistcnt =6
+let g:netrw_dirhistcnt =7
+let g:netrw_dirhist_7='/home/rip/.wine/drive_c/Program Files (x86)/Need for Speed Underground/scripts'
 let g:netrw_dirhist_6='/home/rip/.config/bspwm'
 let g:netrw_dirhist_5='/home/rip/.bspwn/dot/.config/bspwm/scripts'
 let g:netrw_dirhist_4='/home/rip/Documents/games/Need for Speed Carbon_v1.4_ElEnemigos/scripts'
@@ -9,4 +10,3 @@ let g:netrw_dirhist_1='/home/rip/.config/alacritty'
 let g:netrw_dirhist_0='/home/rip/srv/website/rippsec.com/website-source/writeups/proving-grounds'
 let g:netrw_dirhist_9='/home/rip/srv/website/rippsec.com/website-source/articles'
 let g:netrw_dirhist_8='/home/rip/srv/website/rippsec.com/website-source/src/css'
-let g:netrw_dirhist_7='/home/rip/srv/website/rippsec.com/website-source/.docusaurus'

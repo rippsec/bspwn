@@ -1,0 +1,4 @@
+#!/bin/sh
+cal | tail -n +2 | awk 'NF {
+  printf "${alignc}%24s\n", $0
+}'
