@@ -24,4 +24,4 @@ set_terminal_cursor() {
 }
 
 # Execute immediately upon sourcing
-set_terminal_cursor 6
+set_terminal_cursor 2

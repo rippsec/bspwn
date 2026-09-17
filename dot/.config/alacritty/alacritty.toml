@@ -96,7 +96,7 @@ unfocused_hollow = true
 thickness = 0.15
 
 [cursor.style]
-shape = "Beam"
+shape = "Block"
 blinking = "Off"
 
 [terminal]
