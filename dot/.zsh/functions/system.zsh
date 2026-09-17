@@ -20,3 +20,13 @@ function clear_all(){
         unsetg "$i";
     done
 }
+
+
+center() {
+    local text="$1"
+    local width=$(tput cols)
+    local len=${#text}
+    local pad=$(( (width - len) / 2 ))
+    [ $pad -lt 0 ] && pad=0
+    printf "%${pad}s%s\n" "" "$text"
+}
