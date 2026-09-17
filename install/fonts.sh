@@ -15,7 +15,7 @@ install_fonts() {
   # ZipFilename   — actual filename on the GitHub release (without .zip)
   # grep pattern  — passed to `fc-list | grep -qi` to detect if already installed
   local font_specs=(
-    "AdwaitaMono|AdwaitaMono|AdwaitaMono Nerd Font"
+    "BlexMono|BlexMono|BlexMono Nerd Font"
     "Symbols|NerdFontsSymbolsOnly|Symbols Nerd Font"
     "FiraCode|FiraCode|FiraCode Nerd Font"
     "Hack|Hack|Hack Nerd Font"
@@ -79,7 +79,7 @@ install_fonts() {
   rm -rf "$tmp_dir"
 
   log "Font installation completed!"
-  log_info "Primary font: AdwaitaMono Nerd Font Mono"
+  log_info "Primary font: BlexMono Nerd Font Mono"
 }
 
 # Run if executed directly

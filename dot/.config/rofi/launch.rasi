@@ -23,7 +23,7 @@ configuration {
     /* App icon size in pixels -- keep below bar-height      */
     icon-size:   18px;
     /* Font: "Family Style Size"                             */
-    font:        "AdwaitaMono Nerd Font Mono Regular 12";
+    font:        "BlexMono Nerd Font Mono Regular 12";
     /* Width is set directly on the window block below       */
     /* ======================================================= */
 

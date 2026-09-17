@@ -6,6 +6,7 @@ decorations = "full"
 startup_mode = "Windowed"
 title = "Alacritty"
 dynamic_title = true
+opacity = 0.9
 
 [window.padding]
 x = 9
@@ -20,19 +21,19 @@ size = 11
 builtin_box_drawing = true
 
 [font.normal]
-family = "AdwaitaMono Nerd Font Mono"
+family = "BlexMono Nerd Font Mono"
 style = "Regular"
 
 [font.bold]
-family = "AdwaitaMono Nerd Font Mono"
+family = "BlexMono Nerd Font Mono"
 style = "Regular"
 
 [font.italic]
-family = "AdwaitaMono Nerd Font Mono"
+family = "BlexMono Nerd Font Mono"
 style = "Regular"
 
 [font.bold_italic]
-family = "AdwaitaMono Nerd Font Mono"
+family = "BlexMono Nerd Font Mono"
 style = "Regular"
 
 [font.offset]
@@ -48,33 +49,33 @@ text = "#000000"
 cursor = "#9a9a9a"
 
 [colors.primary]
-background = "#090909"
-foreground = "#d8dee9"
+background = "#1e1e1e"
+foreground = "#e8e8e8"
 
 [colors.normal]
-black = "#000000"
-red = "#FF0000"
-green = "#00FF00"
-yellow = "#FFFF00"
-blue = "#00BFFF"
-magenta = "#FFC0CB"
-cyan = "#40E0D0"
-white = "#BEBEBE"
+black = "#2e2e2e"
+red = "#d75f5f" 
+green = "#5faf5f"
+yellow = "#d7af5f"
+blue = "#5fafd7"
+magenta = "#af5faf"
+cyan = "#5fd7af"
+white = "#d0d0d0"
 
 [colors.bright]
-black = "#414141"
-red = "#FFA500"
-green = "#98FB98"
-yellow = "#FFFF00"
-blue = "#0000CD"
-magenta = "#A020F0"
-cyan = "#AEEEEE"
-white = "#FFFFFF"
-
+black = "#5e5e5e"
+red = "#ff8787"
+green = "#87ff87"
+yellow = "#ffff87"
+blue = "#87ceeb"
+magenta = "#ff87ff"
+cyan = "#87ffff"
+white = "#ffffff"
 
 [colors.selection]
-text = "#7aa2f7"
-background = "#28344a"
+text = "#1e1e1e"
+background = "#5f87af"
+
 
 [bell]
 animation = "Linear"

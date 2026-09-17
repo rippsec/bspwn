@@ -16,8 +16,9 @@ xinput set-prop 'TPPS/2 IBM TrackPoint' 'libinput Accel Speed' -0.7 &
 xinput set-prop 'SynPS/2 Synaptics TouchPad' 'libinput Accel Speed' -0.1 &
 xinput set-prop 'SynPS/2 Synaptics TouchPad' 'libinput Scroll Method Enabled' 0 1 0 &
 xinput set-prop 'SynPS/2 Synaptics TouchPad' 'libinput Horizontal Scroll Enabled' 1 &
-xinput set-prop 'SynPS/2 Synaptics TouchPad' 'libinput Natural Scrolling Enabled' 0 &
 xinput set-prop 'SynPS/2 Synaptics TouchPad' 'libinput Tapping Enabled' 1 &
+xinput set-prop 'SynPS/2 Synaptics TouchPad' 'libinput Natural Scrolling Enabled' 1 &
+
 
 # Disable touchpad while typing (0 = off, so touchpad stays responsive after Super+E enable)
 xinput set-prop 'SynPS/2 Synaptics TouchPad' "libinput Disable While Typing Enabled" 1 &
@@ -66,6 +67,7 @@ process_list=(
   #"lxde-settings-daemon"
   "xsettingsd"
   # "xss-lock --ignore-sleep -- slock" # Add --ignore-sleep for robustness
+  "conky -q -c $HOME/.config/conky/conky.conf"
   "xfce4-notes"
   # "picom"
   "cbatticon"
