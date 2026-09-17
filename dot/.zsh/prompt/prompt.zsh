@@ -69,7 +69,7 @@ update_prompt() {
             ;;
         dir)
             #PROMPT="${BGCOLOR}${FGCOLOR}[%~]%(#.#.$)${ENDCOLOR} "
-            PROMPT="${BGCOLOR}${BLUE}%d${WHITE}%(#.#.$)${ENDCOLOR} "
+            PROMPT="${BGCOLOR}%d${WHITE}%(#.#.$)${ENDCOLOR} "
             ;;
         minimal)
             #PROMPT="${BGCOLOR}${FGCOLOR}%(#.#.$)${ENDCOLOR} "

@@ -1,14 +1,14 @@
 #!/bin/bash
 
 # Font Configuration Script
-# Changes system font to AdwaitaMono Nerd Font Mono across all applications
+# Changes system font to BlexMono Nerd Font Mono across all applications
 # Author: Generated for system-wide font changes
 # Date: 2026-01-24
 
 set -e
 
 # Configuration
-FONT_NAME="AdwaitaMono Nerd Font Mono"
+FONT_NAME="BlexMono Nerd Font Mono"
 FONT_SIZE="11"
 
 echo "=========================================="
@@ -150,7 +150,7 @@ cat > ~/.config/fontconfig/fonts.conf << 'EOF'
   <alias>
     <family>monospace</family>
     <prefer>
-      <family>AdwaitaMono Nerd Font Mono</family>
+      <family>BlexMono Nerd Font Mono</family>
     </prefer>
   </alias>
   
@@ -158,7 +158,7 @@ cat > ~/.config/fontconfig/fonts.conf << 'EOF'
   <alias>
     <family>sans-serif</family>
     <prefer>
-      <family>AdwaitaMono Nerd Font Mono</family>
+      <family>BlexMono Nerd Font Mono</family>
     </prefer>
   </alias>
   
@@ -166,7 +166,7 @@ cat > ~/.config/fontconfig/fonts.conf << 'EOF'
   <alias>
     <family>serif</family>
     <prefer>
-      <family>AdwaitaMono Nerd Font Mono</family>
+      <family>BlexMono Nerd Font Mono</family>
     </prefer>
   </alias>
   
