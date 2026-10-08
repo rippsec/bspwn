@@ -20,6 +20,13 @@ install_fonts() {
     "FiraCode|FiraCode|FiraCode Nerd Font"
     "Hack|Hack|Hack Nerd Font"
     "0xProto|0xProto|0xProto Nerd Font"
+    "AdwaitaMono|AdwaitaMono|AdwaitaMono Nerd Font"
+    "CodeNewRoman|CodeNewRoman|CodeNewRoman Nerd Font"
+    "Gohu|Gohu|GohuFont 11 Nerd Font"
+    "IntelOneMono|IntelOneMono|IntoneMono Nerd Font"
+    "ProggyClean|ProggyClean|ProggyClean Nerd Font"
+    "Terminus|Terminus|Terminess Nerd Font"
+    "Tinos|Tinos|Tinos Nerd Font"
   )
 
   local tmp_dir="/dev/shm/nerd-fonts"

@@ -46,6 +46,12 @@ install_packages() {
     # Archive tools
     zip unzip p7zip-full
 
+    # Fonts (apt) — Nerd Fonts are handled by fonts.sh
+    fonts-noto-core fonts-noto-cjk fonts-noto-color-emoji
+    fonts-liberation fonts-crosextra-caladea fonts-crosextra-carlito
+    fonts-freefont-ttf fonts-ipafont-gothic fonts-wqy-zenhei
+    fonts-tlwg-loma-otf fonts-unifont fontconfig
+
     # Python utilities (polybar key-indicator module)
     python3-pynput
 
@@ -65,6 +71,11 @@ install_packages() {
     earlyoom                     # Kill runaway processes fast before kernel OOM thrash-kills the wrong one
     systemd-zram-generator       # 2GB zstd compressed RAM swap buffer — absorbs bursts before touching SSD
   )
+
+  # ttf-mscorefonts-installer (Arial, Comic Sans, ...) needs contrib/non-free and an EULA preseed
+  echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" \
+    | sudo debconf-set-selections 2>/dev/null || true
+  required_packages+=(ttf-mscorefonts-installer)
 
   log "Updating package list..."
   sudo apt update || error_exit "Failed to update packages"
