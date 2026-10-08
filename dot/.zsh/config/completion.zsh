@@ -2,6 +2,10 @@
 autoload -Uz compinit
 compinit -d ~/.cache/zcompdump
 
+autoload -Uz compinit && compinit
+autoload -Uz bashcompinit && bashcompinit
+complete -C '/usr/local/bin/aws_completer' aws
+
 zstyle ':completion:*:*:*:*:*' menu select
 zstyle ':completion:*' auto-description 'specify: %d'
 zstyle ':completion:*' completer _expand _complete
