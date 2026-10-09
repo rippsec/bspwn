@@ -6,12 +6,12 @@
 
 # Toggle Touchpad
 super + e
-    enabled=$(xinput list-props 'SynPS/2 Synaptics TouchPad'  | grep 'Device Enabled'|tr -d "\t"|cut -d ":" -f2); \
+    enabled=$(xinput list-props 'VEN_0488:00 0488:1064 Touchpad'  | grep 'Device Enabled'|tr -d "\t"|cut -d ":" -f2); \
     if [ "$enabled" -eq 1 ]; then \
-        xinput disable 'SynPS/2 Synaptics TouchPad' ; \
+        xinput disable 'VEN_0488:00 0488:1064 Touchpad' ; \
         notify-send -u low "Touchpad: DISABLED"; \
     else \
-        xinput enable 'SynPS/2 Synaptics TouchPad'; \
+        xinput enable 'VEN_0488:00 0488:1064 Touchpad'; \
         notify-send -u low "Touchpad: ENABLED"; \
     fi
 

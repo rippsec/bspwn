@@ -8,20 +8,17 @@ hsetroot -solid '#1e1e1e'
 
 
 ### Mouse and TouchPad Settings
-# TrackPoint settings, (keyboard model update)
-xinput set-prop 'TPPS/2 IBM TrackPoint' 'libinput Accel Speed' -0.7 &
-
-# TouchPad settings, using the id instead of name, preferably use the name
-# change this id in the ~/.config/sxhkd/sxhkdrc file for the on/off touchpad shortcut
-xinput set-prop 'SynPS/2 Synaptics TouchPad' 'libinput Accel Speed' -0.1 &
-xinput set-prop 'SynPS/2 Synaptics TouchPad' 'libinput Scroll Method Enabled' 0 1 0 &
-xinput set-prop 'SynPS/2 Synaptics TouchPad' 'libinput Horizontal Scroll Enabled' 1 &
-xinput set-prop 'SynPS/2 Synaptics TouchPad' 'libinput Tapping Enabled' 1 &
-xinput set-prop 'SynPS/2 Synaptics TouchPad' 'libinput Natural Scrolling Enabled' 1 &
-
+# Dell Precision 7780: I2C-HID touchpad (no TrackPoint). Use the name, not the id;
+# the same name is used by the on/off touchpad shortcut in ~/.config/sxhkd/sxhkdrc
+TOUCHPAD='VEN_0488:00 0488:1064 Touchpad'
+xinput set-prop "$TOUCHPAD" 'libinput Accel Speed' -0.1 &
+xinput set-prop "$TOUCHPAD" 'libinput Scroll Method Enabled' 0 1 0 &
+xinput set-prop "$TOUCHPAD" 'libinput Horizontal Scroll Enabled' 1 &
+xinput set-prop "$TOUCHPAD" 'libinput Tapping Enabled' 1 &
+xinput set-prop "$TOUCHPAD" 'libinput Natural Scrolling Enabled' 1 &
 
 # Disable touchpad while typing (0 = off, so touchpad stays responsive after Super+E enable)
-xinput set-prop 'SynPS/2 Synaptics TouchPad' "libinput Disable While Typing Enabled" 1 &
+xinput set-prop "$TOUCHPAD" "libinput Disable While Typing Enabled" 1 &
 
 #syndaemon -i 2.0 -d
 
@@ -71,7 +68,7 @@ process_list=(
   "conky -q -c $HOME/.config/conky/conky.conf"
   "conky -q -c $HOME/.config/conky/conky.conf"
   "xfce4-notes"
-  # "picom"
+  "picom -b --config $HOME/.config/picom/picom.conf"
   "cbatticon"
   "xbindkeys"
 )

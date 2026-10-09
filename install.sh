@@ -89,6 +89,40 @@ install_obsidian() {
 # MODULAR SCRIPT WRAPPERS
 # =============================================================================
 
+# Custom helper scripts (xlock, ...) from system/bin -> /usr/local/bin
+install_local_bins() {
+  local project_root; project_root="$(dirname "$INSTALL_DIR")"
+  [[ -d "$project_root/system/bin" ]] || return 0
+  log "Installing helper scripts from system/bin to /usr/local/bin..."
+  local f
+  for f in "$project_root"/system/bin/*; do
+    [[ -f "$f" ]] && sudo install -Dm755 "$f" "/usr/local/bin/$(basename "$f")"
+  done
+}
+
+# skippy-xd (window overview, bound in sxhkdrc) is not packaged — build from source
+install_skippy_xd() {
+  if command -v skippy-xd &>/dev/null; then
+    log "skippy-xd already installed"
+    return 0
+  fi
+  log "Building skippy-xd from source..."
+  sudo apt-get install -y build-essential pkg-config meson ninja-build cmake libchipmunk-dev libx11-dev libxft-dev libxext-dev \
+    libxcomposite-dev libxdamage-dev libxfixes-dev libxinerama-dev libxrender-dev \
+    libxmu-dev libxi-dev libimlib2-dev libjpeg-dev libgif-dev libfontconfig1-dev \
+    || { log_warn "skippy-xd build deps failed"; return 0; }
+  local build_dir; build_dir=$(mktemp -d)
+  if git clone --depth=1 https://github.com/felixfung/skippy-xd "$build_dir/skippy-xd" \
+     && meson setup "$build_dir/skippy-xd/build" "$build_dir/skippy-xd" --prefix=/usr/local \
+     && ninja -C "$build_dir/skippy-xd/build" \
+     && sudo ninja -C "$build_dir/skippy-xd/build" install; then
+    log "skippy-xd installed"
+  else
+    log_warn "skippy-xd build failed"
+  fi
+  rm -rf "$build_dir"
+}
+
 run_packages() {
   source "$INSTALL_DIR/packages.sh"
   install_packages
@@ -143,7 +177,7 @@ _install_zig() {
 # Builds from source because ly is not in Debian/trixie repos.
 install_ly() {
   log "=== Installing Ly display manager (last; logout required to use) ==="
-  local project_root="${SCRIPT_DIR}"
+  local project_root; project_root="$(dirname "$INSTALL_DIR")"
   local system_ly="$project_root/system/etc/ly"
 
   if [[ ! -d "$system_ly" ]]; then
@@ -165,7 +199,7 @@ install_ly() {
     local build_dir
     build_dir=$(mktemp -d)
     log "Cloning ly..."
-    git clone --depth=1 https://github.com/fairyglade/ly "$build_dir/ly" \
+    git clone --depth=1 --branch "${LY_VERSION:-v1.3.2}" https://github.com/fairyglade/ly "$build_dir/ly" \
       || { log_warn "Failed to clone ly"; rm -rf "$build_dir"; return 0; }
 
     log "Building ly (this may take a few minutes)..."
@@ -222,9 +256,32 @@ run_ly() {
   install_ly
 }
 
+# Add the current user to the groups bspwm needs for brightness, sound and input hotkeys:
+#   video  -> /sys/class/backlight (brightnessctl udev rule)
+#   audio  -> ALSA devices / PipeWire
+#   input  -> /dev/input (hotkeys, touchpad tooling)
+#   render -> /dev/dri render nodes (VA-API, Intel/NVIDIA hybrid GPU)
+#   plugdev, netdev -> removable devices / NetworkManager without a password
+setup_user_groups() {
+  local groups=(video audio input render plugdev netdev)
+  local g
+  for g in "${groups[@]}"; do
+    if ! getent group "$g" &>/dev/null; then
+      log_warn "Group '$g' does not exist, skipping"
+      continue
+    fi
+    if id -nG "$USER" | tr ' ' '\n' | grep -qx "$g"; then
+      log "$USER already in group $g"
+    else
+      sudo usermod -aG "$g" "$USER" && log "Added $USER to group $g (re-login required)" \
+        || log_warn "Could not add $USER to group $g"
+    fi
+  done
+}
+
 # Phase 7.2 — system-wide files: ACPI, X11, bspwm session entry, TLP, pipewire autostart
 install_system_files() {
-  local project_root="${SCRIPT_DIR}"
+  local project_root; project_root="$(dirname "$INSTALL_DIR")"
 
   # ACPI lid-close / power-button handlers
   if [[ -d "$project_root/system/etc/acpi" ]]; then
@@ -236,10 +293,20 @@ install_system_files() {
 
   # X11 monitor / GPU config (TearFree)
   if [[ -d "$project_root/system/etc/X11/xorg.conf.d" ]]; then
-    log "Installing X11 config (TearFree, 1600x900)..."
+    log "Installing X11 config (TearFree, 1920x1080)..."
     sudo mkdir -p /etc/X11/xorg.conf.d
     sudo cp "$project_root/system/etc/X11/xorg.conf.d/10-monitor.conf" \
             /etc/X11/xorg.conf.d/10-monitor.conf
+  fi
+
+  setup_user_groups
+  install_local_bins
+  install_skippy_xd
+
+  # Make brightnessctl's udev rule apply to the already-present backlight device
+  if [[ -f /usr/lib/udev/rules.d/90-brightnessctl.rules || -f /lib/udev/rules.d/90-brightnessctl.rules ]]; then
+    sudo udevadm control --reload-rules 2>/dev/null || true
+    sudo udevadm trigger --subsystem-match=backlight --subsystem-match=leds 2>/dev/null || true
   fi
 
   # bspwm session entry for Ly / any DM
@@ -268,7 +335,7 @@ EOF'
     sudo cp "$project_root/system/etc/tlp.d/01-rip.conf" /etc/tlp.d/01-rip.conf
   fi
 
-  # TLP (ThinkPad power management) — enable after drop-in is in place
+  # TLP (power management) — enable after drop-in is in place
   if command -v tlp &>/dev/null; then
     log "Enabling TLP..."
     sudo systemctl enable --now tlp 2>/dev/null || log_warn "Could not enable TLP"
@@ -287,7 +354,7 @@ EOF'
     log_info "zram swap will be active after next reboot"
   fi
 
-  # irqbalance — distribute IRQs across all 4 CPUs
+  # irqbalance — distribute IRQs across all CPUs
   if command -v irqbalance &>/dev/null; then
     log "Enabling irqbalance..."
     sudo systemctl enable --now irqbalance 2>/dev/null || log_warn "Could not enable irqbalance"
