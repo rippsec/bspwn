@@ -15,7 +15,7 @@ install_fonts() {
   # ZipFilename   — actual filename on the GitHub release (without .zip)
   # grep pattern  — passed to `fc-list | grep -qi` to detect if already installed
   local font_specs=(
-    "BlexMono|BlexMono|BlexMono Nerd Font"
+    "BlexMono|IBMPlexMono|BlexMono Nerd Font"
     "Symbols|NerdFontsSymbolsOnly|Symbols Nerd Font"
     "FiraCode|FiraCode|FiraCode Nerd Font"
     "Hack|Hack|Hack Nerd Font"
@@ -69,11 +69,14 @@ install_fonts() {
   for spec in "${to_install[@]}"; do
     local name="${spec%%|*}"
     local zip_file="$tmp_dir/${name}.zip"
-    if [[ -f "$zip_file" ]]; then
+    if [[ -s "$zip_file" ]]; then
       log "Extracting $name..."
       sudo mkdir -p "$font_dir/$name"
-      sudo unzip -q -o "$zip_file" -d "$font_dir/$name"
-      log "Installed: $name"
+      if sudo unzip -q -o "$zip_file" -d "$font_dir/$name"; then
+        log "Installed: $name"
+      else
+        log_warn "Failed to extract $name — skipping"
+      fi
     else
       log_warn "Skipping $name — download failed"
     fi

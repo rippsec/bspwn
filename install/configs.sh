@@ -62,6 +62,7 @@ link_config_dirs() {
     "skippy-xd"
     "i3lock"
     "jgmenu"
+    "conky"
   )
   
   mkdir -p "$HOME/.config"
