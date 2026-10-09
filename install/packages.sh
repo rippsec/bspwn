@@ -40,6 +40,11 @@ install_packages() {
     # X11 utilities
     xbindkeys
 
+    # Screen lock, screenshots, media keys, helpers used by sxhkd/bspwm/polybar/xlock
+    i3lock-color imagemagick maim playerctl jq bc
+    xscreensaver unclutter vmtouch gsimplecal xfce4-notes xfce4-clipman
+    conky-all alacritty gnome-keyring
+
     # Shell
     zsh zsh-syntax-highlighting zsh-autosuggestions
 
@@ -58,16 +63,17 @@ install_packages() {
     # Qt/GTK theming
     qt5ct qt6ct
 
-    # ThinkPad T450 / Intel Broadwell hardware support
-    tlp tlp-rdw                  # ThinkPad power management (battery life, charging thresholds)
+    # Dell Precision 7780 / Intel Raptor Lake hardware support
+    tlp tlp-rdw                  # Power management (battery life, charging thresholds via Dell BAT0 sysfs)
     thermald                     # Intel thermal daemon — prevents throttling
     intel-microcode              # CPU microcode updates (security + stability)
-    xserver-xorg-video-intel     # Intel Broadwell GPU driver (modesetting fallback is fine but this adds TearFree)
-    vainfo intel-media-va-driver # VA-API hardware video decode (H.264/H.265 via i965)
+    vainfo intel-media-va-driver # VA-API hardware video decode (iHD driver, Gen12+)
     firmware-misc-nonfree        # Miscellaneous firmware blobs
+    firmware-sof-signed          # Intel Sound Open Firmware (Raptor Lake HDA/DSP audio)
+    firmware-iwlwifi             # Intel WiFi firmware
 
     # Performance / reliability daemons
-    irqbalance                   # Spread NIC/USB interrupts across all 4 CPUs (default: all on CPU0)
+    irqbalance                   # Spread NIC/USB interrupts across all CPUs (default: all on CPU0)
     earlyoom                     # Kill runaway processes fast before kernel OOM thrash-kills the wrong one
     systemd-zram-generator       # 2GB zstd compressed RAM swap buffer — absorbs bursts before touching SSD
   )

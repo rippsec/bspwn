@@ -1,32 +1,27 @@
 #!/bin/bash
 
-# Paths to battery information
-BAT0="/sys/class/power_supply/BAT0"
-BAT1="/sys/class/power_supply/BAT1"
+# Combines every BAT* under /sys/class/power_supply (one on the Dell, two on a ThinkPad)
 AC="/sys/class/power_supply/AC"
 
-# Initialize variables
-bat0_capacity=0
-bat1_capacity=0
-bat0_status="Unknown"
-bat1_status="Unknown"
 ac_status=0
+[[ -f "$AC/online" ]] && ac_status=$(cat "$AC/online")
 
-# Read battery capacities and statuses
-if [[ -f "$BAT0/capacity" ]]; then
-    bat0_capacity=$(cat "$BAT0/capacity")
-    bat0_status=$(cat "$BAT0/status")
-fi
-if [[ -f "$BAT1/capacity" ]]; then
-    bat1_capacity=$(cat "$BAT1/capacity")
-    bat1_status=$(cat "$BAT1/status")
-fi
-if [[ -f "$AC/online" ]]; then
-    ac_status=$(cat "$AC/online")
-fi
+count=0
+sum=0
+charging=0
+details=""
+for bat in /sys/class/power_supply/BAT*; do
+    [[ -f "$bat/capacity" ]] || continue
+    cap=$(cat "$bat/capacity")
+    status=$(cat "$bat/status")
+    sum=$(( sum + cap ))
+    count=$(( count + 1 ))
+    [[ $status == "Charging" ]] && charging=1
+    details+=$(printf '%s: %s%% (%s)\n' "$(basename "$bat")" "$cap" "$status")$'\n'
+done
 
-# Calculate average capacity
-total_capacity=$(( (bat0_capacity + bat1_capacity) / 2 ))
+total_capacity=0
+[[ $count -gt 0 ]] && total_capacity=$(( sum / count ))
 
 # Determine icon based on average capacity
 if [[ $total_capacity -ge 95 ]]; then
@@ -42,27 +37,13 @@ else
 fi
 
 # Determine charging status
-if [[ $ac_status -eq 1 && ($bat0_status == "Charging" || $bat1_status == "Charging") ]]; then
+if [[ $ac_status -eq 1 && $charging -eq 1 ]]; then
     icon="$icon󱐋"
 fi
 
-# Output format: Icon + Average Capacity
-#echo "$icon $total_capacity%"
-echo "$icon" # $total_capacity%"
+echo "$icon"
 
-## Optional: Detailed status on click
-#if [[ "$1" == "--details" ]]; then
-#    echo "BAT0: $bat0_capacity% ($bat0_status)"
-#    echo "BAT1: $bat1_capacity% ($bat1_status)"
-#    [[ $ac_status -eq 1 ]] && echo "AC: Connected" || echo "AC: Disconnected"
-#fi
-
+# Detailed status on click
 if [[ "$1" == "--details" ]]; then
-    message=$(printf "BAT0: %s%% (%s)\nBAT1: %s%% (%s)\nAC: %s" \
-              "$bat0_capacity" "$bat0_status" \
-              "$bat1_capacity" "$bat1_status" \
-              "$([[ $ac_status -eq 1 ]] && echo "Connected" || echo "Disconnected")")
-    notify-send "Battery Details" "$message"
+    notify-send "Battery Details" "${details}AC: $([[ $ac_status -eq 1 ]] && echo Connected || echo Disconnected)"
 fi
-
-
