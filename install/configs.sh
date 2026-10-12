@@ -63,6 +63,7 @@ link_config_dirs() {
     "i3lock"
     "jgmenu"
     "conky"
+    "flameshot"
   )
   
   mkdir -p "$HOME/.config"
