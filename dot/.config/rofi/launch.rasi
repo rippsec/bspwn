@@ -58,14 +58,14 @@ window {
     location:         north;
     anchor:           north;
     fullscreen:       false;
-    width:            100%;
+    width:            calc(100% - 12px);
     height:           var(bar-height);
     x-offset:         0px;
-    y-offset:         0px;
+    y-offset:         4px;
     margin:           0px;
     padding:          0px;
     border:           0px;
-    border-radius:    0px;
+    border-radius:    6px;
     background-color: @background-colour;
     cursor:           "default";
     children:         [ horibox ];
