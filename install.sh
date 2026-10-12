@@ -348,6 +348,12 @@ EOF'
     sudo sysctl --system 2>/dev/null || log_warn "sysctl --system had warnings (non-fatal)"
   fi
 
+  # Keyboard: US layout with AltGr dead keys (console, Ly and X11 default)
+  if [[ -f "$project_root/system/etc/default/keyboard" ]]; then
+    log "Installing keyboard layout (us altgr-intl)..."
+    sudo cp "$project_root/system/etc/default/keyboard" /etc/default/keyboard
+  fi
+
   # TLP drop-in: governor, battery thresholds, USB, audio, PCIe ASPM
   if [[ -f "$project_root/system/etc/tlp.d/01-rip.conf" ]]; then
     log "Installing TLP drop-in (01-rip.conf)..."

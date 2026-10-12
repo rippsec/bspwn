@@ -20,6 +20,9 @@ xinput set-prop "$TOUCHPAD" 'libinput Natural Scrolling Enabled' 1 &
 # Disable touchpad while typing (0 = off, so touchpad stays responsive after Super+E enable)
 xinput set-prop "$TOUCHPAD" "libinput Disable While Typing Enabled" 1 &
 
+# US English layout with AltGr dead keys (á é í ó ú ñ ¿ ¡) for Spanish text
+setxkbmap -layout us -variant altgr-intl
+
 #syndaemon -i 2.0 -d
 
 ### System Settings
