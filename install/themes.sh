@@ -8,6 +8,26 @@ source "$SCRIPT_DIR/utils.sh"
 
 PROJECT_ROOT="$(get_project_root)"
 
+# Flat-Remix GTK is not in Debian/Kali apt: fetch it from the upstream repo
+_download_flat_remix_gtk() {
+  local dest="$1" variant
+  if [[ -d "$dest/Flat-Remix-GTK-Red-Darkest" ]]; then
+    log "Flat-Remix-GTK-Red-Darkest already installed"
+    return 0
+  fi
+  log "Downloading Flat-Remix GTK theme from GitHub..."
+  local tmp; tmp=$(mktemp -d)
+  if git clone -q --depth=1 https://github.com/daniruiz/flat-remix-gtk "$tmp/frgtk"; then
+    for variant in Flat-Remix-GTK-Red-Darkest Flat-Remix-GTK-Red-Darkest-Solid; do
+      cp -r "$tmp/frgtk/themes/$variant" "$dest/"
+    done
+    log "Installed Flat-Remix-GTK-Red-Darkest"
+  else
+    log_warn "Could not download Flat-Remix GTK; install it manually"
+  fi
+  rm -rf "$tmp"
+}
+
 install_gtk_theme() {
   log "Installing GTK themes..."
   
@@ -25,8 +45,7 @@ install_gtk_theme() {
     log "GTK themes installed"
   else
     log_warn "Theme source not found: $theme_source"
-    log_info "Install themes manually or use lxappearance to download"
-    log_info "Current theme: Flat-Remix-GTK-Red-Darkest"
+    _download_flat_remix_gtk "$theme_dest"
   fi
 
   # Copy icons if they exist

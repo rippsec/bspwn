@@ -45,6 +45,9 @@ install_packages() {
     xscreensaver unclutter vmtouch gsimplecal xfce4-notes xfce4-clipman
     conky-all alacritty gnome-keyring
 
+    # yazi previews/search helpers (yazi itself: install.sh -yazi)
+    ffmpeg 7zip poppler-utils fd-find ripgrep fzf zoxide chafa
+
     # Shell
     zsh zsh-syntax-highlighting zsh-autosuggestions
 

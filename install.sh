@@ -123,6 +123,26 @@ install_skippy_xd() {
   rm -rf "$build_dir"
 }
 
+# yazi (terminal file manager) is not in Debian/Kali apt — install the official release binary
+YAZI_VERSION="v26.9.1"
+install_yazi() {
+  if command -v yazi &>/dev/null; then
+    log "yazi already installed ($(yazi --version 2>/dev/null | head -1))"
+    return 0
+  fi
+  log "Installing yazi ${YAZI_VERSION}..."
+  local tmp; tmp=$(mktemp -d)
+  local url="https://github.com/sxyazi/yazi/releases/download/${YAZI_VERSION}/yazi-x86_64-unknown-linux-gnu.zip"
+  if download_file "$url" "$tmp/yazi.zip" && unzip -q "$tmp/yazi.zip" -d "$tmp"; then
+    sudo install -Dm755 "$tmp"/yazi-x86_64-unknown-linux-gnu/yazi /usr/local/bin/yazi
+    sudo install -Dm755 "$tmp"/yazi-x86_64-unknown-linux-gnu/ya /usr/local/bin/ya
+    log "yazi installed"
+  else
+    log_warn "Failed to install yazi"
+  fi
+  rm -rf "$tmp"
+}
+
 run_packages() {
   source "$INSTALL_DIR/packages.sh"
   install_packages
@@ -418,6 +438,9 @@ full_install() {
   run_packages
   echo ""
   
+  install_yazi
+  echo ""
+
   log "=== Installing Fonts ==="
   run_fonts
   echo ""
@@ -470,6 +493,7 @@ Options:
   -config     Link configuration files only
   -nvim       Install Neovim only
   -obsidian   Install Obsidian only
+  -yazi       Install yazi file manager only
   -backup     Create backup of existing configs only
   -ly         Install Ly display manager only (do last; logout to use)
   -system     Install system files (ACPI, X11, bspwm session, TLP, PipeWire)
@@ -493,7 +517,7 @@ EOF
 
 parse_arguments() {
   local has_options=0
-  local do_full=0 do_pkg=0 do_fonts=0 do_themes=0 do_config=0 do_nvim=0 do_obsidian=0 do_backup=0 do_ly=0 do_system=0
+  local do_full=0 do_pkg=0 do_fonts=0 do_themes=0 do_config=0 do_nvim=0 do_obsidian=0 do_yazi=0 do_backup=0 do_ly=0 do_system=0
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -504,6 +528,7 @@ parse_arguments() {
       -config)   do_config=1; has_options=1 ;;
       -nvim)     do_nvim=1; has_options=1 ;;
       -obsidian) do_obsidian=1; has_options=1 ;;
+      -yazi)     do_yazi=1; has_options=1 ;;
       -backup)   do_backup=1; has_options=1 ;;
       -ly)       do_ly=1; has_options=1 ;;
       -system)   do_system=1; has_options=1 ;;
@@ -542,6 +567,7 @@ parse_arguments() {
   [[ $do_themes -eq 1 ]]   && run_themes
   [[ $do_nvim -eq 1 ]]     && run_nvim
   [[ $do_obsidian -eq 1 ]] && install_obsidian
+  [[ $do_yazi -eq 1 ]]     && install_yazi
   [[ $do_system -eq 1 ]]   && install_system_files
   [[ $do_ly -eq 1 ]]       && run_ly
 
