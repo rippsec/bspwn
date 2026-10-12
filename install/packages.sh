@@ -81,7 +81,9 @@ install_packages() {
     systemd-zram-generator       # 2GB zstd compressed RAM swap buffer — absorbs bursts before touching SSD
   )
 
-  # ttf-mscorefonts-installer (Arial, Comic Sans, ...) needs contrib/non-free and an EULA preseed
+  # Microsoft fonts to process word documents
+  # (Arial, Times New Roman, Verdana, ...; Calibri/Cambria are covered by the metric-compatible
+  # Carlito/Caladea above). Needs contrib/non-free and an EULA preseed.
   echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" \
     | sudo debconf-set-selections 2>/dev/null || true
   required_packages+=(ttf-mscorefonts-installer)
