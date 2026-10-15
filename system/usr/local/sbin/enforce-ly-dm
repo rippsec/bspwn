@@ -1,0 +1,12 @@
+#!/bin/sh
+# Keep ly as the display manager even if lightdm/xfce packages are upgraded.
+[ -x /usr/bin/ly ] || exit 0
+echo /usr/bin/ly > /etc/X11/default-display-manager
+systemctl is-enabled lightdm.service 2>/dev/null | grep -qx masked || systemctl mask lightdm.service >/dev/null 2>&1
+if [ "$(readlink -f /etc/systemd/system/display-manager.service)" != "/etc/systemd/system/ly.service" ]; then
+  systemctl disable lightdm.service >/dev/null 2>&1
+  ln -sf /etc/systemd/system/ly.service /etc/systemd/system/display-manager.service
+  systemctl daemon-reload
+fi
+systemctl disable getty@tty2.service >/dev/null 2>&1
+exit 0

@@ -4,7 +4,7 @@
 hsetroot -solid '#1e1e1e'
 #feh --bg-fill "/usr/share/backgrounds/kali-16x9/black-kali-2025-4-3840x2160.png"
 #feh --bg-fill /usr/share/backgrounds/kali-16x9/kali-layers.png
-feh --bg-fill /usr/share/backgrounds/kali-16x9/kali-hack.jpg
+feh --bg-fill /usr/share/backgrounds/kali-16x9/kali-1.1.png
 
 
 ### Mouse and TouchPad Settings
