@@ -1,11 +1,11 @@
 require 'cairo'
 require 'cairo_xlib'
 
--- Dell Precision 7780 (1920x1080): the conky window is taller than on the ThinkPad, so the
+-- Dell Precision 7780 (1600x900, scaled 5/6 from 1920x1080): the conky window is taller than on the ThinkPad, so the
 -- box is centred on the window and nudged down by block_dy to hug clock + date + calendar.
-local block_dy = 18
-local block_h = 485
-local width   = 490
+local block_dy = 15
+local block_h = 404
+local width   = 408
 local radius  = 12
 local color   = {0, 0, 0, 0.60}
 
