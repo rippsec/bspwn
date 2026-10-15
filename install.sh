@@ -266,6 +266,10 @@ install_ly() {
       systemctl is-enabled "$dm" &>/dev/null && sudo systemctl disable "$dm" 2>/dev/null && log "Disabled $dm"
     done
     sudo systemctl enable ly 2>/dev/null || log_warn "Could not enable ly service"
+    # Keep ly as the DM across lightdm/xfce upgrades (apt post-invoke hook)
+    sudo install -Dm755 "$project_root/system/usr/local/sbin/enforce-ly-dm" /usr/local/sbin/enforce-ly-dm
+    sudo install -Dm644 "$project_root/system/etc/apt/apt.conf.d/99-enforce-ly" /etc/apt/apt.conf.d/99-enforce-ly
+    sudo /usr/local/sbin/enforce-ly-dm || log_warn "enforce-ly-dm failed"
     log_info "Ly is enabled. Log out to use Ly; then select bspwm session."
   else
     log_warn "ly binary not found after build — config placed in /etc/ly for manual setup"
