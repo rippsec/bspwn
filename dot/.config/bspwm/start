@@ -9,7 +9,6 @@ hsetroot -solid '#1e1e1e'
 #feh --bg-fill /usr/share/backgrounds/kali-16x9/kali-layers.png
 feh --bg-fill /usr/share/backgrounds/kali-16x9/kali-1.1.png
 
-
 ### Mouse and TouchPad Settings
 # Dell Precision 7780: I2C-HID touchpad (no TrackPoint). Use the name, not the id;
 # the same name is used by the on/off touchpad shortcut in ~/.config/sxhkd/sxhkdrc
@@ -71,8 +70,8 @@ process_list=(
   #"lxde-settings-daemon"
   "xsettingsd"
   # "xss-lock --ignore-sleep -- slock" # Add --ignore-sleep for robustness
-  "conky -q -c $HOME/.config/conky/conky.conf"
-  "conky -q -c $HOME/.config/conky/conky.conf"
+  #"conky -q -c $HOME/.config/conky/conky.conf"
+  #"conky -q -c $HOME/.config/conky/conky.conf"
   "xfce4-notes"
   "picom -b --config $HOME/.config/picom/picom.conf"
   "cbatticon"
