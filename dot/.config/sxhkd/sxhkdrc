@@ -60,6 +60,13 @@ super + Tab
 # rofi -show window -selected-row 1 -theme "$HOME/.config/rofi/window.rasi"
   skippy-xd --paging
 
+# Windows-style alt+tab: hold alt, tab cycles through windows, release alt to focus
+alt + Tab
+  skippy-xd --switch --next --pivot Alt_L
+
+alt + shift + Tab
+  skippy-xd --switch --prev --pivot Alt_L
+
 # file explorer (rofi)
 #super + f
 #  rofi -show filebrowser -theme "$HOME/.config/rofi/launch.rasi"

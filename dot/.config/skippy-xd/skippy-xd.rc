@@ -85,7 +85,7 @@ showSticky = true
 # Whether to limit window select on current virtual desktop
 # Or allow window selection on all virtual desktops
 # Paging always show all desktops
-switchShowAllDesktops = false
+switchShowAllDesktops = true
 exposeShowAllDesktops = false
 
 # Whether the filtering of window class
