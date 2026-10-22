@@ -32,7 +32,7 @@ setxkbmap -layout us -variant altgr-intl
 xset -b
 
 # Keyboard repeat rate
-xset r rate 150 25
+xset r rate 350 25
 
 # Enable DPMS (timeouts in seconds)
 # this setting doesn't suspend or shutdowns the system only the display
