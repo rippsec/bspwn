@@ -1,72 +1,51 @@
 #!/bin/bash
+# acpid handler for lid close: lock the graphical session as its OWNER.
+# (Suspend itself is handled by systemd-logind.)
 
-# Log execution
-echo "[$(date)] Lid event triggered (lock + suspend)" >> /tmp/lid.log
+log() { echo "[$(date)] $*" >> /var/log/lid.log; }
+log "Lid closed"
 
-# Function to find the active user
-get_active_user() {
-    # Try multiple methods to find the active user
-    local user=""
-    
-    # 1. Try loginctl (systemd)
-    user=$(loginctl list-sessions --no-legend | awk '($3 == "tty" || $3 == "x11") {print $2}' | head -n1)
-    
-    # 2. Fallback to who
-    [ -z "$user" ] && user=$(who | grep -m1 "(:[0-9])" | awk '{print $1}')
-    
-    # 3. Fallback to last X11 user
-    [ -z "$user" ] && user=$(ps -eo user,comm | awk '/Xorg/ {print $1}' | head -n1)
-    
-    echo "$user"
-}
+# Owner of the active graphical session on seat0. Never root: an i3lock started
+# as root only accepts the root password, which made unlocking impossible.
+ACTIVE_USER=""
+while read -r sid _; do
+  [[ $(loginctl show-session "$sid" -p Seat --value) == seat0 ]] || continue
+  [[ $(loginctl show-session "$sid" -p Active --value) == yes ]] || continue
+  ACTIVE_USER=$(loginctl show-session "$sid" -p Name --value)
+  break
+done < <(loginctl list-sessions --no-legend)
 
-ACTIVE_USER=$(get_active_user)
-[ -z "$ACTIVE_USER" ] && ACTIVE_USER=$(logname 2>/dev/null || echo "")
-
-if [ -z "$ACTIVE_USER" ]; then
-    echo "Error: Could not determine active user" >> /tmp/lid.log
-    exit 1
+# Fallback: owner of a non-root process that has DISPLAY set (e.g. bspwm)
+if [[ -z $ACTIVE_USER || $ACTIVE_USER == root ]]; then
+  ACTIVE_USER=$(ps -o user= -C bspwm | grep -v '^root$' | head -n1)
 fi
 
-# Get user info
-USER_HOME=$(getent passwd "$ACTIVE_USER" | cut -d: -f6)
+if [[ -z $ACTIVE_USER || $ACTIVE_USER == root ]]; then
+  log "Error: no non-root graphical user found, not locking"
+  exit 1
+fi
+
 USER_ID=$(id -u "$ACTIVE_USER")
+USER_HOME=$(getent passwd "$ACTIVE_USER" | cut -d: -f6)
 
-# Find Xauthority
-XAUTH=""
-for loc in "$USER_HOME/.Xauthority" "/run/user/$USER_ID/gdm/Xauthority" "/run/user/$USER_ID/.Xauthority"; do
-    if [ -f "$loc" ]; then
-        XAUTH="$loc"
-        break
-    fi
-done
+# Take DISPLAY/XAUTHORITY from the user's running window manager
+WM_PID=$(pgrep -u "$USER_ID" -x bspwm | head -n1)
+if [[ -n $WM_PID ]]; then
+  DISPLAY=$(tr '\0' '\n' < /proc/$WM_PID/environ | sed -n 's/^DISPLAY=//p')
+  XAUTH=$(tr '\0' '\n' < /proc/$WM_PID/environ | sed -n 's/^XAUTHORITY=//p')
+fi
+DISPLAY=${DISPLAY:-:0}
+XAUTH=${XAUTH:-$USER_HOME/.Xauthority}
 
-# Get display
-DISPLAY=":$(ls /tmp/.X11-unix/ | grep -oP 'X\d+' | sed 's/X//' | head -n1)"
-[ -z "$DISPLAY" ] && DISPLAY=":0"
-
-echo "Locking $ACTIVE_USER on $DISPLAY (Xauthority: ${XAUTH:-none})" >> /tmp/lid.log
-
-# Lock screen
-if command -v xlock >/dev/null; then
-    # Run xlock as the active user
-    if [ "$(id -u)" = "0" ]; then
-        sudo -u "$ACTIVE_USER" env DISPLAY="$DISPLAY" XAUTHORITY="$XAUTH" xlock &
-    else
-        env DISPLAY="$DISPLAY" XAUTHORITY="$XAUTH" xlock &
-    fi
-    
-    # Give xlock time to initialize
-    sleep 1
-    
-    # Verify xlock is running
-    if ! pgrep -u "$ACTIVE_USER" xlock >/dev/null; then
-        echo "Error: xlock failed to start" >> /tmp/lid.log
-        exit 1
-    fi
-else
-    echo "Error: xlock not found" >> /tmp/lid.log
-    exit 1
+if pgrep -u "$USER_ID" -x i3lock >/dev/null; then
+  log "Already locked"
+  exit 0
 fi
 
-# Extra safety delay
+log "Locking $ACTIVE_USER on $DISPLAY"
+runuser -u "$ACTIVE_USER" -- env DISPLAY="$DISPLAY" XAUTHORITY="$XAUTH" \
+  DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$USER_ID/bus" \
+  XDG_RUNTIME_DIR="/run/user/$USER_ID" /usr/local/bin/xlock >/dev/null 2>&1 &
+
+# Give i3lock time to grab the screen before logind suspends
+sleep 1

@@ -1,7 +1,54 @@
 #!/bin/bash
-pamixer -t
-playerctl --all-players pause
-i3lock -c 000000 --nofork
-# Optional: unmute/resume after unlock
-pamixer -u  # unmute
-playerctl --all-players play
+# Screen locker: i3lock-color with clock + blurred desktop (betterlockscreen-style).
+# Used by sxhkd (super+x), polybar power menu and /etc/acpi/lid.sh.
+
+# i3lock authenticates the user it RUNS AS. Started as root it would only accept
+# the root password, so the session could never be unlocked with your password.
+if [[ $EUID -eq 0 ]]; then
+  echo "xlock: refusing to run as root (would require root password to unlock)" >&2
+  exit 1
+fi
+
+# Single instance: a second i3lock stacked on top means you unlock one and
+# are still stuck behind the other.
+if pgrep -u "$EUID" -x i3lock >/dev/null; then
+  exit 0
+fi
+
+# Pause media / mute while locked, restore previous state afterwards
+was_muted=$(pamixer --get-mute 2>/dev/null)
+pamixer -m 2>/dev/null
+playing=$(playerctl --all-players status 2>/dev/null | grep -c Playing)
+playerctl --all-players pause 2>/dev/null
+
+# Notifications would be drawn ON TOP of the lock screen (message previews,
+# chat contents...). Hold them while locked; they show up after unlocking.
+dunstctl set-paused true 2>/dev/null
+trap 'dunstctl set-paused false 2>/dev/null' EXIT
+
+font="FiraCode Nerd Font"
+fg=d8dee9ff
+red=ff0000ff
+dim=00000088
+
+# Solid black background: no screenshot of the desktop is ever used, so nothing
+# of what was open (even blurred) is visible while locked.
+i3lock --nofork \
+  --color=000000 \
+  --clock --indicator \
+  --time-str="%H:%M" --date-str="%A, %d %B" \
+  --time-font="$font" --date-font="$font" --verif-font="$font" --wrong-font="$font" --layout-font="$font" \
+  --time-size=64 --date-size=18 --verif-size=16 --wrong-size=16 \
+  --time-color=$fg --date-color=$fg \
+  --radius=120 --ring-width=8 \
+  --inside-color=$dim --ring-color=ffffff33 --line-uses-inside \
+  --keyhl-color=$red --bshl-color=b7c2d7ff --separator-color=00000000 \
+  --insidever-color=$dim --ringver-color=b7c2d7ff --verif-color=$fg --verif-text="..." \
+  --insidewrong-color=$dim --ringwrong-color=$red --wrong-color=$red --wrong-text="Wrong" \
+  --noinput-text="" \
+  --ignore-empty-password --show-failed-attempts \
+  --pass-media-keys --pass-volume-keys --pass-screen-keys
+
+[[ $was_muted == false ]] && pamixer -u 2>/dev/null
+[[ $playing -gt 0 ]] && playerctl --all-players play 2>/dev/null
+exit 0
