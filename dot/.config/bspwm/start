@@ -57,6 +57,10 @@ restart_process() {
 #pkill -f "xss-lock.*slock" || true # Force-kill existing instances
 pkill -f xfce4-notifyd || true  # Ensure dunst is used instead of xfce4-notifyd
 
+# JARVIS (systemd user service) needs the X session env to control the desktop
+systemctl --user import-environment DISPLAY XAUTHORITY DBUS_SESSION_BUS_ADDRESS 2>/dev/null
+[[ -f ~/.config/jarvis/config.toml ]] && systemctl --user start jarvis &
+
 # Define processes (use quotes for commands with arguments)
 process_list=(
   "kdeconnectd"

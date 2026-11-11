@@ -1,0 +1,94 @@
+# J.A.R.V.I.S.
+
+Asistente de voz para esta máquina: le hablas (en la PC o desde el celular), te
+contesta con voz y puede **ejecutar código, controlar el escritorio y planear
+proyectos**. El cerebro es Claude Code (`claude -p`) con una sesión persistente,
+así que recuerda la conversación y tiene acceso a la terminal.
+
+```
+ micrófono PC ─┐                                   ┌─ voz en la PC (mpv)
+ "hey jarvis"  ├─ faster-whisper ─ claude -p ─ edge-tts ─┤
+ celular (PWA) ┘   (GPU, español)   (Claude Code)        └─ voz en el celular
+```
+
+## Instalar
+
+```bash
+~/.bspwn/jarvis/install.sh
+```
+
+Esto crea el venv en `~/.local/share/jarvis/venv`, descarga los modelos, genera
+`~/.config/jarvis/config.toml` (con un token aleatorio), enlaza el comando
+`jarvis` y el servicio de usuario `jarvis.service`. `bspwm/start` lo arranca en
+cada sesión de X.
+
+## Uso en la PC
+
+| Atajo | Acción |
+|---|---|
+| `super + a` | hablarle · otra vez = terminar de hablar · mientras habla = callarlo |
+| `super + shift + a` | activar/desactivar "hey Jarvis" (micrófono siempre abierto) |
+| `super + ctrl + a` | cancelar lo que esté haciendo |
+| polybar 󰚩 | clic = hablar · clic derecho = wake word · clic medio = cancelar |
+
+```bash
+jarvis ask "prepara un plan para una app de notas en Flask"
+jarvis say "Hola"        # que diga algo sin pensar
+jarvis reset             # nueva conversación
+jarvis logs              # ver qué está pasando
+```
+
+Lo largo (planes, código) lo guarda en `~/jarvis/<proyecto>/` y te lo resume en voz.
+
+## Acceso desde el celular
+
+El micrófono del navegador solo funciona con HTTPS, así que se usa Tailscale
+(VPN privada, gratis). El daemon solo escucha en `127.0.0.1`, y Tailscale lo
+publica únicamente dentro de tu red privada.
+
+1. En la PC:
+   ```bash
+   sudo systemctl enable --now tailscaled
+   sudo tailscale up            # abre el login en el navegador
+   sudo tailscale set --operator=$USER
+   tailscale serve --bg 8765    # https://<tu-pc>.<tailnet>.ts.net -> jarvis
+   ```
+   (Si `serve` pide activar HTTPS, sigue el enlace que imprime.)
+2. En el celular: instala la app Tailscale e inicia sesión con la misma cuenta.
+3. `jarvis url` muestra la URL con el token y un QR. Ábrelo en el celular y usa
+   "Agregar a pantalla de inicio" para tenerlo como app.
+
+En la app: toca el reactor para hablar y otra vez para enviar, o escribe.
+"voz en" elige dónde suena la respuesta (celular, PC, ambos, mudo). La fila
+de botones tiene la captura de la pantalla de la PC, la música, el volumen,
+el bloqueo y "Mic PC", que hace que la PC te escuche.
+
+## Configuración
+
+`~/.config/jarvis/config.toml` (reinicia con `jarvis restart`):
+
+- `model`: `sonnet` (rápido, por defecto), `opus` (más listo) o `haiku`. También se elige en la app.
+- `permission_mode`: con `bypassPermissions`, Jarvis ejecuta comandos sin
+  preguntar. La personalidad le indica pedir confirmación antes de algo
+  destructivo, pero es una instrucción, no un candado. Usa `acceptEdits` si
+  prefieres que no corra comandos.
+- `whisper_model`: `small` · `medium` · `large-v3-turbo` (mejor precisión, más VRAM).
+- `voice`: cualquier voz de `edge-tts --list-voices` (p. ej. `es-ES-AlvaroNeural`).
+- `user_title`: cómo quieres que te llame Jarvis.
+- `wake_word = true` para que arranque escuchando "hey Jarvis".
+
+La personalidad está en `persona.md`.
+
+## Seguridad
+
+- Cada petición necesita el token (cookie o `Authorization: Bearer`). No compartas la URL de `jarvis url`.
+- No expongas el puerto a internet (`tailscale funnel`, `host = "0.0.0.0"` en una red pública): quien tenga el token controla la PC.
+- Para cambiar el token, edítalo en el config y reinicia.
+
+## Archivos
+
+- `jarvisd.py`: el daemon (STT, wake word, Claude, TTS, API y SSE).
+- `web/`: la PWA del celular.
+- `bin/jarvis`: el CLI, que también usan sxhkd y polybar.
+- `persona.md`: el system prompt de Jarvis.
+- Estado en ejecución: `$XDG_RUNTIME_DIR/jarvis/`. Historial y sesión: `~/.local/share/jarvis/`.

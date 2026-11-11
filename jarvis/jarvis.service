@@ -1,0 +1,11 @@
+[Unit]
+Description=JARVIS voice assistant (Claude Code)
+After=pipewire-pulse.service graphical-session.target
+
+[Service]
+ExecStart=%h/.local/share/jarvis/venv/bin/python %h/.bspwn/jarvis/jarvisd.py
+Environment=PATH=%h/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+Environment=PYTHONUNBUFFERED=1
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=5

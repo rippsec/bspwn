@@ -1,0 +1,12 @@
+aiohttp>=3.9
+numpy
+edge-tts>=7
+faster-whisper>=1.1
+nvidia-cublas-cu12
+nvidia-cudnn-cu12>=9,<10
+onnxruntime
+# openwakeword is installed with --no-deps (its tflite-runtime dep has no py3.13+ wheels)
+tqdm
+scipy
+scikit-learn
+requests
