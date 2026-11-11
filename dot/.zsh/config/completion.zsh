@@ -1,8 +1,12 @@
 # Completion
 autoload -Uz compinit
-compinit -d ~/.cache/zcompdump
+# Full security check only if the dump is older than 24h; otherwise reuse it (-C)
+if [[ -n ~/.cache/zcompdump(#qN.mh+24) || ! -s ~/.cache/zcompdump ]]; then
+  compinit -d ~/.cache/zcompdump
+else
+  compinit -C -d ~/.cache/zcompdump
+fi
 
-autoload -Uz compinit && compinit
 autoload -Uz bashcompinit && bashcompinit
 complete -C '/usr/local/bin/aws_completer' aws
 
