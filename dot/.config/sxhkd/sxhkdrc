@@ -145,6 +145,18 @@ super + shift + r
 super + x 
   xlock
 
+# JARVIS voice assistant (~/.bspwn/jarvis): talk / finish / shut up
+super + a
+  jarvis listen
+
+# JARVIS: toggle "hey jarvis" wake word (mic always on while enabled)
+super + shift + a
+  jarvis wake
+
+# JARVIS: cancel whatever it is doing
+super + ctrl + a
+  jarvis stop
+
 #brightness volume microphone etc...
 
 XF86AudioMicMute

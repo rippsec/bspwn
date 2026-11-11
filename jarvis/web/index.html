@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="theme-color" content="#05090f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icon.svg">
+<title>J.A.R.V.I.S.</title>
+<style>
+:root{
+  --bg:#05090f; --panel:#0b1420; --line:#14324a; --cyan:#3fd8ff; --cyan-dim:#1b7fa3;
+  --text:#d6ecf5; --muted:#6f8da0; --user:#10283a; --warn:#ffb340; --err:#ff5d6c; --think:#b78bff;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);
+  font:15px/1.45 "JetBrains Mono","Iosevka",ui-monospace,monospace}
+body{display:flex;flex-direction:column;height:100dvh;
+  background:radial-gradient(ellipse at 50% 0%,#0d2233 0%,var(--bg) 60%)}
+header{display:flex;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top) + 10px) 16px 10px;
+  border-bottom:1px solid var(--line)}
+.brand{font-weight:700;letter-spacing:.3em;color:var(--cyan);text-shadow:0 0 12px #3fd8ff88}
+#stateTxt{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--cyan-dim);box-shadow:0 0 8px currentColor}
+.spacer{flex:1}
+select,button,input,textarea{font:inherit;color:inherit}
+.chip{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:5px 10px;font-size:12px}
+.chip.on{border-color:var(--cyan);color:var(--cyan)}
+#log{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth}
+.msg{max-width:88%;padding:9px 12px;border-radius:12px;white-space:pre-wrap;word-wrap:break-word;overflow-wrap:anywhere}
+.msg.user{align-self:flex-end;background:var(--user);border:1px solid #1d4865;border-bottom-right-radius:3px}
+.msg.assistant{align-self:flex-start;background:var(--panel);border:1px solid var(--line);border-bottom-left-radius:3px}
+.msg.partial{opacity:.6;font-size:13px}
+.msg.error{align-self:center;color:var(--err);font-size:13px;background:none}
+.msg .src{display:block;font-size:10px;color:var(--muted);letter-spacing:.1em;margin-bottom:2px}
+.tool{align-self:flex-start;font-size:12px;color:var(--muted);padding-left:6px;border-left:2px solid var(--cyan-dim)}
+.tool b{color:var(--cyan)}
+.msg pre{background:#02060b;border:1px solid var(--line);padding:8px;border-radius:6px;overflow-x:auto;white-space:pre;font-size:12.5px}
+.msg code{background:#02060b;padding:1px 4px;border-radius:4px}
+.empty{margin:auto;text-align:center;color:var(--muted);font-size:13px}
+footer{border-top:1px solid var(--line);padding:10px 16px calc(env(safe-area-inset-bottom) + 10px);
+  display:flex;flex-direction:column;gap:10px;background:#060c14ee}
+.row{display:flex;gap:8px;align-items:center}
+.actions{overflow-x:auto;scrollbar-width:none}
+.actions button{flex:none;background:var(--panel);border:1px solid var(--line);border-radius:10px;
+  padding:7px 10px;font-size:13px;white-space:nowrap}
+.actions button:active{border-color:var(--cyan)}
+#reactor{flex:none;width:68px;height:68px;border-radius:50%;border:2px solid var(--cyan);
+  background:radial-gradient(circle,#bff4ff 0%,#3fd8ff 22%,#0b3b52 52%,#05121c 72%);
+  box-shadow:0 0 18px #3fd8ff66,inset 0 0 14px #3fd8ff88;position:relative;touch-action:none}
+#reactor::after{content:"";position:absolute;inset:-8px;border-radius:50%;border:1px dashed var(--cyan-dim)}
+body[data-s=listening] #reactor,#reactor.rec{animation:pulse 1s infinite;border-color:var(--warn);
+  background:radial-gradient(circle,#fff1d6 0%,#ffb340 25%,#523306 55%,#1c1205 72%)}
+body[data-s=thinking] #reactor::after{border-color:var(--think);animation:spin 1.6s linear infinite}
+body[data-s=speaking] #reactor{animation:pulse .6s infinite}
+@keyframes pulse{50%{box-shadow:0 0 34px #3fd8ffcc,inset 0 0 22px #3fd8ff}}
+@keyframes spin{to{transform:rotate(360deg)}}
+body[data-s=thinking] .dot{background:var(--think);color:var(--think)}
+body[data-s=listening] .dot{background:var(--warn);color:var(--warn)}
+body[data-s=speaking] .dot,body[data-s=idle] .dot{background:var(--cyan);color:var(--cyan)}
+#input{flex:1;min-width:0;resize:none;max-height:120px;background:var(--panel);border:1px solid var(--line);
+  border-radius:12px;padding:10px 12px;outline:none}
+#input:focus{border-color:var(--cyan-dim)}
+#send{flex:none;width:44px;height:44px;border-radius:12px;border:1px solid var(--cyan-dim);background:#0c2a3a;color:var(--cyan)}
+.seg{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;font-size:12px}
+.seg button{background:none;border:0;padding:5px 10px;color:var(--muted)}
+.seg button.on{background:#0f3347;color:var(--cyan)}
+#shot{position:fixed;inset:0;background:#000d;display:none;align-items:center;justify-content:center;z-index:9;padding:16px}
+#shot img{max-width:100%;max-height:100%;border:1px solid var(--line);border-radius:6px}
+#shot.on{display:flex}
+#banner{display:none;background:#3a1015;color:#ffc7cd;font-size:12px;padding:6px 16px;text-align:center}
+</style>
+</head>
+<body data-s="idle">
+<header>
+  <span class="dot"></span>
+  <span class="brand">J.A.R.V.I.S.</span>
+  <span id="stateTxt">conectando…</span>
+  <span class="spacer"></span>
+  <select id="model" class="chip" title="Modelo">
+    <option value="sonnet">sonnet</option><option value="opus">opus</option><option value="haiku">haiku</option>
+  </select>
+  <button id="wake" class="chip" title="Wake word en la PC">hey jarvis</button>
+</header>
+<div id="banner"></div>
+<main id="log"><div class="empty" id="empty">Toca el reactor para hablar,<br>o escribe abajo.</div></main>
+<footer>
+  <div class="row actions">
+    <button data-act="pc_listen">🎙 Mic PC</button>
+    <button data-act="stop">⏹ Detener</button>
+    <button data-act="screenshot">📸 Pantalla</button>
+    <button data-act="play_pause">⏯</button>
+    <button data-act="prev">⏮</button>
+    <button data-act="next">⏭</button>
+    <button data-act="vol_down">🔉</button>
+    <button data-act="vol_up">🔊</button>
+    <button data-act="mute">🔇</button>
+    <button data-act="lock">🔒 Bloquear</button>
+    <button data-act="reset">✦ Nueva charla</button>
+  </div>
+  <div class="row">
+    <span style="font-size:12px;color:var(--muted)">voz en</span>
+    <div class="seg" id="speak">
+      <button data-v="phone">celular</button><button data-v="pc">PC</button><button data-v="both">ambos</button><button data-v="none">mudo</button>
+    </div>
+  </div>
+  <div class="row">
+    <button id="reactor" aria-label="Hablar"></button>
+    <textarea id="input" rows="1" placeholder="Escribe a Jarvis…"></textarea>
+    <button id="send" aria-label="Enviar">➤</button>
+  </div>
+</footer>
+<div id="shot"><img alt="pantalla"></div>
+<audio id="player" playsinline></audio>
+<script>
+const $ = s => document.querySelector(s);
+const log = $('#log'), player = $('#player');
+const CLIENT = Math.random().toString(36).slice(2);
+const LABEL = {idle:'en línea', listening:'escuchando', thinking:'procesando', speaking:'hablando'};
+const store = {get:k=>{try{return localStorage.getItem(k)}catch{return null}}, set:(k,v)=>{try{localStorage.setItem(k,v)}catch{}}};
+let speak = store.get('speak') || 'phone';
+let partialEl = null;
+
+// ---- rendering --------------------------------------------------------------
+const esc = s => s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+function md(s){
+  return esc(s)
+    .replace(/```\w*\n?([\s\S]*?)```/g, (_, c) => `<pre>${c}</pre>`)
+    .replace(/`([^`\n]+)`/g, '<code>$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>');
+}
+function add(cls, html){
+  $('#empty')?.remove();
+  const el = document.createElement('div');
+  el.className = cls; el.innerHTML = html;
+  log.appendChild(el); log.scrollTop = log.scrollHeight;
+  return el;
+}
+function render(ev){
+  switch(ev.type){
+    case 'user':
+      clearPartial();
+      add('msg user', `<span class="src">${ev.source==='pc'?'VOZ · PC':'TÚ'}</span>${esc(ev.text)}`); break;
+    case 'partial':
+      clearPartial(); partialEl = add('msg assistant partial', md(ev.text)); break;
+    case 'assistant':
+      clearPartial(); add('msg assistant', md(ev.text)); break;
+    case 'tool':
+      add('tool', `<b>${esc(ev.name)}</b> ${esc(ev.detail||'')}`); break;
+    case 'error':
+      clearPartial(); add('msg error', esc(ev.text)); break;
+  }
+}
+function clearPartial(){ partialEl?.remove(); partialEl = null; }
+function setState(s, wake){
+  document.body.dataset.s = s;
+  $('#stateTxt').textContent = LABEL[s] || s;
+  if (wake !== undefined) $('#wake').classList.toggle('on', !!wake);
+}
+
+// ---- server events ------------------------------------------------------------
+function connect(){
+  const es = new EventSource('/api/events');
+  es.onopen = () => $('#banner').style.display = 'none';
+  es.onerror = () => { $('#stateTxt').textContent = 'reconectando…'; };
+  es.onmessage = m => {
+    const ev = JSON.parse(m.data);
+    if (ev.type === 'hello'){
+      log.innerHTML = '';
+      if (!ev.history.length) log.innerHTML = '<div class="empty" id="empty">Toca el reactor para hablar,<br>o escribe abajo.</div>';
+      ev.history.forEach(render);
+      setState(ev.state, ev.wake);
+      if (!store.get('model')) $('#model').value = ev.model;
+    } else if (ev.type === 'state') setState(ev.state, ev.wake);
+    else if (ev.type === 'audio'){ if (ev.client === CLIENT){ player.src = ev.url; player.play().catch(()=>{}); } }
+    else if (ev.type === 'stop_audio') player.pause();
+    else if (ev.type === 'reset'){ log.innerHTML = '<div class="empty" id="empty">Nueva conversación.</div>'; }
+    else render(ev);
+  };
+}
+
+async function api(path, body){
+  const r = await fetch('/api/' + path, {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(body || {})});
+  if (r.status === 401) location.reload();
+  return r.json().catch(() => ({}));
+}
+
+// ---- text --------------------------------------------------------------------
+const input = $('#input');
+function sendText(){
+  const text = input.value.trim(); if (!text) return;
+  input.value = ''; input.style.height = '';
+  api('chat', {text, speak, client: CLIENT, model: $('#model').value});
+}
+$('#send').onclick = () => { unlockAudio(); sendText(); };
+input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendText(); } });
+input.addEventListener('input', () => { input.style.height = ''; input.style.height = input.scrollHeight + 'px'; });
+
+// ---- voice (tap to start, tap to send) ----------------------------------------
+let rec = null, chunks = [];
+let unlocked = false;
+function unlockAudio(){
+  if (unlocked) return; unlocked = true;
+  // iOS/Android only allow later programmatic playback once a gesture played something
+  const n = 800, b = new DataView(new ArrayBuffer(44 + n * 2));
+  const w = (o, str) => [...str].forEach((c, i) => b.setUint8(o + i, c.charCodeAt(0)));
+  w(0,'RIFF'); b.setUint32(4, 36 + n*2, true); w(8,'WAVEfmt '); b.setUint32(16,16,true); b.setUint16(20,1,true);
+  b.setUint16(22,1,true); b.setUint32(24,16000,true); b.setUint32(28,32000,true); b.setUint16(32,2,true);
+  b.setUint16(34,16,true); w(36,'data'); b.setUint32(40, n*2, true);
+  player.src = URL.createObjectURL(new Blob([b], {type:'audio/wav'}));
+  player.play().catch(()=>{});
+}
+$('#reactor').onclick = async () => {
+  unlockAudio();
+  if (rec){ rec.stop(); return; }
+  if (!navigator.mediaDevices?.getUserMedia){
+    banner('El micrófono necesita HTTPS: abre Jarvis por la URL de Tailscale (jarvis url).'); return;
+  }
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true, noiseSuppression:true}});
+    player.pause();
+    const type = ['audio/webm;codecs=opus','audio/mp4','audio/ogg'].find(t => MediaRecorder.isTypeSupported(t));
+    rec = new MediaRecorder(stream, type ? {mimeType:type} : undefined);
+    chunks = [];
+    rec.ondataavailable = e => chunks.push(e.data);
+    rec.onstop = async () => {
+      stream.getTracks().forEach(t => t.stop());
+      $('#reactor').classList.remove('rec'); rec = null;
+      const blob = new Blob(chunks, {type: chunks[0]?.type || 'audio/webm'});
+      if (blob.size < 2000) return;
+      const fd = new FormData();
+      fd.append('audio', blob, 'voz'); fd.append('speak', speak);
+      fd.append('client', CLIENT); fd.append('model', $('#model').value);
+      setState('thinking');
+      await fetch('/api/voice', {method:'POST', body: fd});
+    };
+    rec.start();
+    $('#reactor').classList.add('rec'); $('#stateTxt').textContent = 'grabando · toca para enviar';
+    if (navigator.vibrate) navigator.vibrate(30);
+  }catch(e){ banner('Micrófono: ' + e.message); }
+};
+function banner(t){ const b = $('#banner'); b.textContent = t; b.style.display = 'block'; }
+
+// ---- controls ----------------------------------------------------------------
+document.querySelectorAll('[data-act]').forEach(b => b.onclick = async () => {
+  unlockAudio();
+  const a = b.dataset.act;
+  if (a === 'screenshot'){
+    const img = $('#shot img'); img.src = '/api/screenshot?' + Date.now(); $('#shot').classList.add('on');
+  } else if (a === 'pc_listen') api('listen');
+  else if (a === 'reset'){ if (confirm('¿Empezar una conversación nueva?')) api('reset'); }
+  else api(a);
+});
+$('#shot').onclick = () => $('#shot').classList.remove('on');
+$('#wake').onclick = () => api('wake', {on: !$('#wake').classList.contains('on')});
+$('#model').value = store.get('model') || 'sonnet';
+$('#model').onchange = () => store.set('model', $('#model').value);
+function paintSpeak(){ document.querySelectorAll('#speak button').forEach(b => b.classList.toggle('on', b.dataset.v === speak)); }
+document.querySelectorAll('#speak button').forEach(b => b.onclick = () => { speak = b.dataset.v; store.set('speak', speak); paintSpeak(); });
+paintSpeak();
+if (!window.isSecureContext) banner('Sin HTTPS: el chat funciona, pero el micrófono del celular no. Usa la URL de Tailscale.');
+if ('serviceWorker' in navigator && window.isSecureContext) navigator.serviceWorker.register('/sw.js').catch(()=>{});
+connect();
+</script>
+</body>
+</html>

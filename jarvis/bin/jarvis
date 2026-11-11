@@ -1,0 +1,51 @@
+#!/bin/bash
+# jarvis — control the JARVIS daemon (see ~/.bspwn/jarvis/README.md)
+CONF="${JARVIS_CONFIG:-$HOME/.config/jarvis/config.toml}"
+get() { sed -nE "s/^$1 *= *\"?([^\"#]*)\"?.*/\1/p" "$CONF" | head -1 | xargs; }
+PORT=$(get port); PORT=${PORT:-8765}; TOKEN=$(get token)
+API="http://127.0.0.1:$PORT/api"
+post() { curl -fsS -m 10 -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -X POST "$API/$1" -d "${2:-{\}}"; }
+json() { python3 -c 'import json,sys;print(json.dumps(sys.argv[1]))' "$1"; }
+
+case "${1:-}" in
+  listen|l)  post listen >/dev/null || notify-send -a Jarvis "Jarvis está apagado" "systemctl --user start jarvis" ;;
+  stop|s)    post stop >/dev/null ;;
+  reset)     post reset >/dev/null && echo "nueva conversación" ;;
+  wake)      case "${2:-}" in on) b='{"on":true}';; off) b='{"on":false}';; *) b='{}';; esac; post wake "$b" ;;
+  ask|a)     shift; post chat "{\"text\":$(json "$*"),\"speak\":\"pc\",\"source\":\"pc\"}" >/dev/null ;;
+  say)       shift; post say "{\"text\":$(json "$*")}" >/dev/null ;;
+  status)    curl -fsS -m 3 -H "Authorization: Bearer $TOKEN" "$API/status"; echo ;;
+  url)
+    echo "local:     http://127.0.0.1:$PORT/?t=$TOKEN"
+    if command -v tailscale >/dev/null && tailscale status >/dev/null 2>&1; then
+      host=$(tailscale status --json | python3 -c 'import json,sys;print(json.load(sys.stdin)["Self"]["DNSName"].rstrip("."))')
+      echo "celular:   https://$host/?t=$TOKEN"
+      command -v qrencode >/dev/null && qrencode -t ansiutf8 "https://$host/?t=$TOKEN"
+    else
+      echo "celular:   (Tailscale apagado — ver README: 'Acceso desde el celular')"
+    fi ;;
+  logs)      journalctl --user -u jarvis -f -n 50 ;;
+  restart)   systemctl --user restart jarvis ;;
+  polybar)
+    # polybar module: icon reflecting state; click handled in polybar config
+    s=$(cat "${XDG_RUNTIME_DIR:-/tmp}/jarvis/state" 2>/dev/null)
+    systemctl --user is-active -q jarvis || { echo "%{F#555}󰚩%{F-}"; exit; }
+    case "$s" in
+      listening*) echo "%{F#ffb340}󰍬 escuchando%{F-}" ;;
+      thinking*)  echo "%{F#b78bff}󰚩 pensando%{F-}" ;;
+      speaking*)  echo "%{F#3fd8ff}󰚩 hablando%{F-}" ;;
+      *wake*)     echo "%{F#3fd8ff}󰚩%{F-}" ;;
+      *)          echo "%{F#1b7fa3}󰚩%{F-}" ;;
+    esac ;;
+  *) cat <<USAGE
+jarvis listen        hablarle por el micrófono de la PC (o terminar / callarlo)
+jarvis ask <texto>   preguntarle por texto (responde en voz)
+jarvis say <texto>   hacer que diga algo
+jarvis stop          cancelar lo que esté haciendo
+jarvis wake on|off   "hey jarvis" siempre escuchando
+jarvis reset         nueva conversación
+jarvis url           URL + QR para el celular
+jarvis status|logs|restart
+USAGE
+  ;;
+esac

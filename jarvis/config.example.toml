@@ -1,0 +1,30 @@
+# ~/.config/jarvis/config.toml — created by jarvis/install.sh
+
+# Address the daemon listens on. Keep 127.0.0.1 and use `tailscale serve`
+# to reach it from the phone over HTTPS (needed for the phone's microphone).
+host = "127.0.0.1"
+port = 8765
+token = "__TOKEN__"            # required for every request (phone + CLI)
+
+# Brain (Claude Code)
+model = "sonnet"               # sonnet = fast for voice · opus = smarter · haiku = fastest
+# bypassPermissions lets Jarvis run commands without asking (it's your voice
+# assistant). Use "acceptEdits" to only allow file edits, "default" to deny tools.
+permission_mode = "bypassPermissions"
+workdir = "~"                  # where Claude Code starts
+projects_dir = "~/jarvis"      # where it saves plans, code and long answers
+user_title = ""                # how Jarvis addresses you, e.g. "señor", "jefe"
+
+# Ears
+language = "es"
+whisper_model = "small"        # small (fast) · medium · large-v3-turbo (best, ~1.6 GB VRAM)
+whisper_device = "cuda"        # cuda or cpu
+wake_word = false              # "hey jarvis" always listening (toggle: super+shift+a / jarvis wake)
+wake_threshold = 0.5
+silence_seconds = 1.2          # stop recording after this much silence
+max_record_seconds = 30
+
+# Voice — list voices with: ~/.local/share/jarvis/venv/bin/edge-tts --list-voices | grep es-
+voice = "es-MX-JorgeNeural"
+voice_rate = "+8%"
+speak_max_chars = 700
