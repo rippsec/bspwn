@@ -1,0 +1,14 @@
+#!/bin/bash
+# Optional: single-instance slock wrapper used by sxhkd (super+x), xss-lock and /etc/acpi/lid.sh.
+# Install manually:  sudo install -m755 scripts/xlock /usr/bin/xlock
+# Single-instance screen lock. If a locker is already running, do nothing:
+# stacking two lockers makes the visible one ignore input (looks "frozen").
+exec 9>"/tmp/xlock-$(id -u).lock"
+flock -n 9 || exit 0
+pgrep -u "$(id -u)" -x 'i3lock|slock' >/dev/null && exit 0
+
+pamixer -m                          # mute (not toggle, so it can't invert state)
+playerctl --all-players pause 2>/dev/null
+slock
+pamixer -u
+playerctl --all-players play 2>/dev/null

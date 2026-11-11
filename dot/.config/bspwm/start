@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # additional settings
-hsetroot -solid '#1e1e1e'
-#feh --bg-fill "/usr/share/backgrounds/kali-16x9/black-kali-2025-4-3840x2160.png"
-#feh --bg-fill /usr/share/backgrounds/kali-16x9/kali-layers.png
+# hsetroot -solid '#1e1e1e'
+#feh --bg-fill "$HOME/Pictures/kali-whitehack.jpg"
+feh --bg-fill /usr/share/backgrounds/kali-16x9/kali-layers.png
 # feh --bg-fill /usr/share/backgrounds/kali-16x9/kali-mesh.png
 
 
@@ -34,7 +34,10 @@ xset r rate 150 25
 
 # Enable DPMS (timeouts in seconds)
 # this setting doesn't suspend or shutdowns the system only the display
-xset dpms 150 300 600 # display-dims, display turns off, display powered off
+# After 5 min idle: lock (xss-lock -> xlock), then turn the display off ~10s later.
+# Only the display sleeps; the machine keeps running.
+xset s 300 0
+xset dpms 310 310 310
 
 ### Process Management
 
@@ -67,11 +70,11 @@ process_list=(
   "polybar -q -r main -c ~/.config/polybar/config.ini"
   #"lxde-settings-daemon"
   "xsettingsd"
-  # "xss-lock --ignore-sleep -- slock" # Add --ignore-sleep for robustness
-  "conky -q -c $HOME/.config/conky/conky.conf"
-  "conky -q -c $HOME/.config/conky/conky.conf"
+  "xss-lock -- xlock"  # locks on idle (xset s) and before suspend; xlock is single-instance
+  #"conky -q -c $HOME/.config/conky/conky.conf"
+  #"conky -q -c $HOME/.config/conky/conky.conf"
   "xfce4-notes"
-  # "picom"
+  #"picom"
   "cbatticon"
   "xbindkeys"
 )
