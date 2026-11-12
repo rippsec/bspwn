@@ -66,6 +66,8 @@ DEFAULTS = {
     # File manager: directories the phone may browse/upload/download within.
     # Keep this tight — anyone with the token can read/write anything under these.
     "file_roots": ["~"],
+    # Name this machine shows as in the phone's machine switcher (multi-device).
+    "machine_name": "",
 }
 
 
@@ -75,6 +77,9 @@ def load_config() -> dict:
         cfg.update(tomllib.loads(CONFIG_PATH.read_text()))
     for k in ("workdir", "projects_dir"):
         cfg[k] = os.path.expanduser(cfg[k])
+    if not cfg["machine_name"]:
+        import socket
+        cfg["machine_name"] = socket.gethostname()
     if not cfg["token"]:
         sys.exit(f"jarvis: set `token` in {CONFIG_PATH} (run jarvis/install.sh)")
     return cfg
@@ -566,32 +571,48 @@ def make_app(j: Jarvis) -> web.Application:
     token = j.cfg["token"]
 
     @web.middleware
+    async def cors(request: web.Request, handler):
+        # The phone app can be loaded from one machine and talk to another
+        # (multi-device). Auth is by token (header/query), never ambient
+        # cookies cross-origin, so reflecting the Origin is safe here.
+        origin = request.headers.get("Origin")
+        if request.method == "OPTIONS":
+            resp = web.Response(status=204)
+        else:
+            resp = await handler(request)
+        if origin and not resp.prepared:
+            resp.headers["Access-Control-Allow-Origin"] = origin
+            resp.headers["Vary"] = "Origin"
+            resp.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+            resp.headers["Access-Control-Allow-Headers"] = "authorization, content-type"
+            resp.headers["Access-Control-Max-Age"] = "86400"
+        return resp
+
+    @web.middleware
     async def auth(request: web.Request, handler):
         if request.path in ("/manifest.webmanifest", "/icon.svg", "/sw.js"):
             return await handler(request)
-        q = request.query.get("t")
-        given = q or request.cookies.get("jarvis") or request.headers.get("Authorization", "").removeprefix("Bearer ")
+        given = (request.query.get("t") or request.cookies.get("jarvis")
+                 or request.headers.get("Authorization", "").removeprefix("Bearer "))
         if not secrets.compare_digest(given or "", token):
             return web.Response(status=401, text="401 — abre la URL con ?t=<token> (jarvis url)")
-        if q and request.method == "GET" and request.path == "/":
-            resp = web.HTTPFound("/")
-            resp.set_cookie("jarvis", token, max_age=3600 * 24 * 365, httponly=True, samesite="Strict",
-                            secure=request.headers.get("X-Forwarded-Proto") == "https" or request.secure)
-            raise resp
         return await handler(request)
 
     async def index(_):
         return web.FileResponse(HERE / "web/index.html", headers={"Cache-Control": "no-cache"})
 
     async def events(request):
-        resp = web.StreamResponse(headers={"Content-Type": "text/event-stream", "Cache-Control": "no-cache",
-                                           "X-Accel-Buffering": "no"})
+        headers = {"Content-Type": "text/event-stream", "Cache-Control": "no-cache", "X-Accel-Buffering": "no"}
+        if (origin := request.headers.get("Origin")):
+            headers["Access-Control-Allow-Origin"] = origin
+            headers["Vary"] = "Origin"
+        resp = web.StreamResponse(headers=headers)
         await resp.prepare(request)
         q: asyncio.Queue = asyncio.Queue()
         j.clients.add(q)
         try:
             hello = {"type": "hello", "state": j.state, "wake": j.wake_enabled, "history": j.history[-60:],
-                     "model": j.cfg["model"]}
+                     "model": j.cfg["model"], "machine": j.cfg["machine_name"]}
             await resp.write(f"data: {json.dumps(hello, ensure_ascii=False)}\n\n".encode())
             while True:
                 try:
@@ -670,7 +691,7 @@ def make_app(j: Jarvis) -> web.Application:
 
     async def status(_):
         return web.json_response({"state": j.state, "wake": j.wake_enabled, "session": j.session_id,
-                                  "roots": [str(r) for r in j.files.roots]})
+                                  "machine": j.cfg["machine_name"], "roots": [str(r) for r in j.files.roots]})
 
     # -- file manager ---------------------------------------------------------
     def fail(e: Exception) -> web.Response:
@@ -695,6 +716,37 @@ def make_app(j: Jarvis) -> web.Application:
         j.emit("file", op="download", path=str(p), name=p.name)
         return web.FileResponse(p, headers={
             "Content-Disposition": f'attachment; filename="{p.name}"', "Cache-Control": "no-store"})
+
+    async def files_zip(request):
+        try:
+            d = j.files.resolve(request.query.get("path", ""))
+            if not d.is_dir():
+                raise NotADirectoryError("no es una carpeta")
+        except Exception as e:
+            return fail(e)
+
+        def build():
+            import zipfile
+            now = time.time()
+            for old in RUN_DIR.glob("zip_*.zip"):           # drop stale temp zips
+                if now - old.stat().st_mtime > 300:
+                    old.unlink(missing_ok=True)
+            tmp = RUN_DIR / f"zip_{uuid.uuid4().hex}.zip"
+            with zipfile.ZipFile(tmp, "w", zipfile.ZIP_DEFLATED, compresslevel=6) as z:
+                for root, _dirs, fnames in os.walk(d):
+                    for fn in fnames:
+                        fp = Path(root) / fn
+                        try:
+                            z.write(fp, fp.relative_to(d.parent))
+                        except OSError:
+                            pass
+            return tmp
+
+        tmp = await asyncio.to_thread(build)
+        audit("zip", who=request.remote, path=str(d), size=tmp.stat().st_size)
+        j.emit("file", op="download", path=str(d), name=d.name + ".zip", size=tmp.stat().st_size)
+        return web.FileResponse(tmp, headers={
+            "Content-Disposition": f'attachment; filename="{d.name}.zip"', "Cache-Control": "no-store"})
 
     async def files_upload(request):
         reader = await request.multipart()
@@ -754,7 +806,7 @@ def make_app(j: Jarvis) -> web.Application:
             return fail(e)
         raise web.HTTPNotFound()
 
-    app = web.Application(middlewares=[auth], client_max_size=4 * 1024 ** 3)
+    app = web.Application(middlewares=[cors, auth], client_max_size=4 * 1024 ** 3)
     app.add_routes([
         web.get("/", index),
         web.get("/api/events", events),
@@ -763,6 +815,7 @@ def make_app(j: Jarvis) -> web.Application:
         web.post("/api/voice", voice),
         web.get("/api/files", files_list),
         web.get("/api/download", files_download),
+        web.get("/api/zip", files_zip),
         web.post("/api/upload", files_upload),
         web.post("/api/files/{action}", files_op),
         web.post("/api/{action}", control),

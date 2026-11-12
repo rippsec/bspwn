@@ -21,6 +21,9 @@ user_title = ""                # how Jarvis addresses you, e.g. "señor", "jefe"
 # <projects_dir>/inbox. All file ops are recorded in ~/.local/share/jarvis/audit.log
 file_roots = ["~"]
 
+# Name this machine shows as in the phone's machine switcher (empty = hostname).
+machine_name = ""
+
 # Ears
 language = "es"
 whisper_model = "small"        # small (fast) · medium · large-v3-turbo (best, ~1.6 GB VRAM)
