@@ -70,8 +70,9 @@ En la app:
 - **📎 Subir**: manda archivos del celular a la PC. Caen en `<projects_dir>/inbox`
   y Jarvis los puede usar: "lee el PDF que subí y resúmelo", "convierte esa foto".
 - **📁 Archivos**: explora las carpetas de la PC. Toca un archivo para descargarlo
-  al celular, una carpeta para entrar, 🗑 para borrar, ＋ para crear carpeta, y
-  "📎 Subir aquí" para subir a la carpeta que estás viendo.
+  al celular, una carpeta para entrar, ⬇ para bajar una carpeta completa como zip,
+  🗑 para borrar, ＋ para crear carpeta, y "📎 Subir aquí" para subir a la carpeta
+  que estás viendo.
 - Cuando Jarvis crea algo (un script, un informe), aparece en el chat con un
   enlace para descargarlo directo al celular.
 
@@ -92,6 +93,24 @@ jarvis audit           # últimas 40 acciones
 jarvis audit 200
 ```
 
+## Varias máquinas
+
+Cada equipo corre su propio `jarvisd` con su token. La app guarda una lista de
+máquinas y el selector del encabezado elige a cuál le hablas; todo (chat, voz,
+archivos, pantalla) va a la máquina activa.
+
+1. Instala Jarvis en el otro equipo y exponlo con Tailscale igual que este.
+   Ponle un nombre claro con `machine_name` en su config.
+2. En la app, abre el selector de máquina (arriba) → **➕ Agregar…** y pega la
+   URL que da `jarvis url` en ese equipo (incluye su token).
+3. Cambia entre equipos con el mismo selector. Cada uno mantiene su propia
+   conversación y su sesión de Claude.
+
+Esto funciona porque el agente acepta el token por cabecera o por `?t=` y
+responde con CORS, así que la app cargada desde una máquina puede hablarle a
+otra dentro de tu red de Tailscale. Es la base para administrar varios
+servidores desde un mismo panel.
+
 ## Configuración
 
 `~/.config/jarvis/config.toml` (reinicia con `jarvis restart`):
@@ -104,6 +123,7 @@ jarvis audit 200
 - `whisper_model`: `small` · `medium` · `large-v3-turbo` (mejor precisión, más VRAM).
 - `voice`: cualquier voz de `edge-tts --list-voices` (p. ej. `es-ES-AlvaroNeural`).
 - `user_title`: cómo quieres que te llame Jarvis.
+- `machine_name`: nombre de este equipo en el selector de máquina (por defecto el hostname).
 - `wake_word = true` para que arranque escuchando "hey Jarvis".
 
 La personalidad está en `persona.md`.

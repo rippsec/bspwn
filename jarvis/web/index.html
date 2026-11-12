@@ -94,6 +94,7 @@ body[data-s=speaking] .dot,body[data-s=idle] .dot{background:var(--cyan);color:v
   <span class="brand">J.A.R.V.I.S.</span>
   <span id="stateTxt">conectando…</span>
   <span class="spacer"></span>
+  <select id="mach" class="chip" title="Máquina"></select>
   <select id="model" class="chip" title="Modelo">
     <option value="sonnet">sonnet</option><option value="opus">opus</option><option value="haiku">haiku</option>
   </select>
@@ -154,6 +155,71 @@ const store = {get:k=>{try{return localStorage.getItem(k)}catch{return null}}, s
 let speak = store.get('speak') || 'phone';
 let partialEl = null;
 
+// ---- machines (multi-device) -------------------------------------------------
+// Each machine runs its own jarvisd; we keep {base, token, name} per machine and
+// point every request at the active one. Token goes in the header for fetch and
+// in ?t= for EventSource / <img> / download links (which can't set headers).
+function loadMachines(){ try{ return JSON.parse(store.get('machines')) || []; }catch{ return []; } }
+function saveMachines(){ store.set('machines', JSON.stringify(machines)); }
+let machines = loadMachines();
+let active = null, es = null;
+
+function bootMachine(){
+  const url = new URL(location.href);
+  const tok = url.searchParams.get('t');
+  const base = location.origin;
+  if (tok){                                   // opened with a token: register/refresh this machine
+    let m = machines.find(x => x.base === base);
+    if (!m){ m = {base, token: tok, name: base.replace(/^https?:\/\//,'')}; machines.push(m); }
+    else m.token = tok;
+    store.set('active', base); saveMachines();
+    history.replaceState(null, '', location.pathname);   // keep the token out of the address bar
+  }
+  active = machines.find(x => x.base === (store.get('active')||base)) || machines[0]
+        || {base, token:'', name: base.replace(/^https?:\/\//,'')};
+}
+const u = (path) => active.base + path;
+const uTok = (path) => u(path) + (path.includes('?')?'&':'?') + 't=' + encodeURIComponent(active.token);
+function authFetch(path, opts={}){
+  return fetch(u(path), {...opts, headers: {...(opts.headers||{}), Authorization: 'Bearer ' + active.token}});
+}
+async function api(path, body){
+  try{
+    const r = await authFetch('/api/' + path, {method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(body || {})});
+    if (r.status === 401){ banner('Token inválido para ' + active.name); return {}; }
+    return r.json().catch(() => ({}));
+  }catch(e){ banner('Sin conexión con ' + active.name); return {}; }
+}
+function renderMachines(){
+  const sel = $('#mach');
+  sel.innerHTML = machines.map(m => `<option value="${esc(m.base)}"${m===active?' selected':''}>${esc(m.name)}</option>`).join('')
+    + '<option value="__add__">➕ Agregar…</option>';
+}
+async function addMachine(){
+  const raw = prompt('Pega la URL de la otra máquina (la que da «jarvis url», con el token):');
+  if (!raw) { renderMachines(); return; }
+  let url; try{ url = new URL(raw.trim()); }catch{ alert('URL inválida'); renderMachines(); return; }
+  const tok = url.searchParams.get('t');
+  if (!tok){ alert('A esa URL le falta el token (?t=...)'); renderMachines(); return; }
+  const base = url.origin;
+  let name = base.replace(/^https?:\/\//,'');
+  try{
+    const r = await fetch(base + '/api/status', {headers:{Authorization:'Bearer '+tok}});
+    if (r.ok){ const d = await r.json(); if (d.machine) name = d.machine; }
+    else { alert('No respondió (¿token correcto? ¿Tailscale conectado?)'); renderMachines(); return; }
+  }catch{ alert('No se pudo contactar a esa máquina'); renderMachines(); return; }
+  const ex = machines.find(x => x.base === base);
+  if (ex){ ex.token = tok; ex.name = name; } else machines.push({base, token: tok, name});
+  saveMachines(); switchMachine(base);
+}
+function switchMachine(base){
+  active = machines.find(x => x.base === base) || active;
+  store.set('active', active.base); renderMachines();
+  log.innerHTML = '<div class="empty" id="empty">Conectando con ' + esc(active.name) + '…</div>';
+  connect();
+}
+
 // ---- rendering --------------------------------------------------------------
 const esc = s => s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 function md(s){
@@ -185,7 +251,7 @@ function render(ev){
     case 'file':{
       const v = {upload:'⬆ subido', download:'⬇ descargado', delete:'🗑 borrado'}[ev.op] || ev.op;
       const link = ev.op==='delete' ? esc(ev.name)
-        : `<a href="/api/download?path=${encodeURIComponent(ev.path)}">${esc(ev.name)}</a>`;
+        : `<a href="${uTok('/api/download?path=' + encodeURIComponent(ev.path))}">${esc(ev.name)}</a>`;
       add('msg file', `${v}: ${link}${ev.size?` · ${fmtSize(ev.size)}`:''}`); break;
     }
   }
@@ -200,7 +266,8 @@ function setState(s, wake){
 
 // ---- server events ------------------------------------------------------------
 function connect(){
-  const es = new EventSource('/api/events');
+  if (es) es.close();
+  es = new EventSource(uTok('/api/events'));
   es.onopen = () => $('#banner').style.display = 'none';
   es.onerror = () => { $('#stateTxt').textContent = 'reconectando…'; };
   es.onmessage = m => {
@@ -211,19 +278,13 @@ function connect(){
       ev.history.forEach(render);
       setState(ev.state, ev.wake);
       if (!store.get('model')) $('#model').value = ev.model;
+      if (ev.machine && ev.machine !== active.name){ active.name = ev.machine; saveMachines(); renderMachines(); }
     } else if (ev.type === 'state') setState(ev.state, ev.wake);
-    else if (ev.type === 'audio'){ if (ev.client === CLIENT){ player.src = ev.url; player.play().catch(()=>{}); } }
+    else if (ev.type === 'audio'){ if (ev.client === CLIENT){ player.src = uTok(ev.url); player.play().catch(()=>{}); } }
     else if (ev.type === 'stop_audio') player.pause();
     else if (ev.type === 'reset'){ log.innerHTML = '<div class="empty" id="empty">Nueva conversación.</div>'; }
     else render(ev);
   };
-}
-
-async function api(path, body){
-  const r = await fetch('/api/' + path, {method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify(body || {})});
-  if (r.status === 401) location.reload();
-  return r.json().catch(() => ({}));
 }
 
 // ---- text --------------------------------------------------------------------
@@ -273,7 +334,7 @@ $('#reactor').onclick = async () => {
       fd.append('audio', blob, 'voz'); fd.append('speak', speak);
       fd.append('client', CLIENT); fd.append('model', $('#model').value);
       setState('thinking');
-      await fetch('/api/voice', {method:'POST', body: fd});
+      await authFetch('/api/voice', {method:'POST', body: fd});
     };
     rec.start();
     $('#reactor').classList.add('rec'); $('#stateTxt').textContent = 'grabando · toca para enviar';
@@ -287,7 +348,7 @@ document.querySelectorAll('[data-act]').forEach(b => b.onclick = async () => {
   unlockAudio();
   const a = b.dataset.act;
   if (a === 'screenshot'){
-    const img = $('#shot img'); img.src = '/api/screenshot?' + Date.now(); $('#shot').classList.add('on');
+    const img = $('#shot img'); img.src = uTok('/api/screenshot?' + Date.now()); $('#shot').classList.add('on');
   } else if (a === 'pc_listen') api('listen');
   else if (a === 'files') openFiles();
   else if (a === 'upload'){ uploadTo = ''; $('#fileinput').click(); }
@@ -304,7 +365,7 @@ async function openFiles(path){
 }
 async function loadDir(path){
   const list = $('#flist'); list.innerHTML = '<div class="fpath">cargando…</div>';
-  const r = await fetch('/api/files?path=' + encodeURIComponent(path || fcur || ''));
+  const r = await authFetch('/api/files?path=' + encodeURIComponent(path || fcur || ''));
   const d = await r.json();
   if (!d.path){ list.innerHTML = `<div class="fpath">${esc(d.error||'error')}</div>`; return; }
   fcur = d.path; $('#fpath').textContent = d.path;
@@ -314,23 +375,25 @@ async function loadDir(path){
   for (const e of d.entries){
     const full = d.path.replace(/\/$/,'') + '/' + e.name;
     const el = e.dir
-      ? row('📁', e.name, '', () => loadDir(full), full)
-      : row('📄', e.name, '', () => { location.href = '/api/download?path=' + encodeURIComponent(full); }, full, fmtSize(e.size));
+      ? row('📁', e.name, '', () => loadDir(full), full, null, uTok('/api/zip?path=' + encodeURIComponent(full)))
+      : row('📄', e.name, '', () => { location.href = uTok('/api/download?path=' + encodeURIComponent(full)); }, full, fmtSize(e.size));
     list.append(el);
   }
 }
-function row(ic, name, cls, onclick, full, meta){
+function row(ic, name, cls, onclick, full, meta, zipUrl){
   const el = document.createElement('div');
   el.className = 'fitem ' + cls;
   el.innerHTML = `<span class="ic">${ic}</span><span class="nm">${esc(name)}</span>` +
     (meta ? `<span class="meta">${meta}</span>` : '') +
+    (zipUrl ? `<a class="del" title="Descargar como zip" href="${zipUrl}">⬇</a>` : '') +
     (full ? `<button class="del" title="Borrar">🗑</button>` : '');
   el.querySelector('.nm').onclick = el.querySelector('.ic').onclick = onclick;
+  const z = el.querySelector('a.del'); if (z) z.onclick = ev => ev.stopPropagation();
   const del = el.querySelector('.del');
   if (del) del.onclick = async (ev) => {
     ev.stopPropagation();
     if (!confirm('¿Borrar ' + name + '?')) return;
-    const res = await (await fetch('/api/files/delete', {method:'POST', headers:{'Content-Type':'application/json'},
+    const res = await (await authFetch('/api/files/delete', {method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({path: full})})).json();
     if (res.ok) loadDir(); else alert(res.error);
   };
@@ -339,7 +402,7 @@ function row(ic, name, cls, onclick, full, meta){
 $('#fclose').onclick = () => $('#files').classList.remove('on');
 $('#fmk').onclick = async () => {
   const name = prompt('Nombre de la carpeta nueva:'); if (!name) return;
-  const res = await (await fetch('/api/files/mkdir', {method:'POST', headers:{'Content-Type':'application/json'},
+  const res = await (await authFetch('/api/files/mkdir', {method:'POST', headers:{'Content-Type':'application/json'},
     body: JSON.stringify({path: fcur, name})})).json();
   if (res.ok) loadDir(); else alert(res.error);
 };
@@ -353,7 +416,7 @@ $('#fileinput').onchange = async () => {
   const dest = uploadTo ? 'a esta carpeta' : 'a inbox';
   const note = add('msg file', `⬆ subiendo ${files.length} archivo(s) ${dest}…`);
   try{
-    const res = await (await fetch('/api/upload', {method:'POST', body: fd})).json();
+    const res = await (await authFetch('/api/upload', {method:'POST', body: fd})).json();
     note.remove();
     if (!res.ok) add('msg error', esc(res.error || 'falló la subida'));
     else if ($('#files').classList.contains('on') && uploadTo) loadDir();
@@ -365,8 +428,11 @@ $('#model').onchange = () => store.set('model', $('#model').value);
 function paintSpeak(){ document.querySelectorAll('#speak button').forEach(b => b.classList.toggle('on', b.dataset.v === speak)); }
 document.querySelectorAll('#speak button').forEach(b => b.onclick = () => { speak = b.dataset.v; store.set('speak', speak); paintSpeak(); });
 paintSpeak();
+$('#mach').onchange = e => { const v = e.target.value; if (v === '__add__') addMachine(); else switchMachine(v); };
 if (!window.isSecureContext) banner('Sin HTTPS: el chat funciona, pero el micrófono del celular no. Usa la URL de Tailscale.');
 if ('serviceWorker' in navigator && window.isSecureContext) navigator.serviceWorker.register('/sw.js').catch(()=>{});
+bootMachine();
+renderMachines();
 connect();
 </script>
 </body>
