@@ -15,6 +15,12 @@ workdir = "~"                  # where Claude Code starts
 projects_dir = "~/jarvis"      # where it saves plans, code and long answers
 user_title = ""                # how Jarvis addresses you, e.g. "señor", "jefe"
 
+# File manager (phone: 📁 Archivos / 📎 Subir). Directories the phone may
+# browse, download from and upload to. Anyone with the token can read/write
+# anything under these, so keep the list tight. Uploads with no target go to
+# <projects_dir>/inbox. All file ops are recorded in ~/.local/share/jarvis/audit.log
+file_roots = ["~"]
+
 # Ears
 language = "es"
 whisper_model = "small"        # small (fast) · medium · large-v3-turbo (best, ~1.6 GB VRAM)

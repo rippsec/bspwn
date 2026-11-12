@@ -25,6 +25,7 @@ case "${1:-}" in
       echo "celular:   (Tailscale apagado — ver README: 'Acceso desde el celular')"
     fi ;;
   logs)      journalctl --user -u jarvis -f -n 50 ;;
+  audit)     tail -n "${2:-40}" "$HOME/.local/share/jarvis/audit.log" 2>/dev/null || echo "sin registros aún" ;;
   restart)   systemctl --user restart jarvis ;;
   polybar)
     # polybar module: icon reflecting state; click handled in polybar config
@@ -45,6 +46,7 @@ jarvis stop          cancelar lo que esté haciendo
 jarvis wake on|off   "hey jarvis" siempre escuchando
 jarvis reset         nueva conversación
 jarvis url           URL + QR para el celular
+jarvis audit [n]     ver las últimas n acciones (archivos, comandos)
 jarvis status|logs|restart
 USAGE
   ;;

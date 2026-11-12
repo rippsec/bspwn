@@ -70,6 +70,22 @@ body[data-s=speaking] .dot,body[data-s=idle] .dot{background:var(--cyan);color:v
 #shot img{max-width:100%;max-height:100%;border:1px solid var(--line);border-radius:6px}
 #shot.on{display:flex}
 #banner{display:none;background:#3a1015;color:#ffc7cd;font-size:12px;padding:6px 16px;text-align:center}
+.modal{position:fixed;inset:0;background:#000c;display:none;z-index:10;align-items:flex-end;justify-content:center}
+.modal.on{display:flex}
+.sheet{background:var(--panel);border:1px solid var(--line);border-top-left-radius:16px;border-top-right-radius:16px;
+  width:100%;max-width:640px;max-height:82dvh;display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom)}
+.fhead{display:flex;align-items:center;gap:6px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.fpath{padding:8px 14px;font-size:12px;color:var(--muted);word-break:break-all;border-bottom:1px solid var(--line)}
+#flist{overflow-y:auto;padding:4px 6px}
+.fitem{display:flex;align-items:center;gap:10px;padding:10px 10px;border-radius:8px}
+.fitem:active{background:#0f2433}
+.fitem .ic{flex:none;width:22px;text-align:center}
+.fitem .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fitem .meta{font-size:11px;color:var(--muted);flex:none}
+.fitem .del{flex:none;background:none;border:0;color:var(--err);font-size:15px;padding:4px 6px;opacity:.7}
+.fitem.up{color:var(--cyan)}
+.msg.file{align-self:center;font-size:12px;color:var(--muted);background:#0d2433;border:1px solid var(--line);border-radius:8px}
+.msg.file a{color:var(--cyan)}
 </style>
 </head>
 <body data-s="idle">
@@ -90,6 +106,8 @@ body[data-s=speaking] .dot,body[data-s=idle] .dot{background:var(--cyan);color:v
     <button data-act="pc_listen">🎙 Mic PC</button>
     <button data-act="stop">⏹ Detener</button>
     <button data-act="screenshot">📸 Pantalla</button>
+    <button data-act="files">📁 Archivos</button>
+    <button data-act="upload">📎 Subir</button>
     <button data-act="play_pause">⏯</button>
     <button data-act="prev">⏮</button>
     <button data-act="next">⏭</button>
@@ -112,6 +130,20 @@ body[data-s=speaking] .dot,body[data-s=idle] .dot{background:var(--cyan);color:v
   </div>
 </footer>
 <div id="shot"><img alt="pantalla"></div>
+<input type="file" id="fileinput" multiple hidden>
+<div id="files" class="modal">
+  <div class="sheet">
+    <div class="fhead">
+      <b>Archivos de la PC</b>
+      <span class="spacer"></span>
+      <button id="fup" class="chip">📎 Subir aquí</button>
+      <button id="fmk" class="chip">＋ Carpeta</button>
+      <button id="fclose" class="chip">✕</button>
+    </div>
+    <div id="fpath" class="fpath"></div>
+    <div id="flist"></div>
+  </div>
+</div>
 <audio id="player" playsinline></audio>
 <script>
 const $ = s => document.querySelector(s);
@@ -150,8 +182,15 @@ function render(ev){
       add('tool', `<b>${esc(ev.name)}</b> ${esc(ev.detail||'')}`); break;
     case 'error':
       clearPartial(); add('msg error', esc(ev.text)); break;
+    case 'file':{
+      const v = {upload:'⬆ subido', download:'⬇ descargado', delete:'🗑 borrado'}[ev.op] || ev.op;
+      const link = ev.op==='delete' ? esc(ev.name)
+        : `<a href="/api/download?path=${encodeURIComponent(ev.path)}">${esc(ev.name)}</a>`;
+      add('msg file', `${v}: ${link}${ev.size?` · ${fmtSize(ev.size)}`:''}`); break;
+    }
   }
 }
+function fmtSize(n){ if(n==null) return ''; const u=['B','KB','MB','GB']; let i=0; while(n>=1024&&i<3){n/=1024;i++;} return (i?n.toFixed(1):n)+' '+u[i]; }
 function clearPartial(){ partialEl?.remove(); partialEl = null; }
 function setState(s, wake){
   document.body.dataset.s = s;
@@ -250,10 +289,76 @@ document.querySelectorAll('[data-act]').forEach(b => b.onclick = async () => {
   if (a === 'screenshot'){
     const img = $('#shot img'); img.src = '/api/screenshot?' + Date.now(); $('#shot').classList.add('on');
   } else if (a === 'pc_listen') api('listen');
+  else if (a === 'files') openFiles();
+  else if (a === 'upload'){ uploadTo = ''; $('#fileinput').click(); }
   else if (a === 'reset'){ if (confirm('¿Empezar una conversación nueva?')) api('reset'); }
   else api(a);
 });
 $('#shot').onclick = () => $('#shot').classList.remove('on');
+
+// ---- file manager ------------------------------------------------------------
+let fcur = '', uploadTo = '';
+async function openFiles(path){
+  $('#files').classList.add('on');
+  await loadDir(path);
+}
+async function loadDir(path){
+  const list = $('#flist'); list.innerHTML = '<div class="fpath">cargando…</div>';
+  const r = await fetch('/api/files?path=' + encodeURIComponent(path || fcur || ''));
+  const d = await r.json();
+  if (!d.path){ list.innerHTML = `<div class="fpath">${esc(d.error||'error')}</div>`; return; }
+  fcur = d.path; $('#fpath').textContent = d.path;
+  list.innerHTML = '';
+  if (d.parent !== null) list.append(row('⬆', '..', 'up', () => loadDir(d.parent)));
+  if (!d.entries.length) list.insertAdjacentHTML('beforeend', '<div class="fpath">(vacío)</div>');
+  for (const e of d.entries){
+    const full = d.path.replace(/\/$/,'') + '/' + e.name;
+    const el = e.dir
+      ? row('📁', e.name, '', () => loadDir(full), full)
+      : row('📄', e.name, '', () => { location.href = '/api/download?path=' + encodeURIComponent(full); }, full, fmtSize(e.size));
+    list.append(el);
+  }
+}
+function row(ic, name, cls, onclick, full, meta){
+  const el = document.createElement('div');
+  el.className = 'fitem ' + cls;
+  el.innerHTML = `<span class="ic">${ic}</span><span class="nm">${esc(name)}</span>` +
+    (meta ? `<span class="meta">${meta}</span>` : '') +
+    (full ? `<button class="del" title="Borrar">🗑</button>` : '');
+  el.querySelector('.nm').onclick = el.querySelector('.ic').onclick = onclick;
+  const del = el.querySelector('.del');
+  if (del) del.onclick = async (ev) => {
+    ev.stopPropagation();
+    if (!confirm('¿Borrar ' + name + '?')) return;
+    const res = await (await fetch('/api/files/delete', {method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({path: full})})).json();
+    if (res.ok) loadDir(); else alert(res.error);
+  };
+  return el;
+}
+$('#fclose').onclick = () => $('#files').classList.remove('on');
+$('#fmk').onclick = async () => {
+  const name = prompt('Nombre de la carpeta nueva:'); if (!name) return;
+  const res = await (await fetch('/api/files/mkdir', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({path: fcur, name})})).json();
+  if (res.ok) loadDir(); else alert(res.error);
+};
+$('#fup').onclick = () => { uploadTo = fcur; $('#fileinput').click(); };
+$('#fileinput').onchange = async () => {
+  const files = [...$('#fileinput').files]; $('#fileinput').value = '';
+  if (!files.length) return;
+  const fd = new FormData();
+  if (uploadTo) fd.append('path', uploadTo);
+  files.forEach(f => fd.append('file', f, f.name));
+  const dest = uploadTo ? 'a esta carpeta' : 'a inbox';
+  const note = add('msg file', `⬆ subiendo ${files.length} archivo(s) ${dest}…`);
+  try{
+    const res = await (await fetch('/api/upload', {method:'POST', body: fd})).json();
+    note.remove();
+    if (!res.ok) add('msg error', esc(res.error || 'falló la subida'));
+    else if ($('#files').classList.contains('on') && uploadTo) loadDir();
+  }catch(e){ note.remove(); add('msg error', 'Subida: ' + e.message); }
+};
 $('#wake').onclick = () => api('wake', {on: !$('#wake').classList.contains('on')});
 $('#model').value = store.get('model') || 'sonnet';
 $('#model').onchange = () => store.set('model', $('#model').value);

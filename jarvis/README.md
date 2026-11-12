@@ -63,6 +63,35 @@ En la app: toca el reactor para hablar y otra vez para enviar, o escribe.
 de botones tiene la captura de la pantalla de la PC, la música, el volumen,
 el bloqueo y "Mic PC", que hace que la PC te escuche.
 
+## Archivos (celular ↔ PC)
+
+En la app:
+
+- **📎 Subir**: manda archivos del celular a la PC. Caen en `<projects_dir>/inbox`
+  y Jarvis los puede usar: "lee el PDF que subí y resúmelo", "convierte esa foto".
+- **📁 Archivos**: explora las carpetas de la PC. Toca un archivo para descargarlo
+  al celular, una carpeta para entrar, 🗑 para borrar, ＋ para crear carpeta, y
+  "📎 Subir aquí" para subir a la carpeta que estás viendo.
+- Cuando Jarvis crea algo (un script, un informe), aparece en el chat con un
+  enlace para descargarlo directo al celular.
+
+Qué carpetas se pueden ver se controla con `file_roots` en el config (por defecto
+`["~"]`, toda tu carpeta personal). Las rutas se confinan a esas raíces: no se
+puede salir con `..` ni con enlaces simbólicos. **Quien tenga el token puede
+leer y escribir todo lo que esté bajo `file_roots`**, así que mantén esa lista
+corta si quieres limitar el alcance.
+
+## Auditoría
+
+Cada acción con permisos (archivos, comandos de control, lo que le pides al
+cerebro) se registra en `~/.local/share/jarvis/audit.log` (JSON por línea, con
+hora e IP de origen). Revísalo con:
+
+```bash
+jarvis audit           # últimas 40 acciones
+jarvis audit 200
+```
+
 ## Configuración
 
 `~/.config/jarvis/config.toml` (reinicia con `jarvis restart`):
@@ -85,7 +114,7 @@ La personalidad está en `persona.md`.
 - No expongas el puerto a internet (`tailscale funnel`, `host = "0.0.0.0"` en una red pública): quien tenga el token controla la PC.
 - Para cambiar el token, edítalo en el config y reinicia.
 
-## Archivos
+## Estructura del proyecto
 
 - `jarvisd.py`: el daemon (STT, wake word, Claude, TTS, API y SSE).
 - `web/`: la PWA del celular.
