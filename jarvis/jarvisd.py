@@ -63,6 +63,9 @@ DEFAULTS = {
     "silence_seconds": 1.2,
     "max_record_seconds": 30,
     "speak_max_chars": 700,
+    # File manager: directories the phone may browse/upload/download within.
+    # Keep this tight — anyone with the token can read/write anything under these.
+    "file_roots": ["~"],
 }
 
 
@@ -123,6 +126,66 @@ def speakable(text: str, limit: int) -> str:
     return t
 
 
+AUDIT_FILE = DATA_DIR / "audit.log"
+
+
+def audit(action: str, *, who: str = "-", **detail):
+    """Append-only JSONL record of every privileged action (file op, command,
+    control). This is a self-hosted admin tool for the owner's own machines;
+    the audit trail is what makes that accountable."""
+    rec = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "action": action, "who": who, **detail}
+    try:
+        with AUDIT_FILE.open("a") as f:
+            f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+    except OSError as e:
+        log.warning("audit write failed: %s", e)
+    log.info("audit %s %s %s", action, who, {k: v for k, v in detail.items() if k != "preview"})
+
+
+class FileAccess:
+    """Confines every file operation to a set of allowed root directories.
+    Paths are resolved (symlinks included) and must stay inside a root, so the
+    phone cannot walk out via `..` or a symlink."""
+
+    def __init__(self, roots: list[str]):
+        self.roots: list[Path] = []
+        for r in roots:
+            p = Path(os.path.expanduser(r)).resolve()
+            if p.is_dir():
+                self.roots.append(p)
+        if not self.roots:
+            self.roots = [Path.home()]
+
+    def resolve(self, raw: str, *, must_exist: bool = True) -> Path:
+        raw = (raw or "").strip() or str(self.roots[0])
+        p = Path(os.path.expanduser(raw))
+        if not p.is_absolute():
+            p = self.roots[0] / p
+        target = p.resolve()
+        if not any(target == root or root in target.parents for root in self.roots):
+            raise PermissionError(f"fuera de las carpetas permitidas: {raw}")
+        if must_exist and not target.exists():
+            raise FileNotFoundError(raw)
+        return target
+
+    def listing(self, raw: str) -> dict:
+        d = self.resolve(raw)
+        if not d.is_dir():
+            raise NotADirectoryError(raw)
+        entries = []
+        for e in sorted(d.iterdir(), key=lambda x: (not x.is_dir(), x.name.lower())):
+            try:
+                st = e.stat()
+                entries.append({"name": e.name, "dir": e.is_dir(),
+                                "size": st.st_size if not e.is_dir() else None,
+                                "mtime": int(st.st_mtime)})
+            except OSError:
+                continue
+        at_root = any(d == root for root in self.roots)
+        return {"path": str(d), "parent": None if at_root else str(d.parent),
+                "roots": [str(r) for r in self.roots], "entries": entries}
+
+
 async def decode_to_pcm(data: bytes) -> np.ndarray:
     """Any browser audio blob (webm/opus, mp4/aac, ogg) -> float32 mono 16 kHz."""
     p = await asyncio.create_subprocess_exec(
@@ -166,11 +229,13 @@ class Jarvis:
         self.mic_task: asyncio.Task | None = None
         self.record_request: asyncio.Event = asyncio.Event()
         self.record_stop: asyncio.Event = asyncio.Event()
+        self.files = FileAccess(cfg["file_roots"])
+        self.inbox = Path(cfg["projects_dir"]) / "inbox"
         self.persona = (HERE / "persona.md").read_text().format(
             projects_dir=cfg["projects_dir"],
             title=(f'Dirígete al usuario como "{cfg["user_title"]}". ' if cfg["user_title"] else ""),
         )
-        for d in (RUN_DIR, AUDIO_DIR, DATA_DIR, Path(cfg["projects_dir"])):
+        for d in (RUN_DIR, AUDIO_DIR, DATA_DIR, Path(cfg["projects_dir"]), self.inbox):
             d.mkdir(parents=True, exist_ok=True)
         self.set_state("idle")
 
@@ -547,6 +612,7 @@ def make_app(j: Jarvis) -> web.Application:
         text = (body.get("text") or "").strip()
         if not text:
             raise web.HTTPBadRequest(text="empty")
+        audit("ask", who=request.remote, source=body.get("source", "phone"), preview=text[:200])
         asyncio.create_task(j.ask(text, source=body.get("source", "phone"), speak=body.get("speak", "phone"),
                                   client=body.get("client"), model=body.get("model")))
         return web.json_response({"ok": True})
@@ -567,6 +633,7 @@ def make_app(j: Jarvis) -> web.Application:
         if not text:
             j.emit("error", text="No te entendí.")
             return web.json_response({"ok": False})
+        audit("ask", who=request.remote, source="voice", preview=text[:200])
         asyncio.create_task(j.ask(text, source="phone", speak=post.get("speak", "phone"),
                                   client=post.get("client"), model=post.get("model")))
         return web.json_response({"ok": True, "text": text})
@@ -574,6 +641,7 @@ def make_app(j: Jarvis) -> web.Application:
     async def control(request):
         action = request.match_info["action"]
         body = await request.json() if request.can_read_body else {}
+        audit("control", who=request.remote, cmd=action)
         if action == "listen":
             j.toggle_listen()
         elif action == "stop":
@@ -601,15 +669,102 @@ def make_app(j: Jarvis) -> web.Application:
         return web.Response(body=out, content_type="image/jpeg", headers={"Cache-Control": "no-store"})
 
     async def status(_):
-        return web.json_response({"state": j.state, "wake": j.wake_enabled, "session": j.session_id})
+        return web.json_response({"state": j.state, "wake": j.wake_enabled, "session": j.session_id,
+                                  "roots": [str(r) for r in j.files.roots]})
 
-    app = web.Application(middlewares=[auth], client_max_size=32 * 1024 * 1024)
+    # -- file manager ---------------------------------------------------------
+    def fail(e: Exception) -> web.Response:
+        code = {PermissionError: 403, FileNotFoundError: 404, NotADirectoryError: 400,
+                IsADirectoryError: 400, FileExistsError: 409}.get(type(e), 400)
+        return web.json_response({"ok": False, "error": str(e)}, status=code)
+
+    async def files_list(request):
+        try:
+            return web.json_response(j.files.listing(request.query.get("path", "")))
+        except Exception as e:
+            return fail(e)
+
+    async def files_download(request):
+        try:
+            p = j.files.resolve(request.query.get("path", ""))
+            if p.is_dir():
+                raise IsADirectoryError("es una carpeta")
+        except Exception as e:
+            return fail(e)
+        audit("download", who=request.remote, path=str(p), size=p.stat().st_size)
+        j.emit("file", op="download", path=str(p), name=p.name)
+        return web.FileResponse(p, headers={
+            "Content-Disposition": f'attachment; filename="{p.name}"', "Cache-Control": "no-store"})
+
+    async def files_upload(request):
+        reader = await request.multipart()
+        dest_raw = ""
+        saved = []
+        async for part in reader:
+            if part.name == "path":
+                dest_raw = (await part.text()).strip()
+                continue
+            if part.name != "file" or not part.filename:
+                continue
+            try:
+                folder = j.files.resolve(dest_raw) if dest_raw else j.inbox
+            except Exception as e:
+                return fail(e)
+            folder.mkdir(parents=True, exist_ok=True)
+            name = Path(part.filename).name or "archivo"
+            target = folder / name
+            n = 1
+            while target.exists():                 # never overwrite silently
+                target = folder / f"{Path(name).stem}_{n}{Path(name).suffix}"
+                n += 1
+            size = 0
+            with target.open("wb") as fh:
+                while chunk := await part.read_chunk(1 << 16):
+                    size += len(chunk)
+                    fh.write(chunk)
+            saved.append({"path": str(target), "name": target.name, "size": size})
+            audit("upload", who=request.remote, path=str(target), size=size)
+            j.emit("file", op="upload", path=str(target), name=target.name, size=size)
+        if not saved:
+            return web.json_response({"ok": False, "error": "sin archivos"}, status=400)
+        return web.json_response({"ok": True, "saved": saved})
+
+    async def files_op(request):
+        action = request.match_info["action"]
+        body = await request.json()
+        try:
+            if action == "mkdir":
+                parent = j.files.resolve(body.get("path", ""))
+                d = (parent / Path(body["name"]).name)
+                d.mkdir(parents=False, exist_ok=False)
+                audit("mkdir", who=request.remote, path=str(d))
+                return web.json_response({"ok": True, "path": str(d)})
+            if action == "delete":
+                p = j.files.resolve(body.get("path", ""))
+                if any(p == root for root in j.files.roots):
+                    raise PermissionError("no se puede borrar una carpeta raíz")
+                if p.is_dir():
+                    shutil.rmtree(p)
+                else:
+                    p.unlink()
+                audit("delete", who=request.remote, path=str(p))
+                j.emit("file", op="delete", path=str(p), name=p.name)
+                return web.json_response({"ok": True})
+        except Exception as e:
+            return fail(e)
+        raise web.HTTPNotFound()
+
+    app = web.Application(middlewares=[auth], client_max_size=4 * 1024 ** 3)
     app.add_routes([
         web.get("/", index),
         web.get("/api/events", events),
         web.get("/api/status", status),
         web.post("/api/chat", chat),
         web.post("/api/voice", voice),
+        web.get("/api/files", files_list),
+        web.get("/api/download", files_download),
+        web.post("/api/upload", files_upload),
+        web.post("/api/files/{action}", files_op),
         web.post("/api/{action}", control),
         web.get("/api/screenshot", screenshot),
         web.static("/audio", AUDIO_DIR),
