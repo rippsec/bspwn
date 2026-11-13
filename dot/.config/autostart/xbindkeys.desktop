@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Name=xbindkeys
+Comment=Start xbindkeys
+Exec=xbindkeys_autostart
+Terminal=false
+Type=Application
+Categories=
+GenericName=
+# bspwm starts its own; under XFCE these clash with xfwm4 compositor / xfce pulseaudio plugin
+NotShowIn=XFCE;

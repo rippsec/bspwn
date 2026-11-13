@@ -1,0 +1,15 @@
+#!/bin/sh
+# Keep LightDM as the display manager even if gdm3/sddm/ly packages are upgraded
+# (their postinst can repoint /etc/X11/default-display-manager or display-manager.service).
+[ -x /usr/sbin/lightdm ] || exit 0
+echo /usr/sbin/lightdm > /etc/X11/default-display-manager
+for dm in sddm gdm ly; do
+  systemctl is-enabled "$dm.service" 2>/dev/null | grep -qx masked || systemctl mask "$dm.service" >/dev/null 2>&1
+done
+if [ "$(readlink -f /etc/systemd/system/display-manager.service)" != "$(readlink -f /usr/lib/systemd/system/lightdm.service)" ]; then
+  rm -f /etc/systemd/system/display-manager.service
+  systemctl unmask lightdm.service >/dev/null 2>&1
+  systemctl enable lightdm.service >/dev/null 2>&1
+  systemctl daemon-reload
+fi
+exit 0
