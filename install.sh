@@ -280,6 +280,29 @@ run_ly() {
   install_ly
 }
 
+# XFCE + LightDM: default desktop/login for this shared machine.
+# bspwm stays available from the greeter's session menu; XFCE is always preselected.
+install_xfce_lightdm() {
+  local project_root; project_root="$(dirname "$INSTALL_DIR")"
+  log "Installing XFCE + LightDM..."
+  echo "lightdm shared/default-x-display-manager select lightdm" | sudo debconf-set-selections
+  sudo DEBIAN_FRONTEND=noninteractive apt-get install -y kali-desktop-xfce lightdm lightdm-gtk-greeter \
+    || { log_warn "XFCE/LightDM install failed"; return 0; }
+
+  sudo mkdir -p /etc/lightdm/xsessions /etc/lightdm/lightdm.conf.d
+  sudo cp "$project_root"/system/etc/lightdm/xsessions/*.desktop /etc/lightdm/xsessions/
+  sudo install -Dm644 "$project_root/system/etc/lightdm/lightdm.conf.d/50-bspwn.conf" \
+    /etc/lightdm/lightdm.conf.d/50-bspwn.conf
+  sudo install -Dm755 "$project_root/system/usr/local/sbin/lightdm-default-xfce" /usr/local/sbin/lightdm-default-xfce
+
+  # Make LightDM the DM and keep it that way across gdm3/sddm/ly upgrades
+  sudo rm -f /etc/apt/apt.conf.d/99-enforce-ly /etc/apt/apt.conf.d/99-enforce-sddm
+  sudo install -Dm755 "$project_root/system/usr/local/sbin/enforce-lightdm-dm" /usr/local/sbin/enforce-lightdm-dm
+  sudo install -Dm644 "$project_root/system/etc/apt/apt.conf.d/99-enforce-lightdm" /etc/apt/apt.conf.d/99-enforce-lightdm
+  sudo /usr/local/sbin/enforce-lightdm-dm || log_warn "enforce-lightdm-dm failed"
+  log_info "LightDM enabled (reboot to use). XFCE is preselected; bspwm is in the session menu."
+}
+
 # Add the current user to the groups bspwm needs for brightness, sound and input hotkeys:
 #   video  -> /sys/class/backlight (brightnessctl udev rule)
 #   audio  -> ALSA devices / PipeWire
@@ -471,15 +494,15 @@ full_install() {
   install_system_files
   echo ""
 
-  log "=== Ly display manager (last; logout to use) ==="
-  run_ly
+  log "=== XFCE + LightDM display manager (last; reboot to use) ==="
+  install_xfce_lightdm
   echo ""
 
   log "Full installation completed!"
   log_info "Backup available at: $BACKUP_DIR.tar.gz"
   echo ""
   log_info "Next steps:"
-  log_info "  1. Log out — Ly is enabled; select 'bspwm' at the login"
+  log_info "  1. Reboot — LightDM is enabled; XFCE is preselected, pick 'bspwm' in the session menu"
   log_info "  2. Run 'nvim' once to complete plugin installation"
   log_info "  3. Use 'lxappearance' to verify GTK theme"
   log_info "  4. Use 'qt5ct'/'qt6ct' to verify Qt theme"
@@ -506,6 +529,7 @@ Options:
   -yazi       Install yazi file manager only
   -backup     Create backup of existing configs only
   -ly         Install Ly display manager only (do last; logout to use)
+  -xfce       Install XFCE + LightDM as default DM/session (bspwm selectable)
   -system     Install system files (ACPI, X11, bspwm session, TLP, PipeWire)
   -h, --help  Show this help message
 
@@ -527,7 +551,7 @@ EOF
 
 parse_arguments() {
   local has_options=0
-  local do_full=0 do_pkg=0 do_fonts=0 do_themes=0 do_config=0 do_nvim=0 do_obsidian=0 do_yazi=0 do_backup=0 do_ly=0 do_system=0
+  local do_full=0 do_pkg=0 do_fonts=0 do_themes=0 do_config=0 do_nvim=0 do_obsidian=0 do_yazi=0 do_backup=0 do_ly=0 do_xfce=0 do_system=0
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -541,6 +565,7 @@ parse_arguments() {
       -yazi)     do_yazi=1; has_options=1 ;;
       -backup)   do_backup=1; has_options=1 ;;
       -ly)       do_ly=1; has_options=1 ;;
+      -xfce)     do_xfce=1; has_options=1 ;;
       -system)   do_system=1; has_options=1 ;;
       -h|--help) show_usage; exit 0 ;;
       *) log_error "Unknown option: $1"; show_usage; exit 1 ;;
@@ -580,6 +605,7 @@ parse_arguments() {
   [[ $do_yazi -eq 1 ]]     && install_yazi
   [[ $do_system -eq 1 ]]   && install_system_files
   [[ $do_ly -eq 1 ]]       && run_ly
+  [[ $do_xfce -eq 1 ]]     && install_xfce_lightdm
 
   log "Selected operations completed!"
 }

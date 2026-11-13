@@ -12,8 +12,16 @@ while read -r sid _; do
   [[ $(loginctl show-session "$sid" -p Seat --value) == seat0 ]] || continue
   [[ $(loginctl show-session "$sid" -p Active --value) == yes ]] || continue
   ACTIVE_USER=$(loginctl show-session "$sid" -p Name --value)
+  SESSION_DESKTOP=$(loginctl show-session "$sid" -p Desktop --value)
   break
 done < <(loginctl list-sessions --no-legend)
+
+# XFCE locks itself on lid close/suspend (xfce4-power-manager + xfce4-screensaver);
+# starting i3lock too would mean unlocking twice.
+if [[ ${SESSION_DESKTOP,,} == xfce* ]] || pgrep -x xfce4-session >/dev/null; then
+  log "XFCE session: XFCE handles locking"
+  exit 0
+fi
 
 # Fallback: owner of a non-root process that has DISPLAY set (e.g. bspwm)
 if [[ -z $ACTIVE_USER || $ACTIVE_USER == root ]]; then

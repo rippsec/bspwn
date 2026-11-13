@@ -1,0 +1,16 @@
+# One-shot: remove the sddm package on the first boot after switching to LightDM.
+# (Removing it while logged in through SDDM would stop sddm.service and kill the session.)
+[Unit]
+Description=Purge leftover SDDM package (runs once)
+After=network-online.target
+ConditionPathExists=/usr/bin/sddm
+
+[Service]
+Type=oneshot
+Environment=DEBIAN_FRONTEND=noninteractive
+ExecStartPre=/bin/sh -c 'pgrep -x sddm && exit 1 || exit 0'
+ExecStart=/usr/bin/apt-get purge -y -q sddm
+ExecStartPost=/bin/systemctl disable purge-sddm-once.service
+
+[Install]
+WantedBy=multi-user.target

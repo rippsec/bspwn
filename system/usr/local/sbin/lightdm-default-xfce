@@ -1,0 +1,14 @@
+#!/bin/sh
+# Reset every regular user's remembered session to XFCE before the greeter
+# shows, so XFCE is always preselected. bspwm stays one click away.
+for f in /var/lib/AccountsService/users/*; do
+  [ -f "$f" ] || continue
+  uid=$(id -u "$(basename "$f")" 2>/dev/null) || continue
+  [ "$uid" -ge 1000 ] && [ "$uid" -lt 60000 ] || continue
+  for m in SetXSession SetSession; do
+    busctl call org.freedesktop.Accounts "/org/freedesktop/Accounts/User$uid" \
+      org.freedesktop.Accounts.User "$m" s xfce >/dev/null 2>&1
+  done
+done
+# Never block the greeter
+exit 0
