@@ -23,6 +23,7 @@ col="#b0ada7"
 if (( util >= 90 || temp >= 85 )); then   # alarm: inverted (monochrome palette)
     printf '%s %%{B#e6e3dd}%%{F#111214} %2d%% %s° %%{F-}%%{B-}\n' "$LBL" "$util" "$temp"; exit 0
 fi
-# value: temperature only (utilisation is shown by the gauge)
 # with utilisation: printf '%s %%{F%s}%2d%% %s°%%{F-}\n' "$LBL" "$col" "$util" "$temp"
-printf '%s %%{F%s}%s°%%{F-}\n' "$LBL" "$col" "$temp"
+# gauge only (temperature/utilisation values kept below for later)
+# with temperature: printf '%s %%{F%s}%s°%%{F-}\n' "$LBL" "$col" "$temp"
+printf '%s\n' "$LBL"
