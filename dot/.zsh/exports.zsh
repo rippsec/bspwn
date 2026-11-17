@@ -23,8 +23,10 @@ export lhost="$(get_ipaddr)"
 _adapt_display() {
   [[ -n $SSH_CONNECTION ]] && return
   [[ -n $DISPLAY && $DISPLAY != :<->* ]] && return
-  local -a active
-  active=(${(f)"$(ps -C Xorg,Xwayland -o args= 2>/dev/null | grep -oE ' :[0-9]+' | tr -d ' ')"})
+  # running X servers = their sockets in /tmp/.X11-unix (no subprocess: this
+  # runs before every prompt)
+  local -a active=(/tmp/.X11-unix/X<->(N:t))
+  active=(${active/#X/:})
   (( ${#active} )) || return
   [[ -n ${active[(r)${DISPLAY%%.*}]} ]] || export DISPLAY=${active[1]}
 }

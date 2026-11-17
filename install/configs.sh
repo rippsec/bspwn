@@ -17,6 +17,7 @@ link_dotfiles() {
     ".bashrc"
     ".gtkrc-2.0"
     ".zshrc"
+    ".zshenv"
     ".zsh"
     ".tmux.conf"
     ".vimrc"
