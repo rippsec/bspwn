@@ -4,7 +4,7 @@
 PCI=/sys/bus/pci/devices/0000:01:00.0
 WARN=50
 
-LBL='%{T2}%{F#8e9099}GPU%{F-}%{T-}'
+LBL='%{T3}%{F#8e9099}󰢮%{F-}%{T-}'
 if [[ "$(cat "$PCI/power/runtime_status" 2>/dev/null)" == "suspended" ]]; then
     echo "$LBL %{F#4b4d55}off%{F-}"; exit 0
 fi
@@ -14,6 +14,10 @@ IFS=', ' read -r util temp < <(nvidia-smi --query-gpu=utilization.gpu,temperatur
 [[ -z "$util" ]] && { echo "$LBL %{F#4b4d55}n/a%{F-}"; exit 0; }
 
 # value tone: normal (grey) / busy (white) / hot or maxed (inverted)
+# mini gauge like the other instruments (dim -> white with load)
+blocks=(▁ ▂ ▃ ▄ ▅ ▆ ▇ █); b=${blocks[$(( util * 7 / 100 ))]}
+gcol="#6f7178"; (( util >= 38 )) && gcol="#b0ada7"; (( util >= 63 )) && gcol="#f2efe9"
+LBL="$LBL %{F$gcol}$b%{F-}"
 col="#b0ada7"
 (( util >= WARN || temp >= 75 )) && col="#f2efe9"
 if (( util >= 90 || temp >= 85 )); then   # alarm: inverted (monochrome palette)
