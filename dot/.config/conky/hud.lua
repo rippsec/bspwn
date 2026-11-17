@@ -14,6 +14,7 @@ local FG = {0xe6/255, 0xe3/255, 0xdd/255, 1}
 local DIM = {0x8e/255, 0x90/255, 0x99/255, 1}
 local WHITE = {0xf2/255, 0xef/255, 0xe9/255, 1}
 local FONT = "Atkinson Hyperlegible Mono"
+local CJK = "Noto Sans CJK JP"
 
 -- month calendar position inside the panel (the conky text leaves a gap here)
 local CAL_Y, CELL_W, CELL_H = 112, 36, 21
@@ -62,6 +63,36 @@ function draw_calendar(cr, w)
   end
 end
 
+-- clock header: [四  HH:MM] centred on the panel, date centred underneath
+function draw_clock(cr, w)
+  local function ext_of(str, face, weight, size)
+    cairo_select_font_face(cr, face, CAIRO_FONT_SLANT_NORMAL, weight)
+    cairo_set_font_size(cr, size)
+    local e = cairo_text_extents_t:create()
+    cairo_text_extents(cr, str, e)
+    return e
+  end
+  local t = os.date("%H:%M")
+  local g = ext_of("四", CJK, CAIRO_FONT_WEIGHT_BOLD, 26)
+  local c = ext_of(t, FONT, CAIRO_FONT_WEIGHT_BOLD, 34)
+  local gap = 12
+  local total = g.x_advance + gap + c.x_advance
+  local x = (w - total) / 2
+  local base = 68
+  cairo_select_font_face(cr, CJK, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD)
+  cairo_set_font_size(cr, 26)
+  cairo_set_source_rgba(cr, table.unpack(DIM))
+  cairo_move_to(cr, x, base); cairo_show_text(cr, "四")
+  cairo_select_font_face(cr, FONT, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD)
+  cairo_set_font_size(cr, 34)
+  cairo_set_source_rgba(cr, table.unpack(WHITE))
+  cairo_move_to(cr, x + g.x_advance + gap, base); cairo_show_text(cr, t)
+  local d = os.date("%A %d %B %Y")
+  local de = ext_of(d, FONT, CAIRO_FONT_WEIGHT_NORMAL, 12)
+  cairo_set_source_rgba(cr, table.unpack(DIM))
+  cairo_move_to(cr, (w - de.x_advance) / 2, base + 24); cairo_show_text(cr, d)
+end
+
 function conky_hud_bg()
   if conky_window == nil then return end
   local w, h = conky_window.width, conky_window.height
@@ -82,6 +113,7 @@ function conky_hud_bg()
     cairo_stroke(cr)
   end
 
+  draw_clock(cr, w)
   draw_calendar(cr, w)
   cairo_destroy(cr); cairo_surface_destroy(cs)
 end
