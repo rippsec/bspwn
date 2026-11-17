@@ -381,6 +381,13 @@ EOF'
     sudo cp "$project_root/system/etc/default/keyboard" /etc/default/keyboard
   fi
 
+  # Touchpad: Synaptics over RMI4/SMBus (fixes freezes after idle/resume); needs a reboot
+  if [[ -f "$project_root/system/etc/modprobe.d/psmouse-intertouch.conf" ]]; then
+    log "Installing touchpad modprobe option (psmouse synaptics_intertouch=1)..."
+    sudo cp "$project_root/system/etc/modprobe.d/psmouse-intertouch.conf" /etc/modprobe.d/
+    sudo update-initramfs -u >/dev/null 2>&1 || log_warn "update-initramfs failed (non-fatal)"
+  fi
+
   # TLP drop-in: governor, battery thresholds, USB, audio, PCIe ASPM
   if [[ -f "$project_root/system/etc/tlp.d/01-rip.conf" ]]; then
     log "Installing TLP drop-in (01-rip.conf)..."
