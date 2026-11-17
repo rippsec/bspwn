@@ -15,6 +15,10 @@ super + e
         notify-send -u low "Touchpad: ENABLED"; \
     fi
 
+# Un-freeze the touchpad (reconnects the PS/2 port, re-applies settings)
+super + shift + e
+    ~/.config/bspwm/scripts/touchpad-reset.sh
+
 # chromium
 super + G
   chromium --disable-gpu --disable-accelerated-2d-canvas --disable-accelerated-video-decode --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-renderer-backgrounding --disable-features=VizDisplayCompositor --disable-gcm-client --enable-unsafe-swiftshader --disable-webrtc
