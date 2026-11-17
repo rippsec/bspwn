@@ -14,7 +14,7 @@ get_mic_status() {
     if [ "$muted" = "yes" ]; then
         echo "%{A1:$HOME/.config/polybar/scripts/micvol.sh --toggle:}%{F#4b4d55} 󰍭 %{F-}%{A}"
     else
-        echo "%{A1:$HOME/.config/polybar/scripts/micvol.sh --toggle:}%{B#e6e3dd}%{F#111214} 󰍬 %{F-}%{B-}%{A}"
+        echo "%{A1:$HOME/.config/polybar/scripts/micvol.sh --toggle:}%{u#f2efe9}%{+u}%{F#f2efe9} 󰍬 %{F-}%{-u}%{A}"
     fi
 }
 
