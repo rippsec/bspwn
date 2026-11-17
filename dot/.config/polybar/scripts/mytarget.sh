@@ -110,7 +110,7 @@ inline_edit() {
     -p "$icon" -filter "$prefill" -theme-str "$ts"
 }
 
-# Right click: edit the target inline. Enter = save · empty Enter = clear ·
+# Left click: edit the target inline (right click copies). Enter = save · empty Enter = clear ·
 # Esc = cancel · an invalid IP turns the box red and stays open.
 handle_edit() {
   local current prefill val err=

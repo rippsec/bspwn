@@ -62,3 +62,4 @@ export PATH=$PATH:/home/rip/.pdtm/go/bin
 
 
 export RUSTICL_ENABLE=iris
+export rhost="192.168.1.1"

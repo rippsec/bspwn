@@ -223,7 +223,7 @@ inline_edit() {
     -p "$icon" -filter "$prefill" -theme-str "$ts"
 }
 
-# Right click: pick an interface or type an IP inline.
+# Left click: pick an interface or type an IP inline (right click copies).
 # Suggestions: "auto" + every interface with an IPv4 (docker bridges hidden).
 # Typed IP = custom LHOST.
 # Esc = cancel · invalid input turns the box red and stays open.
