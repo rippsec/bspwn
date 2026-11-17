@@ -4,10 +4,13 @@
 # any compdef and runs compinit itself. Without it, fall back to a cached
 # compinit (-C: skip the security audit; full rebuild at most once a day).
 if [[ -r /usr/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh ]]; then
-    # less work per keystroke: wait for a short pause and 2+ typed chars
-    zstyle ':autocomplete:*' delay 0.12
-    zstyle ':autocomplete:*' min-input 2
-    zstyle -e ':autocomplete:*:*' list-lines 'reply=( $(( LINES / 3 )) )'
+    # Tuned for a slow CPU: the live menu only runs after a pause, on 3+ chars,
+    # and shows a short list; history search is kept (cheap), file globbing is not.
+    zstyle ':autocomplete:*' delay 0.25
+    zstyle ':autocomplete:*' min-input 3
+    zstyle -e ':autocomplete:*:*' list-lines 'reply=( $(( LINES / 4 > 8 ? 8 : LINES / 4 )) )'
+    # no live recent-dirs/paths menu on an empty prompt
+    zstyle ':autocomplete:*' ignored-input '..##'
     source /usr/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh
 else
     autoload -Uz compinit
