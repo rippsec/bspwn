@@ -12,9 +12,13 @@ fi
 
 # Single instance: a second i3lock stacked on top means you unlock one and
 # are still stuck behind the other.
-if pgrep -u "$EUID" -x i3lock >/dev/null; then
-  exit 0
-fi
+# Only i3locks on THIS display count (a stale one on another X display, e.g. a
+# test Xvfb, must not stop the real screen from locking).
+for p in $(pgrep -u "$EUID" -x i3lock); do
+  if tr '\0' '\n' < "/proc/$p/environ" 2>/dev/null | grep -qx "DISPLAY=${DISPLAY}"; then
+    exit 0
+  fi
+done
 
 # Pause media / mute while locked, restore previous state afterwards
 was_muted=$(pamixer --get-mute 2>/dev/null)
