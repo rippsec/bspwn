@@ -4,10 +4,10 @@
 # Dell 1600x900 (this branch only)
 xrandr --output eDP-1 --mode 1600x900
 
-hsetroot -solid '#1e1e1e'
+hsetroot -solid '#000000'
 #feh --bg-fill "/usr/share/backgrounds/kali-16x9/black-kali-2025-4-3840x2160.png"
 #feh --bg-fill /usr/share/backgrounds/kali-16x9/kali-layers.png
-feh --bg-fill /usr/share/backgrounds/kali-16x9/kali-1.1.png
+#feh --bg-fill /usr/share/backgrounds/kali-16x9/kali-layers.png
 
 ### Mouse and TouchPad Settings
 # Dell Precision 7780: I2C-HID touchpad (no TrackPoint). Use the name, not the id;
@@ -73,9 +73,9 @@ process_list=(
   "polybar -q -r main -c ~/.config/polybar/config.ini"
   #"lxde-settings-daemon"
   "xsettingsd"
-  # "xss-lock --ignore-sleep -- slock" # Add --ignore-sleep for robustness
-  #"conky -q -c $HOME/.config/conky/conky.conf"
-  #"conky -q -c $HOME/.config/conky/conky.conf"
+  #"xss-lock --ignore-sleep -- slock" # Add --ignore-sleep for robustness
+  "conky -q -c $HOME/.config/conky/conky.conf"
+  "conky -q -c $HOME/.config/conky/conky.conf"
   "xfce4-notes"
   "picom -b --config $HOME/.config/picom/picom.conf"
   "cbatticon"
@@ -96,6 +96,11 @@ $HOME/.config/bspwm/scripts/audio-wakeup.sh &
 for process in "${process_list[@]}"; do
   restart_process $process
 done
+# Notes widget: started after the loop because restart_process kills every "conky" by name
+#conky -q -c "$HOME/.config/conky/notes.conf" &
+# click the widget to edit, wheel over it to scroll (kill any old watcher first)
+#pkill -f "conky/notes/notes[.]py watch" || true
+#python3 "$HOME/.config/conky/notes/notes.py" watch &
 redshift -x
 redshift -P -O 4500
 
