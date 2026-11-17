@@ -140,8 +140,8 @@ case "$1" in
       notify-send -u low "Target copied to clipboard: $(cat "$TARGET_FILE")"
       echo "Target copied"
     else
-      echo "No target"
-      exit 1
+      # nothing to copy yet: open the inline editor instead
+      handle_edit
     fi
     ;;
   "--edit")
