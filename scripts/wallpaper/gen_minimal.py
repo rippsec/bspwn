@@ -101,8 +101,9 @@ for i in range(7):
 
 # ---- the glyph
 font = ImageFont.truetype(CJK, 380 * K, index=2)
-d.text(P(CX + 2, CY + 2 + 6), "四", font=font, fill=(8, 8, 10), anchor="mm")       # hard offset shadow
-d.text(P(CX, CY + 6), "四", font=font, fill=(236, 233, 227), anchor="mm")
+d.text(P(CX + 3, CY + 3 + 6), "四", font=font, fill=(6, 6, 8), anchor="mm")         # hard offset shadow
+d.text(P(CX - 1.5, CY - 1.5 + 6), "四", font=font, fill=(214, 211, 205), anchor="mm")  # white highlight edge (top-left)
+d.text(P(CX, CY + 6), "四", font=font, fill=(46, 47, 53), anchor="mm")              # dark grey body
 
 # ---- output
 out = img.resize((W, H), Image.LANCZOS)
