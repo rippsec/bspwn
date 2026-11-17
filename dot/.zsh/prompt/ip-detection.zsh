@@ -1,40 +1,49 @@
-# Enhanced IP detection logic
-get_ipaddr() {
-    local CURRENT_IP_FILE="$HOME/.current_ip"
-    local custom_mode=false
-  
-    # Check for custom/interface mode
-    if [[ -f "$CURRENT_IP_FILE" ]] && [[ -s "$CURRENT_IP_FILE" ]]; then
-        local file_mode=$(head -n 1 "$CURRENT_IP_FILE" | cut -d':' -f1)
-        local file_value=$(head -n 1 "$CURRENT_IP_FILE" | cut -d':' -f2)
-        
-        if [[ "$file_mode" == "custom" ]]; then
-            echo "$file_value"
-            return 0
-        elif [[ "$file_mode" == "interface" ]]; then
-            # Check specified interface
-            local ipaddr=$(ip -4 addr show "$file_value" 2>/dev/null | grep -Po 'inet \K\d{1,3}(\.\d{1,3}){3}' | head -n1)
-            if [[ -n "$ipaddr" ]]; then
-                echo "$ipaddr"
-                return 0
-            fi
-        fi
+# IP detection. Sets REPLY (no subshell); get_ipaddr prints it.
+# Priority: custom IP in ~/.current_ip > chosen interface > tun0/tun1/tap0 (VPN)
+# > wlan/ethernet > lo. Only ONE external process (`ip`), the rest is pure zsh.
+_ipaddr() {
+    local f=$HOME/.current_ip line mode= val=
+    if [[ -s $f ]]; then
+        IFS= read -r line < $f
+        mode=${line%%:*} val=${line#*:}
     fi
+    if [[ $mode == custom ]]; then REPLY=$val; return 0; fi
 
-    # Auto-detect
-    local interfaces=("tun0" "tun1" "tap0" "wlp3s0" "wlan0" "enp0s25" "eth0" "lo")
-    for iface in "${interfaces[@]}"; do
-        if ip link show "$iface" &>/dev/null; then
-            local ipaddr=$(ip -4 addr show "$iface" 2>/dev/null | grep -Po 'inet \K\d{1,3}(\.\d{1,3}){3}' | head -n1)
-            if [[ -n "$ipaddr" ]]; then
-                echo "$ipaddr"
-                return 0
-            fi
-        fi
+    local -A addr
+    local l
+    local -a w
+    for l in ${(f)"$(ip -4 -o addr show 2>/dev/null)"}; do
+        w=(${=l})                       # "3: wlan0 inet 192.168.1.5/24 ..."
+        [[ -z ${addr[${w[2]}]} ]] && addr[${w[2]}]=${w[4]%%/*}
     done
-    
-    echo "offline"
-    return 0
+    if [[ $mode == interface && -n ${addr[$val]} ]]; then REPLY=${addr[$val]}; return 0; fi
+    local iface
+    for iface in tun0 tun1 tap0 wlp3s0 wlan0 enp0s25 eth0 lo; do
+        if [[ -n ${addr[$iface]} ]]; then REPLY=${addr[$iface]}; return 0; fi
+    done
+    REPLY=offline
+}
+
+get_ipaddr() {
+    local REPLY
+    _ipaddr
+    print -r -- $REPLY
+}
+
+# Prompt helper: refresh the IP at most every 5 s (plus whenever ~/.current_ip
+# changes), so most prompts don't spawn any process at all.
+zmodload -F zsh/datetime p:EPOCHSECONDS 2>/dev/null
+zmodload -F zsh/stat b:zstat 2>/dev/null
+typeset -g _IP_CACHE= _IP_CACHE_T=0 _IP_CACHE_M=
+_ipaddr_cached() {
+    local m= ; local -a st
+    [[ -e $HOME/.current_ip ]] && zstat -A st +mtime $HOME/.current_ip 2>/dev/null && m=$st[1]
+    if (( EPOCHSECONDS - _IP_CACHE_T >= 5 )) || [[ $m != $_IP_CACHE_M ]]; then
+        local REPLY
+        _ipaddr
+        _IP_CACHE=$REPLY _IP_CACHE_T=$EPOCHSECONDS _IP_CACHE_M=$m
+    fi
+    REPLY=$_IP_CACHE
 }
 
 # Function to update the current IP configuration file
