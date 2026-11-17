@@ -1,0 +1,8 @@
+# Commands whose flags should be completed from their --help output.
+# Only installed tools without an existing completion are registered.
+arp-scan netdiscover masscan rustscan
+gobuster feroxbuster ffuf dirb wfuzz
+nikto sqlmap wpscan nuclei httpx subfinder amass
+hydra john hashcat medusa
+enum4linux enum4linux-ng smbmap crackmapexec netexec responder
+whatweb sslscan testssl.sh dnsrecon dnsenum fierce
