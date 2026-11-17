@@ -38,8 +38,9 @@ typeset -g _IP_CACHE= _IP_CACHE_T=0 _IP_CACHE_M=
 _ipaddr_cached() {
     local m= ; local -a st
     [[ -e $HOME/.current_ip ]] && zstat -A st +mtime $HOME/.current_ip 2>/dev/null && m=$st[1]
+    # NB: no `local REPLY` here — zsh locals are function-wide, it would hide
+    # the caller's REPLY and the prompt would get an empty IP.
     if (( EPOCHSECONDS - _IP_CACHE_T >= 5 )) || [[ $m != $_IP_CACHE_M ]]; then
-        local REPLY
         _ipaddr
         _IP_CACHE=$REPLY _IP_CACHE_T=$EPOCHSECONDS _IP_CACHE_M=$m
     fi
