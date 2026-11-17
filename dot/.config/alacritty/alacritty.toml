@@ -44,38 +44,38 @@ y = 0
 x = 0
 y = 0
 
-# Cockpit palette (same as kitty/cockpit.conf): low-halation, myopia/astigmatism friendly
+# Cockpit palette (same as kitty/cockpit.conf): black / white / red, low-halation
 [colors.cursor]
-text = "#141820"
-cursor = "#e8b04b"
+text = "#f2efe9"
+cursor = "#e5383b"
 
 [colors.primary]
-background = "#141820"
-foreground = "#d8d4c7"
+background = "#111214"
+foreground = "#e6e3dd"
 
 [colors.normal]
-black = "#222833"
-red = "#ef6a5a"
+black = "#1c1d21"
+red = "#e5383b"
 green = "#9ccc65"
-yellow = "#e8b04b"
-blue = "#7bb8d9"
+yellow = "#d9b46a"
+blue = "#8fb8d4"
 magenta = "#c99bd6"
-cyan = "#56c8b9"
-white = "#c9c5b9"
+cyan = "#7fc4bb"
+white = "#c9c6c0"
 
 [colors.bright]
-black = "#5c6576"
-red = "#ff8b7d"
+black = "#5e6068"
+red = "#ff6b6e"
 green = "#b8e08a"
-yellow = "#f5c86e"
-blue = "#9fcde6"
+yellow = "#ecd08f"
+blue = "#b1cfe3"
 magenta = "#ddb9e6"
-cyan = "#80dccf"
-white = "#f2eee2"
+cyan = "#a3dbd3"
+white = "#f2efe9"
 
 [colors.selection]
-text = "#f2eee2"
-background = "#3a4250"
+text = "#f2efe9"
+background = "#34363c"
 
 
 [bell]

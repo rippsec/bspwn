@@ -1,13 +1,13 @@
 /**
- * Cockpit palette (same as polybar / kitty / conky): dark slate, warm text,
- * amber selection. Tuned for myopia + astigmatism (no pure black/white,
+ * Cockpit palette (same as polybar / kitty / conky): black / white / red,
+ * crimson selection. Tuned for myopia + astigmatism (no pure black/white,
  * no saturated blue).
  **/
 * {
-    background:     #141820F2;
-    background-alt: #222833FF;
-    foreground:     #D8D4C7FF;
-    selected:       #E8B04BFF;
-    active:         #56C8B9FF;
-    urgent:         #EF6A5AFF;
+    background:     #111214F2;
+    background-alt: #1c1d21FF;
+    foreground:     #e6e3ddFF;
+    selected:       #e5383bFF;
+    active:         #c9c6c0FF;
+    urgent:         #ff4d4fFF;
 }
