@@ -28,14 +28,14 @@ case "${1:-}" in
   audit)     tail -n "${2:-40}" "$HOME/.local/share/jarvis/audit.log" 2>/dev/null || echo "sin registros aún" ;;
   restart)   systemctl --user restart jarvis ;;
   polybar)
-    # polybar module: icon reflecting state (cockpit palette: grey idle, white
-    # wake-word armed, red listening/speaking); click handled in polybar config
+    # polybar module: icon reflecting state (monochrome: grey idle, white wake
+    # word armed, inverted while listening); click handled in polybar config
     s=$(cat "${XDG_RUNTIME_DIR:-/tmp}/jarvis/state" 2>/dev/null)
     systemctl --user is-active -q jarvis || { echo "%{F#4b4d55}󰚩%{F-}"; exit; }
     case "$s" in
-      listening*) echo "%{F#e5383b}󰍬 escuchando%{F-}" ;;
-      thinking*)  echo "%{F#f08080}󰚩 pensando%{F-}" ;;
-      speaking*)  echo "%{F#ff6b6e}󰚩 hablando%{F-}" ;;
+      listening*) echo "%{B#e6e3dd}%{F#111214} 󰍬 escuchando %{F-}%{B-}" ;;
+      thinking*)  echo "%{F#b0ada7}󰚩 pensando%{F-}" ;;
+      speaking*)  echo "%{F#ffffff}󰚩 hablando%{F-}" ;;
       *wake*)     echo "%{F#f2efe9}󰚩%{F-}" ;;
       *)          echo "%{F#8e9099}󰚩%{F-}" ;;
     esac ;;
