@@ -25,16 +25,16 @@ family = "Atkinson Hyperlegible Mono"
 style = "Medium"
 
 [font.bold]
-family = "BlexMono Nerd Font Mono"
-style = "Medium"
+family = "Atkinson Hyperlegible Mono"
+style = "Bold"
 
 [font.italic]
-family = "BlexMono Nerd Font Mono"
-style = "Medium"
+family = "Atkinson Hyperlegible Mono"
+style = "Italic"
 
 [font.bold_italic]
-family = "BlexMono Nerd Font Mono"
-style = "Medium"
+family = "Atkinson Hyperlegible Mono"
+style = "Italic"
 
 [font.offset]
 x = 0
