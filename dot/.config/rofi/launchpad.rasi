@@ -1,6 +1,6 @@
 /*
  * launchpad.rasi — full-screen app launcher (macOS Launchpad style)
- * Opened by the dragon button at the start of the left polybar island
+ * Opened by the 四 button at the start of the left polybar island
  * (scripts/launchpad.sh). Type to search, arrows / mouse to pick,
  * Enter or click to launch, Esc or click on an empty area to close.
  * picom blurs the desktop behind the translucent background.
