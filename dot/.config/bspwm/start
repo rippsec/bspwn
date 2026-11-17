@@ -1,11 +1,12 @@
 #!/bin/bash
 
 # additional settings
-# hsetroot -solid '#1e1e1e'
-#feh --bg-fill "$HOME/Pictures/kali-whitehack.jpg"
-feh --bg-fill /usr/share/backgrounds/kali-16x9/kali-layers.png
-# feh --bg-fill /usr/share/backgrounds/kali-16x9/kali-mesh.png
-
+# Emblem wallpaper 四 (generated: ~/.bspwn/scripts/wallpaper/gen_emblem.py)
+# alternatives in assets/wallpaper: dragon.jpg (gen_dragon.py), cockpit.jpg (gen_wallpaper.py)
+feh --no-fehbg --bg-fill "$HOME/.bspwn/assets/wallpaper/emblem.jpg" 2>/dev/null || hsetroot -solid "#111214"
+#feh --bg-fill "/usr/share/backgrounds/kali-16x9/black-kali-2025-4-3840x2160.png"
+#feh --bg-fill /usr/share/backgrounds/kali-16x9/kali-layers.png
+#feh --bg-fill /usr/share/backgrounds/kali-16x9/kali-layers.png
 
 ### Mouse and TouchPad Settings
 # TrackPoint settings, (keyboard model update)
@@ -30,7 +31,7 @@ xinput set-prop 'SynPS/2 Synaptics TouchPad' "libinput Disable While Typing Enab
 xset -b
 
 # Keyboard repeat rate
-xset r rate 150 25
+xset r rate 350 25
 
 # Enable DPMS (timeouts in seconds)
 # this setting doesn't suspend or shutdowns the system only the display
@@ -58,6 +59,10 @@ restart_process() {
 #pkill -f "xss-lock.*slock" || true # Force-kill existing instances
 pkill -f xfce4-notifyd || true  # Ensure dunst is used instead of xfce4-notifyd
 
+# JARVIS (systemd user service) needs the X session env to control the desktop
+systemctl --user import-environment DISPLAY XAUTHORITY DBUS_SESSION_BUS_ADDRESS 2>/dev/null
+[[ -f ~/.config/jarvis/config.toml ]] && systemctl --user start jarvis &
+
 # Define processes (use quotes for commands with arguments)
 process_list=(
   "kdeconnectd"
@@ -67,14 +72,12 @@ process_list=(
   "nm-applet"
   "dunst"
   "sxhkd"
-  "polybar -q -r main -c ~/.config/polybar/config.ini"
   #"lxde-settings-daemon"
   "xsettingsd"
   "xss-lock -- xlock"  # locks on idle (xset s) and before suspend; xlock is single-instance
-  #"conky -q -c $HOME/.config/conky/conky.conf"
-  #"conky -q -c $HOME/.config/conky/conky.conf"
+  "conky -q -c $HOME/.config/conky/hud.conf"
   "xfce4-notes"
-  #"picom"
+  "picom -b --config $HOME/.config/picom/picom.conf"
   "cbatticon"
   "xbindkeys"
 )
@@ -93,6 +96,13 @@ $HOME/.config/bspwm/scripts/audio-wakeup.sh &
 for process in "${process_list[@]}"; do
   restart_process $process
 done
+# Cockpit polybar: three floating islands (left / center / right)
+"$HOME/.config/polybar/launch.sh" &
+# Notes widget: started after the loop because restart_process kills every "conky" by name
+#conky -q -c "$HOME/.config/conky/notes.conf" &
+# click the widget to edit, wheel over it to scroll (kill any old watcher first)
+#pkill -f "conky/notes/notes[.]py watch" || true
+#python3 "$HOME/.config/conky/notes/notes.py" watch &
 redshift -x
 redshift -P -O 4500
 

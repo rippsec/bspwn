@@ -21,7 +21,7 @@ size = 12
 builtin_box_drawing = true
 
 [font.normal]
-family = "BlexMono Nerd Font Mono"
+family = "Atkinson Hyperlegible Mono"
 style = "Medium"
 
 [font.bold]
@@ -44,37 +44,38 @@ y = 0
 x = 0
 y = 0
 
+# Cockpit palette (same as kitty/cockpit.conf): monochrome, low-halation
 [colors.cursor]
-text = "#000000"
-cursor = "#9a9a9a"
+text = "#111214"
+cursor = "#f2efe9"
 
 [colors.primary]
-background = "#1e1e1e"
-foreground = "#e8e8e8"
+background = "#111214"
+foreground = "#e6e3dd"
 
 [colors.normal]
-black = "#2e2e2e"
-red = "#d75f5f" 
-green = "#5faf5f"
-yellow = "#d7af5f"
-blue = "#5fafd7"
-magenta = "#af5faf"
-cyan = "#5fd7af"
-white = "#d0d0d0"
+black = "#1c1d21"
+red = "#c98a84"
+green = "#a3b88f"
+yellow = "#c9b68e"
+blue = "#98abb8"
+magenta = "#b9a3bf"
+cyan = "#93b5b0"
+white = "#c9c6c0"
 
 [colors.bright]
-black = "#5e5e5e"
-red = "#ff8787"
-green = "#87ff87"
-yellow = "#ffff87"
-blue = "#87ceeb"
-magenta = "#ff87ff"
-cyan = "#87ffff"
-white = "#ffffff"
+black = "#5e6068"
+red = "#ddaaa4"
+green = "#bfcfae"
+yellow = "#ddcfae"
+blue = "#b7c5cf"
+magenta = "#cfbfd3"
+cyan = "#b2ccc8"
+white = "#f2efe9"
 
 [colors.selection]
-text = "#1e1e1e"
-background = "#5f87af"
+text = "#f2efe9"
+background = "#34363c"
 
 
 [bell]

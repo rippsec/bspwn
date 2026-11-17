@@ -1,0 +1,13 @@
+/**
+ * Cockpit palette (same as polybar / kitty / conky): monochrome,
+ * white selection. Tuned for myopia + astigmatism (no pure black/white,
+ * no saturated blue).
+ **/
+* {
+    background:     #111214F2;
+    background-alt: #1c1d21FF;
+    foreground:     #e6e3ddFF;
+    selected:       #f2efe9FF;
+    active:         #b0ada7FF;
+    urgent:         #ffffffFF;
+}

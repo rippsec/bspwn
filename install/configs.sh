@@ -17,6 +17,7 @@ link_dotfiles() {
     ".bashrc"
     ".gtkrc-2.0"
     ".zshrc"
+    ".zshenv"
     ".zsh"
     ".tmux.conf"
     ".vimrc"
@@ -62,6 +63,8 @@ link_config_dirs() {
     "skippy-xd"
     "i3lock"
     "jgmenu"
+    "conky"
+    "flameshot"
   )
   
   mkdir -p "$HOME/.config"

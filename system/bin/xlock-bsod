@@ -1,0 +1,215 @@
+#!/usr/bin/env python3
+"""Backgrounds for the 'troll' lock screen (used by xlock).
+
+Scenes:
+  bsod   fake blue-screen parody (default lock screen)
+  alert  shown after a WRONG password: random red glitch scene — either an
+         Emergency-Alert-System style warning or a corrupted red BSOD
+  final  after 3+ wrong passwords: black screen, ":):" face and a zalgo
+         "i know what you did"
+
+Renders the static picture to OUT.png at the screen size and prints shell
+variables with positions for the live i3lock-color elements (bar indicator,
+clock lines, status text).
+
+usage: xlock-bsod SCENE OUT.png WIDTH HEIGHT [FAILS]
+"""
+import io
+import os
+import platform
+import random
+import secrets
+import subprocess
+import sys
+from datetime import datetime
+
+import numpy as np
+from PIL import Image, ImageDraw, ImageFont
+
+scene, out, W, H = sys.argv[1], sys.argv[2], int(sys.argv[3]), int(sys.argv[4])
+fails = int(sys.argv[5]) if len(sys.argv) > 5 else 0
+s = H / 900                                   # layouts are designed for 1600x900
+X = int(150 * s)
+rnd = random.Random()
+
+WHITE = (255, 255, 255)
+F_LIGHT = "/usr/share/fonts/truetype/noto/NotoSans-Light.ttf"
+F_REG = "/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf"
+F_BOLD = "/usr/share/fonts/truetype/noto/NotoSans-Bold.ttf"
+F_BLACK = "/usr/share/fonts/truetype/noto/NotoSans-Black.ttf"
+F_MONO = "/usr/share/fonts/truetype/noto/NotoSansMono-Bold.ttf"
+
+
+def font(path, px):
+    if not os.path.exists(path):
+        path = F_REG
+    return ImageFont.truetype(path, max(8, int(px * s)))
+
+
+def emit(**kv):
+    for k, v in kv.items():
+        print(f"{k}={v}")
+
+
+# ------------------------------------------------------------------ glitch fx
+def glitch(img, strength=1.0):
+    """VHS / digital corruption: slice shifts, RGB split, noise, scanlines, tracking bars"""
+    a = np.asarray(img, np.int16).copy()
+    h, w = a.shape[:2]
+    for _ in range(int(14 * strength)):                       # displaced horizontal slices
+        y0 = rnd.randrange(0, h - 4)
+        hh = rnd.randrange(2, max(3, int(h * 0.04)))
+        a[y0:y0 + hh] = np.roll(a[y0:y0 + hh], rnd.randint(-int(w * 0.08), int(w * 0.08)), axis=1)
+    sh = max(2, int(6 * s * strength))                        # chromatic aberration
+    a[..., 0] = np.roll(a[..., 0], sh, axis=1)
+    a[..., 2] = np.roll(a[..., 2], -sh, axis=1)
+    a[::3] = (a[::3] * 0.72).astype(np.int16)                 # scanlines
+    a += np.random.randint(-18, 19, (h, w, 1), dtype=np.int16)  # noise
+    for _ in range(int(3 * strength)):                        # bright tracking bars
+        y0 = rnd.randrange(0, h - 10)
+        a[y0:y0 + rnd.randrange(2, int(10 * s) + 3)] += rnd.randint(40, 90)
+    return Image.fromarray(np.clip(a, 0, 255).astype(np.uint8))
+
+
+def corrupt(text, p=0.12):
+    junk = "#@%&$?!/\\|<>{}=*_~^"
+    return "".join(rnd.choice(junk) if c != " " and rnd.random() < p else c for c in text)
+
+
+# combining marks that Noto Sans actually has (others render as boxes)
+ZALGO_UP = [chr(c) for c in range(0x0300, 0x0315)] + ["\u033d", "\u033e"]
+ZALGO_DN = [chr(c) for c in range(0x0316, 0x0334)]
+
+
+def zalgo(text, up=3, down=3):
+    outc = []
+    for c in text:
+        outc.append(c)
+        if c != " ":
+            outc += rnd.sample(ZALGO_UP, rnd.randint(1, up)) + rnd.sample(ZALGO_DN, rnd.randint(1, down))
+    return "".join(outc)
+
+
+def qr_image(msg, size, fg, bg):
+    png = subprocess.run(["qrencode", "-o", "-", "-s", "6", "-m", "1", "-l", "M", msg],
+                         capture_output=True, check=True).stdout
+    qr = Image.open(io.BytesIO(png)).convert("RGBA").convert("L").point(lambda v: 255 if v > 128 else 0)
+    qr = qr.resize((size, size), Image.NEAREST)
+    im = Image.new("RGB", qr.size, fg)
+    im.paste(bg, mask=Image.eval(qr, lambda v: 255 - v))
+    return im
+
+
+# ------------------------------------------------------------------ scene: bsod
+def draw_bsod(bg, face=":(", headline=None, glitchy=False):
+    img = Image.new("RGB", (W, H), bg)
+    d = ImageDraw.Draw(img)
+    soft = tuple(min(255, c + 200) for c in bg)
+    d.text((X - int(6 * s), int(40 * s)), face, font=font(F_LIGHT, 150), fill=WHITE)
+    y = int(255 * s)
+    for line in headline or ("Widnows ran into a problem and your PC needs to reboot.",
+                             "Enter the recovery code to restart the machine."):
+        d.text((X, y), corrupt(line) if glitchy else line, font=font(F_LIGHT, 27), fill=WHITE)
+        y += int(42 * s)
+    d.text((X, int(372 * s)), "Recovery code", font=font(F_REG, 17), fill=WHITE)
+    pct = f"{rnd.randint(13, 99)}% complete" if glitchy else "0% complete"
+    d.text((X, int(446 * s)), pct, font=font(F_LIGHT, 22), fill=WHITE)
+
+    qr_size, qy = int(118 * s), int(540 * s)
+    try:
+        img.paste(qr_image("nice try :) the only stop code that works is the password", qr_size, WHITE, bg), (X, qy))
+    except Exception:
+        d.rectangle([X, qy, X + qr_size, qy + qr_size], outline=WHITE, width=2)
+    tx = X + qr_size + int(26 * s)
+    small, tiny = font(F_REG, 15), font(F_REG, 13)
+    lines = ["Stop code: USER_LEFT_THE_DESK (0x0000004E)", "What failed: human.sys"]
+    if glitchy:
+        lines = [f"Stop code: UNAUTHORIZED_HUMAN_DETECTED (0x{0xDEAD0000 + fails:08X})",
+                 f"What failed: you.sys   ·   failed attempts: {fails}"]
+    d.text((tx, qy - int(4 * s)), "For more information about this issue and possible fixes, try turning yourself off and on again.",
+           font=small, fill=WHITE)
+    d.text((tx, qy + int(30 * s)), "If you call a support person, give them this info:", font=tiny, fill=soft)
+    ly, lh = qy + int(52 * s), int(21 * s)
+    for ln in lines:
+        d.text((tx, ly), ln, font=tiny, fill=WHITE)
+        ly += lh
+    time_y, date_y = ly, ly + lh
+    ly += 2 * lh
+    now, un = datetime.now(), platform.uname()
+    for ln in (f"Locked at: {now:%Y-%m-%d %H:%M:%S}   ·   Error ID: 0x{secrets.token_hex(4).upper()}",
+               f"Host: {un.node}   ·   Session: {os.environ.get('USER', 'user')}@bspwm   ·   Kernel {un.release.split('-')[0]}"):
+        d.text((tx, ly), ln, font=tiny, fill=soft)
+        ly += lh
+    if glitchy:
+        img = glitch(img, 1.0)
+    img.save(out)
+    asc = int(13 * s)
+    emit(BAR_X=X - int(5 * s), BAR_Y=int(402 * s), BAR_W=int(520 * s), BAR_H=int(20 * s),
+         TEXT_X=tx - int(9 * s), TIME_Y=time_y + asc - int(21 * s), DATE_Y=date_y + asc - int(21 * s),
+         TINY=int(13 * s), STATUS_X=X + int(160 * s) + (int(60 * s) if glitchy else 0),
+         STATUS_Y=int(442 * s) + int(22 * s), STATUS_SIZE=int(18 * s), CLOCK=1)
+
+
+# ------------------------------------------------------------------ scene: EAS alert
+def draw_eas():
+    img = Image.new("RGB", (W, H), (8, 0, 0))
+    d = ImageDraw.Draw(img)
+    # red/black hazard stripes top and bottom
+    stripe_h, sw = int(70 * s), int(60 * s)
+    for band_y in (0, H - stripe_h):
+        for k in range(-2, W // sw + 3):
+            x0 = k * sw
+            d.polygon([(x0, band_y), (x0 + sw // 2, band_y), (x0 + sw // 2 + stripe_h, band_y + stripe_h),
+                       (x0 + stripe_h, band_y + stripe_h)], fill=(200, 0, 0))
+    d.rectangle([0, int(150 * s), W, int(250 * s)], fill=(190, 0, 0))
+    d.text((W // 2, int(200 * s)), "EMERGENCY  ALERT  SYSTEM", font=font(F_BLACK, 64), fill=WHITE, anchor="mm")
+    d.text((W // 2, int(330 * s)), "UNAUTHORIZED ACCESS ATTEMPT", font=font(F_BOLD, 44), fill=(255, 40, 40), anchor="mm")
+    body = [
+        "THE FOLLOWING MESSAGE IS TRANSMITTED AT THE REQUEST OF THIS MACHINE.",
+        f"AN INCORRECT RECOVERY CODE WAS ENTERED  ·  ATTEMPT {fails} OF 3",
+        f"LOCAL TIME OF INCIDENT: {datetime.now():%H:%M:%S}  ·  NODE: {platform.node().upper()}",
+        "REMAIN WHERE YOU ARE. DO NOT LOOK BEHIND YOU.",
+    ]
+    y = int(420 * s)
+    for ln in body:
+        d.text((W // 2, y), ln, font=font(F_MONO, 20), fill=(235, 220, 220), anchor="mm")
+        y += int(38 * s)
+    img = glitch(img, 1.4)
+    img.save(out)
+    emit(BAR_X=W // 2 - int(260 * s), BAR_Y=int(640 * s), BAR_W=int(520 * s), BAR_H=int(20 * s),
+         TEXT_X=W // 2 - int(260 * s), TIME_Y=0, DATE_Y=0, TINY=int(13 * s),
+         STATUS_X=W // 2 - int(110 * s), STATUS_Y=int(700 * s), STATUS_SIZE=int(18 * s), CLOCK=0)
+
+
+# ------------------------------------------------------------------ scene: final
+def draw_final():
+    img = Image.new("RGB", (W, H), (0, 0, 0))
+    d = ImageDraw.Draw(img)
+    d.text((X - int(6 * s), int(40 * s)), ":):", font=font(F_LIGHT, 150), fill=(235, 235, 235))
+    msg = zalgo("i know what you did", up=6, down=6)
+    # faint red ghost behind the message, slightly offset
+    d.text((W // 2 + int(5 * s), int(474 * s)), zalgo("i know what you did", 3, 3), font=font(F_BOLD, 74),
+           fill=(90, 0, 0), anchor="mm")
+    d.text((W // 2, int(470 * s)), msg, font=font(F_BOLD, 74), fill=(225, 225, 225), anchor="mm")
+    d.text((W // 2, int(560 * s)), zalgo("there is no recovery code", 2, 2), font=font(F_REG, 22),
+           fill=(120, 0, 0), anchor="mm")
+    img = glitch(img, 0.7)
+    img.save(out)
+    emit(BAR_X=W // 2 - int(200 * s), BAR_Y=int(760 * s), BAR_W=int(400 * s), BAR_H=int(14 * s),
+         TEXT_X=W // 2 - int(200 * s), TIME_Y=int(850 * s), DATE_Y=0, TINY=int(13 * s),
+         STATUS_X=W // 2 - int(90 * s), STATUS_Y=int(810 * s), STATUS_SIZE=int(16 * s), CLOCK=2)
+
+
+if scene == "bsod":
+    draw_bsod((0, 120, 215))
+elif scene == "alert":
+    if rnd.random() < 0.5:
+        draw_eas()
+    else:
+        draw_bsod((170, 0, 0), face=":(", glitchy=True,
+                  headline=("Widnows detected an UNAUTHORIZED user at this machine.",
+                            "Incident reported. Enter the recovery code or stay very still."))
+elif scene == "final":
+    draw_final()
+else:
+    sys.exit(f"unknown scene {scene}")

@@ -1,14 +1,13 @@
 #!/bin/sh
 today=$(date +%-d)
-size=26
+size=22   # keep in sync with the calendar font in conky.conf
 font="BlexMono Nerd Font"
 
 cal | tail -n +2 | awk -v d="$today" -v f="$font" -v s="$size" 'NF {
-  line = sprintf("%24s", $0)
+  reg  = "${font " f ":regular:size=" s "}"
+  bold = "${font " f ":bold:size=" s "}"
+  line = sprintf("%-20s", $0)
   if (NR > 1)
-    line = gensub("(^| )(" d ")( |$)",
-                  "\\1${font " f ":bold:size=" s "}\\2${font " f ":regular:size=" s "}\\3",
-                  1, line)
-  printf "${alignc}%s\n", line
-}
-END { printf "${font " f ":regular:size=" s "}" }'
+    line = gensub("(^| )(" d ")( |$)", "\\1" bold "\\2" reg "\\3", 1, line)
+  printf "${alignc}%s%s\n", reg, line
+}'

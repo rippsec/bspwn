@@ -1,0 +1,44 @@
+#!/bin/sh
+# Make XFCE the preselected session every time the LightDM greeter shows
+# (boot and after every logout). bspwm stays one click away in the session menu.
+# LightDM / lightdm-gtk-greeter remember the last session in THREE places,
+# all of them are reset here.
+SESSION=xfce
+
+# 1. lightdm-gtk-greeter's own memory (this is what it actually preselects)
+STATE=/var/lib/lightdm/.cache/lightdm-gtk-greeter/state
+if [ -f "$STATE" ]; then
+  if grep -q '^last-session=' "$STATE"; then
+    sed -i "s/^last-session=.*/last-session=$SESSION/" "$STATE"
+  else
+    echo "last-session=$SESSION" >> "$STATE"
+  fi
+fi
+
+for f in /var/lib/AccountsService/users/*; do
+  [ -f "$f" ] || continue
+  user=$(basename "$f")
+  uid=$(id -u "$user" 2>/dev/null) || continue
+  [ "$uid" -ge 1000 ] && [ "$uid" -lt 60000 ] || continue
+
+  # 2. AccountsService (per-user last session). At early boot accounts-daemon
+  #    may not answer yet: then edit its file directly (read when it starts).
+  ok=1
+  for m in SetXSession SetSession; do
+    timeout 5 busctl call org.freedesktop.Accounts "/org/freedesktop/Accounts/User$uid" \
+      org.freedesktop.Accounts.User "$m" s "$SESSION" >/dev/null 2>&1 || ok=0
+  done
+  if [ "$ok" -eq 0 ]; then
+    sed -i "s/^XSession=.*/XSession=$SESSION/; s/^Session=.*/Session=$SESSION/" "$f"
+  fi
+
+  # 3. ~/.dmrc (fallback LightDM reads when AccountsService has no value)
+  home=$(getent passwd "$user" | cut -d: -f6)
+  if [ -d "$home" ]; then
+    printf '[Desktop]\nSession=%s\n' "$SESSION" > "$home/.dmrc"
+    chown "$user:" "$home/.dmrc"
+  fi
+done
+
+# Never block the greeter
+exit 0
