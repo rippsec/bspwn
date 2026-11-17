@@ -43,7 +43,7 @@ install_packages() {
     # Screen lock, screenshots, media keys, helpers used by sxhkd/bspwm/polybar/xlock
     i3lock-color imagemagick maim playerctl jq bc
     xscreensaver unclutter vmtouch gsimplecal xfce4-notes xfce4-clipman
-    conky-all alacritty gnome-keyring
+    conky-all alacritty gnome-keyring mousepad
 
     # yazi previews/search helpers (yazi itself: install.sh -yazi)
     ffmpeg 7zip poppler-utils fd-find ripgrep fzf zoxide chafa

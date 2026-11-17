@@ -302,3 +302,13 @@ super + alt + shift + {h,j,k,l}
 super + shift + {Left,Down,Up,Right}
 	bspc node -v {-20 0,0 20,0 -20,20 0}
 
+
+# desktop notes widget (conky/notes): edit / quick-add todo / tick a task
+super + n
+  python3 ~/.config/conky/notes/notes.py edit
+
+super + shift + n
+  python3 ~/.config/conky/notes/notes.py add
+
+super + ctrl + n
+  python3 ~/.config/conky/notes/notes.py toggle

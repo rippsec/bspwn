@@ -1,0 +1,10 @@
+/* ~/.config/rofi/notes.rasi — quick-add / toggle dialog for the desktop notes widget */
+@import "shared/pentest-input.rasi"
+
+* {
+    lines:      8;
+}
+
+entry {
+    placeholder: "new todo...  (@today @tomorrow @fri)";
+}

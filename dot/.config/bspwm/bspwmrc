@@ -57,6 +57,7 @@ bspc rule -a "Burp Suite Community Edition" state=floating    #rectangle=1280x80
 bspc rule -a "burp-StartBurp" title="Settings" state=floating #rectangle=1286x700+155+112
 bspc rule -a "Color_picker_gui.py" state=floating rectangle=400x400
 bspc rule -a "Xfce4-notes" state=floating sticky=on rectangle=400x400
+bspc rule -a "org.xfce.mousepad" state=floating rectangle=900x600+350+150
 bspc rule -a "Sxiv" state=floating
 bspc rule -a "sxiv" state=floating
 
