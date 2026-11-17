@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Minimal abstract dragon wallpaper (original design) — black / white / red.
+"""Minimal abstract dragon wallpaper (original design) — monochrome.
 
 A serpentine dragon coiled in a spiral: white line-art body with chevron scales,
-red dorsal spikes, red eye, thin red enso ring, small red seal with 龍.
+grey dorsal spikes, glowing white eye, thin enso ring, small white seal with 龍.
 The right ~22% stays empty for the conky HUD.
 
 Builds an SVG, renders it with rsvg-convert, then adds film grain with PIL.
@@ -23,7 +23,8 @@ OUT = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "assets/wallpaper/drago
 W, H = (int(v) for v in (sys.argv[2] if len(sys.argv) > 2 else "3200x1800").split("x"))
 S = W / 3200
 
-RED, RED_HI, WHITE, BG0, BG1 = "#e5383b", "#ff5a5f", "#ece8e1", "#0a0a0c", "#121216"
+# monochrome: "RED" names kept for the accent role, values are greys
+RED, RED_HI, WHITE, BG0, BG1 = "#a9a6a0", "#ffffff", "#ece8e1", "#0a0a0c", "#131315"
 
 # ------------------------------------------------------------------ spine
 CX, CY = 1230 * S, 930 * S            # coil centre (left of the HUD column)
@@ -60,8 +61,8 @@ add(f'''<defs>
     <stop offset="0" stop-color="{BG1}"/><stop offset="1" stop-color="{BG0}"/>
   </radialGradient>
   <radialGradient id="halo" cx="0.5" cy="0.5" r="0.5">
-    <stop offset="0" stop-color="{RED}" stop-opacity="0.16"/>
-    <stop offset="0.6" stop-color="{RED}" stop-opacity="0.05"/>
+    <stop offset="0" stop-color="{WHITE}" stop-opacity="0.07"/>
+    <stop offset="0.6" stop-color="{WHITE}" stop-opacity="0.02"/>
     <stop offset="1" stop-color="{RED}" stop-opacity="0"/>
   </radialGradient>
   <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
@@ -229,7 +230,7 @@ for k, sgn in enumerate((1, -1)):
 
 # ------------------------------------------------------------------ seal + caption
 sx, sy, ss = 205 * S, H - 330 * S, 118 * S
-add(f'<rect x="{sx:.0f}" y="{sy:.0f}" width="{ss:.0f}" height="{ss:.0f}" rx="{8 * S:.0f}" fill="{RED}" opacity="0.92"/>')
+add(f'<rect x="{sx:.0f}" y="{sy:.0f}" width="{ss:.0f}" height="{ss:.0f}" fill="{RED}" opacity="0.92"/>')
 add(f'<text x="{sx + ss / 2:.0f}" y="{sy + ss * 0.78:.0f}" font-family="Noto Serif CJK JP, Noto Sans CJK JP" '
     f'font-weight="700" font-size="{ss * 0.78:.0f}" fill="{BG0}" text-anchor="middle">龍</text>')
 add(f'<text x="{sx + ss + 34 * S:.0f}" y="{sy + 48 * S:.0f}" font-family="Atkinson Hyperlegible Mono" '

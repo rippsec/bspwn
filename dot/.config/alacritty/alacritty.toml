@@ -44,10 +44,10 @@ y = 0
 x = 0
 y = 0
 
-# Cockpit palette (same as kitty/cockpit.conf): black / white / red
+# Cockpit palette (same as kitty/cockpit.conf): monochrome
 [colors.cursor]
-text = "#f2efe9"
-cursor = "#e5383b"
+text = "#111214"
+cursor = "#f2efe9"
 
 [colors.primary]
 background = "#111214"
@@ -55,22 +55,22 @@ foreground = "#e6e3dd"
 
 [colors.normal]
 black = "#1c1d21"
-red = "#e5383b"
-green = "#9ccc65"
-yellow = "#d9b46a"
-blue = "#8fb8d4"
-magenta = "#c99bd6"
-cyan = "#7fc4bb"
+red = "#c98a84"
+green = "#a3b88f"
+yellow = "#c9b68e"
+blue = "#98abb8"
+magenta = "#b9a3bf"
+cyan = "#93b5b0"
 white = "#c9c6c0"
 
 [colors.bright]
 black = "#5e6068"
-red = "#ff6b6e"
-green = "#b8e08a"
-yellow = "#ecd08f"
-blue = "#b1cfe3"
-magenta = "#ddb9e6"
-cyan = "#a3dbd3"
+red = "#ddaaa4"
+green = "#bfcfae"
+yellow = "#ddcfae"
+blue = "#b7c5cf"
+magenta = "#cfbfd3"
+cyan = "#b2ccc8"
 white = "#f2efe9"
 
 [colors.selection]

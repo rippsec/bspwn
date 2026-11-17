@@ -13,8 +13,10 @@ IFS=', ' read -r util temp < <(nvidia-smi --query-gpu=utilization.gpu,temperatur
     --format=csv,noheader,nounits 2>/dev/null)
 [[ -z "$util" ]] && { echo "$LBL %{F#4b4d55}n/a%{F-}"; exit 0; }
 
-# value colour: normal / busy (amber) / hot or maxed (red)
-col="#e6e3dd"
-(( util >= WARN || temp >= 75 )) && col="#e5383b"
-(( util >= 90 || temp >= 85 )) && col="#ff4d4f"
+# value tone: normal (grey) / busy (white) / hot or maxed (inverted)
+col="#b0ada7"
+(( util >= WARN || temp >= 75 )) && col="#f2efe9"
+if (( util >= 90 || temp >= 85 )); then   # alarm: inverted (monochrome palette)
+    printf '%s %%{B#e6e3dd}%%{F#111214} %2d%% %s° %%{F-}%%{B-}\n' "$LBL" "$util" "$temp"; exit 0
+fi
 printf '%s %%{F%s}%2d%% %s°%%{F-}\n' "$LBL" "$col" "$util" "$temp"

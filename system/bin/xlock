@@ -28,8 +28,8 @@ trap 'dunstctl set-paused false 2>/dev/null' EXIT
 
 font="Atkinson Hyperlegible Mono"
 fg=e6e3ddff
-accent=e5383bff
-red=ff4d4fff
+accent=f2efe9ff
+red=ffffffff
 dim=11121499
 
 # Solid slate background (cockpit palette): no screenshot of the desktop is ever used, so nothing
@@ -43,8 +43,8 @@ i3lock --nofork \
   --time-color=$fg --date-color=$fg \
   --radius=120 --ring-width=8 \
   --inside-color=$dim --ring-color=ffffff33 --line-uses-inside \
-  --keyhl-color=$accent --bshl-color=c9c6c0ff --separator-color=00000000 \
-  --insidever-color=$dim --ringver-color=c9c6c0ff --verif-color=$fg --verif-text="..." \
+  --keyhl-color=$accent --bshl-color=8e9099ff --separator-color=00000000 \
+  --insidever-color=$dim --ringver-color=b0ada7ff --verif-color=$fg --verif-text="..." \
   --insidewrong-color=$dim --ringwrong-color=$red --wrong-color=$red --wrong-text="Wrong" \
   --noinput-text="" \
   --ignore-empty-password --show-failed-attempts \

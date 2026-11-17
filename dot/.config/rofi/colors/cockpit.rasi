@@ -1,13 +1,13 @@
 /**
- * Cockpit palette (same as polybar / kitty / conky): black / white / red,
- * crimson selection (no pure black/white,
+ * Cockpit palette (same as polybar / kitty / conky): monochrome,
+ * white selection (no pure black/white,
  * no saturated blue).
  **/
 * {
     background:     #111214F2;
     background-alt: #1c1d21FF;
     foreground:     #e6e3ddFF;
-    selected:       #e5383bFF;
-    active:         #c9c6c0FF;
-    urgent:         #ff4d4fFF;
+    selected:       #f2efe9FF;
+    active:         #b0ada7FF;
+    urgent:         #ffffffFF;
 }

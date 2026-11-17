@@ -1,13 +1,15 @@
--- Cockpit HUD panel: translucent black card, hairline border, red corner
--- brackets (instrument bezel) + month calendar with today boxed in red.
--- Palette = polybar "cockpit" (black / white / red).
+-- Cockpit HUD panel: borderless translucent black card with sharp corners,
+-- grey corner brackets (instrument bezel) + month calendar, today inverted.
+-- Palette = polybar "cockpit" (monochrome).
 require 'cairo'
 require 'cairo_xlib'
 
-local R = 10                                   -- corner radius (matches polybar)
+local R = 0                                    -- sharp corners (matches polybar)
 local BG = {0x11/255, 0x12/255, 0x14/255, 0.84}
 local LINE = {0x2a/255, 0x2b/255, 0x30/255, 1}
-local ACCENT = {0xe5/255, 0x38/255, 0x3b/255, 0.95}
+local ACCENT = {0xf2/255, 0xef/255, 0xe9/255, 0.9}
+local BRACKET = {0x8e/255, 0x90/255, 0x99/255, 0.9}
+local INK = {0x11/255, 0x12/255, 0x14/255, 1}
 local FG = {0xe6/255, 0xe3/255, 0xdd/255, 1}
 local DIM = {0x8e/255, 0x90/255, 0x99/255, 1}
 local WHITE = {0xf2/255, 0xef/255, 0xe9/255, 1}
@@ -43,7 +45,7 @@ function draw_calendar(cr, w)
   end
 
   for i, d in ipairs({"MO", "TU", "WE", "TH", "FR", "SA", "SU"}) do
-    text_c(d, x0 + (i - 0.5) * CELL_W, CAL_Y, 10, CAIRO_FONT_WEIGHT_BOLD, i >= 6 and ACCENT or DIM)
+    text_c(d, x0 + (i - 0.5) * CELL_W, CAL_Y, 10, CAIRO_FONT_WEIGHT_BOLD, i >= 6 and FG or DIM)
   end
   for day = 1, days do
     local idx = wd + day - 1
@@ -51,9 +53,9 @@ function draw_calendar(cr, w)
     local cx = x0 + (col + 0.5) * CELL_W
     local cy = CAL_Y + 8 + (row + 0.5) * CELL_H + 4
     if day == now.day then
-      rrect(cr, cx - 15, cy - 10, 30, 20, 5)
-      cairo_set_source_rgba(cr, table.unpack(ACCENT)); cairo_fill(cr)
-      text_c(tostring(day), cx, cy, 13, CAIRO_FONT_WEIGHT_BOLD, WHITE)
+      cairo_rectangle(cr, cx - 15, cy - 10, 30, 20)          -- today: inverted square
+      cairo_set_source_rgba(cr, table.unpack(WHITE)); cairo_fill(cr)
+      text_c(tostring(day), cx, cy, 13, CAIRO_FONT_WEIGHT_BOLD, INK)
     else
       text_c(tostring(day), cx, cy, 12, CAIRO_FONT_WEIGHT_NORMAL, col >= 5 and DIM or FG)
     end
@@ -68,12 +70,12 @@ function conky_hud_bg()
   local cr = cairo_create(cs)
 
   rrect(cr, 0.5, 0.5, w - 1, h - 1, R)
-  cairo_set_source_rgba(cr, table.unpack(BG)); cairo_fill_preserve(cr)
-  cairo_set_line_width(cr, 1); cairo_set_source_rgba(cr, table.unpack(LINE)); cairo_stroke(cr)
+  cairo_set_source_rgba(cr, table.unpack(BG)); cairo_fill(cr)
+  cairo_new_path(cr)                                  -- no outline: borderless card
 
   -- amber corner brackets
   local L, o = 18, 5
-  cairo_set_line_width(cr, 2); cairo_set_source_rgba(cr, table.unpack(ACCENT))
+  cairo_set_line_width(cr, 2); cairo_set_source_rgba(cr, table.unpack(BRACKET))
   for _, c in ipairs({{o, o, 1, 1}, {w - o, o, -1, 1}, {o, h - o, 1, -1}, {w - o, h - o, -1, -1}}) do
     local x, y, sx, sy = c[1], c[2], c[3], c[4]
     cairo_move_to(cr, x, y + sy * L); cairo_line_to(cr, x, y); cairo_line_to(cr, x + sx * L, y)
