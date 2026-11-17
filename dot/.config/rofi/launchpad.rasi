@@ -17,6 +17,7 @@ configuration {
     me-select-entry:      "";
     me-accept-entry:      "MousePrimary";
     scroll-method:        0;
+    kb-cancel:            "Escape,Control+g,Control+bracketleft";   /* Esc closes */
 }
 
 * {
