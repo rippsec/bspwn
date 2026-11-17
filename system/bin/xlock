@@ -26,15 +26,16 @@ playerctl --all-players pause 2>/dev/null
 dunstctl set-paused true 2>/dev/null
 trap 'dunstctl set-paused false 2>/dev/null' EXIT
 
-font="FiraCode Nerd Font"
-fg=d8dee9ff
-red=ff0000ff
-dim=00000088
+font="Atkinson Hyperlegible Mono"
+fg=d8d4c7ff
+amber=e8b04bff
+red=ef6a5aff
+dim=14182099
 
-# Solid black background: no screenshot of the desktop is ever used, so nothing
+# Solid slate background (cockpit palette): no screenshot of the desktop is ever used, so nothing
 # of what was open (even blurred) is visible while locked.
 i3lock --nofork \
-  --color=000000 \
+  --color=141820 \
   --clock --indicator \
   --time-str="%H:%M" --date-str="%A, %d %B" \
   --time-font="$font" --date-font="$font" --verif-font="$font" --wrong-font="$font" --layout-font="$font" \
@@ -42,8 +43,8 @@ i3lock --nofork \
   --time-color=$fg --date-color=$fg \
   --radius=120 --ring-width=8 \
   --inside-color=$dim --ring-color=ffffff33 --line-uses-inside \
-  --keyhl-color=$red --bshl-color=b7c2d7ff --separator-color=00000000 \
-  --insidever-color=$dim --ringver-color=b7c2d7ff --verif-color=$fg --verif-text="..." \
+  --keyhl-color=$amber --bshl-color=56c8b9ff --separator-color=00000000 \
+  --insidever-color=$dim --ringver-color=56c8b9ff --verif-color=$fg --verif-text="..." \
   --insidewrong-color=$dim --ringwrong-color=$red --wrong-color=$red --wrong-text="Wrong" \
   --noinput-text="" \
   --ignore-empty-password --show-failed-attempts \

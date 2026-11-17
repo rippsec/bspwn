@@ -160,6 +160,11 @@ case "$1" in
   "--edit")
     handle_edit
     ;;
+  --bar)
+    # polybar: only show the target when one is set (saves room in the bar)
+    t=$(cat "$TARGET_FILE" 2>/dev/null)
+    if [ -n "$t" ] && [ "$t" != "none" ]; then echo "R:$t"; else echo ""; fi
+    ;;
   *)
     if [ -f "$TARGET_FILE" ]; then
       echo "R:$(cat "$TARGET_FILE")"
