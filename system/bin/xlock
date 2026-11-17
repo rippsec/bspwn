@@ -53,41 +53,96 @@ lock_classic() {
     --pass-media-keys --pass-volume-keys --pass-screen-keys
 }
 
+# ---------------------------------------------------------------- bsod style
+# Starts i3lock on one scene image (xlock-bsod renders it + prints positions).
+# Sets $pid to the new i3lock.
+start_scene() {   # start_scene SCENE FAILS
+  local scene=$1 fails=$2 img="$dir/$1-$2.png" vars
+  vars=$(/usr/local/bin/xlock-bsod "$scene" "$img" "$w" "$h" "$fails") || return 1
+  local BAR_X BAR_Y BAR_W BAR_H TEXT_X TIME_Y DATE_Y TINY STATUS_X STATUS_Y STATUS_SIZE CLOCK
+  eval "$vars"
+  local font="Noto Sans" white=ffffffff
+  local track keyhl status_c verif wrong
+  case $scene in
+    bsod)  track=4da0e6ff keyhl=$white status_c=$white verif="checking recovery code..." wrong="invalid recovery code" ;;
+    alert) track=ff3b3bff keyhl=$white status_c=$white verif="VERIFYING IDENTITY..." wrong="ACCESS DENIED" ;;
+    final) track=1a1a1aff keyhl=7a0000ff status_c=5a0000ff verif="..." wrong="no." ;;
+  esac
+  local args=(
+    --nofork --image="$img" --color=000000
+    --bar-indicator --bar-orientation=horizontal
+    --bar-pos="$BAR_X:$BAR_Y" --bar-total-width="$BAR_W" --bar-max-height="$BAR_H"
+    --bar-base-width=3 --bar-count=64 --bar-step=2 --bar-periodic-step=8
+    --bar-color=$track --keyhl-color=$keyhl --bshl-color=$keyhl
+    --ringver-color=$keyhl --ringwrong-color=$keyhl
+    --verif-font="$font" --wrong-font="$font" --verif-size="$STATUS_SIZE" --wrong-size="$STATUS_SIZE"
+    --verif-align=1 --wrong-align=1
+    --verif-pos="$STATUS_X:$STATUS_Y" --wrong-pos="$STATUS_X:$STATUS_Y"
+    --verif-color=$status_c --wrong-color=$status_c
+    --verif-text="$verif" --wrong-text="$wrong"
+    --noinput-text="" --lock-text="" --lockfailed-text=""
+    --ignore-empty-password
+    --pass-media-keys --pass-volume-keys --pass-screen-keys
+  )
+  case $CLOCK in
+    1) args+=(--clock --force-clock
+              --time-str="Error time: %H:%M:%S" --date-str="Error date: %A, %d %B %Y"
+              --time-font="$font" --date-font="$font" --time-size="$TINY" --date-size="$TINY"
+              --time-color=$white --date-color=$white --time-align=1 --date-align=1
+              --time-pos="$TEXT_X:$TIME_Y" --date-pos="$TEXT_X:$DATE_Y") ;;
+    2) args+=(--clock --force-clock
+              --time-str="i am still here. %H:%M:%S" --date-str=""
+              --time-font="$font" --time-size="$TINY" --time-color=5a0000ff --time-align=1
+              --time-pos="$TEXT_X:$TIME_Y") ;;
+  esac
+  i3lock "${args[@]}" &
+  pid=$!
+}
+
+# Troll lock: blue screen; every wrong password swaps to a random red glitch /
+# Emergency-Alert scene; from the 3rd wrong password on, a black ":):" screen
+# with a zalgo "i know what you did". The real password works in every scene.
+#
+# Swapping scenes never leaves the screen unlocked: the NEW i3lock is started
+# first (it maps on top and keeps retrying the keyboard/pointer grab), and only
+# then the old one is stopped, so the grab passes straight from one to the other.
 lock_bsod() {
-  local dir="${XDG_RUNTIME_DIR:-/tmp}/xlock" geo w h vars
+  dir="${XDG_RUNTIME_DIR:-/tmp}/xlock"
   mkdir -p "$dir" && chmod 700 "$dir"
-  # whole X screen (all monitors): the image is laid out for its size
+  local geo
   geo=$(xdpyinfo 2>/dev/null | awk '/dimensions:/ {print $2; exit}')
   w=${geo%x*}; h=${geo#*x}
   [[ -n $w && -n $h ]] || { w=1600; h=900; }
-  vars=$(/usr/local/bin/xlock-bsod "$dir/bsod.png" "$w" "$h") || return 1
-  local BAR_X BAR_Y BAR_W BAR_H TEXT_X TIME_Y DATE_Y TINY STATUS_X STATUS_Y STATUS_SIZE
-  eval "$vars"
-  local font="Noto Sans" white=ffffffff soft=d6e9faff none=00000000
 
-  i3lock --nofork \
-    --image="$dir/bsod.png" --color=0078d7 \
-    --bar-indicator --bar-orientation=horizontal \
-    --bar-pos="$BAR_X:$BAR_Y" --bar-total-width="$BAR_W" --bar-max-height="$BAR_H" \
-    --bar-base-width=3 --bar-count=64 --bar-step=2 --bar-periodic-step=8 \
-    --bar-color=4da0e6ff --keyhl-color=$white --bshl-color=$soft \
-    --ringver-color=$white --ringwrong-color=$white \
-    --clock --force-clock \
-    --time-str="Error time: %H:%M:%S" --date-str="Error date: %A, %d %B %Y" \
-    --time-font="$font" --date-font="$font" --time-size="$TINY" --date-size="$TINY" \
-    --time-color=$white --date-color=$white \
-    --time-align=1 --date-align=1 \
-    --time-pos="$TEXT_X:$TIME_Y" --date-pos="$TEXT_X:$DATE_Y" \
-    --verif-font="$font" --wrong-font="$font" --verif-size="$STATUS_SIZE" --wrong-size="$STATUS_SIZE" \
-    --verif-align=1 --wrong-align=1 \
-    --verif-pos="$STATUS_X:$STATUS_Y" --wrong-pos="$STATUS_X:$STATUS_Y" \
-    --verif-color=$white --wrong-color=$white \
-    --verif-text="checking recovery code..." --wrong-text="invalid recovery code" \
-    --noinput-text="" --lock-text="" --lockfailed-text="" \
-    --ignore-empty-password \
-    --pass-media-keys --pass-volume-keys --pass-screen-keys
-  local rc=$?
-  rm -f "$dir/bsod.png"
+  start_scene bsod 0 || return 1
+  local fails=0 line rc old scene=bsod retries=0
+
+  # wrong passwords show up in the journal as PAM auth failures of i3lock
+  exec {jfd}< <(journalctl -f -n 0 -o cat SYSLOG_IDENTIFIER=i3lock 2>/dev/null)
+  local jpid=$!
+
+  while :; do
+    if ! kill -0 "$pid" 2>/dev/null; then
+      wait "$pid"; rc=$?
+      (( rc == 0 )) && break                       # correct password: unlocked
+      # i3lock died without a correct password (e.g. lost the grab during a
+      # swap): lock again right away, give up to the caller after 5 tries
+      (( ++retries > 5 )) && break
+      start_scene "$scene" "$fails" || break
+      continue
+    fi
+    if read -r -t 0.3 -u "$jfd" line && [[ $line == *"authentication failure"* ]]; then
+      fails=$((fails + 1))
+      old=$pid
+      if (( fails >= 3 )); then scene=final; else scene=alert; fi
+      start_scene "$scene" "$fails" || { pid=$old; continue; }
+      sleep 0.3                       # new lock window is mapped and waiting for the grab
+      kill "$old" 2>/dev/null; wait "$old" 2>/dev/null
+    fi
+  done
+
+  kill "$jpid" 2>/dev/null; exec {jfd}<&-
+  rm -f "$dir"/*.png
   return $rc
 }
 
