@@ -161,9 +161,9 @@ case "$1" in
     handle_edit
     ;;
   --bar)
-    # polybar: only show the target when one is set (saves room in the bar)
+    # polybar: value only (the bar adds the icon); grey "none" when unset
     t=$(cat "$TARGET_FILE" 2>/dev/null)
-    if [ -n "$t" ] && [ "$t" != "none" ]; then echo "R:$t"; else echo ""; fi
+    if [ -n "$t" ] && [ "$t" != "none" ]; then echo "$t"; else echo "%{F#4b4d55}none%{F-}"; fi
     ;;
   *)
     if [ -f "$TARGET_FILE" ]; then

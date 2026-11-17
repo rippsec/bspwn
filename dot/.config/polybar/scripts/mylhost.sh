@@ -289,6 +289,10 @@ handle_copy() {
 
 # Main script logic
 case "$1" in
+  "--bar")
+    # polybar: value only (the bar adds the icon); "L:ip" stays for tmux
+    get_ipaddr
+    ;;
   "--copy")
     handle_copy
     ;;
