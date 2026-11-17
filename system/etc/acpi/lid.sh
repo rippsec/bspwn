@@ -45,10 +45,12 @@ fi
 DISPLAY=${DISPLAY:-:0}
 XAUTH=${XAUTH:-$USER_HOME/.Xauthority}
 
-if pgrep -u "$USER_ID" -x i3lock >/dev/null; then
-  log "Already locked"
-  exit 0
-fi
+for p in $(pgrep -u "$USER_ID" -x i3lock); do
+  if tr '\0' '\n' < "/proc/$p/environ" 2>/dev/null | grep -qx "DISPLAY=${DISPLAY}"; then
+    log "Already locked"
+    exit 0
+  fi
+done
 
 log "Locking $ACTIVE_USER on $DISPLAY"
 runuser -u "$ACTIVE_USER" -- env DISPLAY="$DISPLAY" XAUTHORITY="$XAUTH" \
