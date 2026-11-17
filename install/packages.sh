@@ -44,6 +44,8 @@ install_packages() {
     i3lock-color imagemagick maim playerctl jq bc
     # troll BSOD lock screen (xlock-bsod): QR code + screen size
     qrencode x11-utils
+    # polybar clock calendar dropdown (scripts/calendar-popup.py)
+    python3-gi gir1.2-gtk-3.0
     xscreensaver unclutter vmtouch gsimplecal xfce4-notes xfce4-clipman
     conky-all alacritty gnome-keyring mousepad
 
