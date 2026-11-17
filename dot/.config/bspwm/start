@@ -3,7 +3,9 @@
 # additional settings
 # Emblem wallpaper 四 (generated: ~/.bspwn/scripts/wallpaper/gen_emblem.py)
 # alternatives in assets/wallpaper: dragon.jpg (gen_dragon.py), cockpit.jpg (gen_wallpaper.py)
-feh --no-fehbg --bg-fill "$HOME/.bspwn/assets/wallpaper/emblem.jpg" 2>/dev/null || hsetroot -solid "#111214"
+# Cheatsheet wallpaper (ASCII/bases/OWASP web+LLM): scripts/wallpaper/gen_cheatsheet.py
+feh --no-fehbg --bg-fill "$HOME/.bspwn/assets/wallpaper/cheatsheet.jpg" 2>/dev/null || hsetroot -solid "#111214"
+#feh --no-fehbg --bg-fill "$HOME/.bspwn/assets/wallpaper/emblem.jpg"
 #feh --bg-fill "/usr/share/backgrounds/kali-16x9/black-kali-2025-4-3840x2160.png"
 #feh --bg-fill /usr/share/backgrounds/kali-16x9/kali-layers.png
 #feh --bg-fill /usr/share/backgrounds/kali-16x9/kali-layers.png
