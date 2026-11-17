@@ -26,7 +26,7 @@ rng = np.random.default_rng(4)          # 四
 WHITE, LIGHT, MID, DIM, FAINT = "#f2efe9", "#c9c6c0", "#8e9099", "#4b4d55", "#26272b"
 BG0, BG1 = "#0a0a0c", "#141417"
 MONO = "Atkinson Hyperlegible Mono"
-CX, CY = 1240 * S, 900 * S              # emblem centre (left of the HUD column)
+CX, CY = W / 2, H / 2                   # emblem centred on the screen
 
 svg = []
 add = svg.append
@@ -144,10 +144,9 @@ for deg in (0, 90, 180, 270):
 # soft glow only
 add(f'<text x="{f(CX)}" y="{f(CY + 165 * S)}" font-family="Noto Sans CJK JP" font-weight="900" '
     f'font-size="{f(440 * S)}" fill="#e6e3dd" text-anchor="middle" filter="url(#glow)">四</text>')
-text(CX, CY + 300 * S, "S H I · 0 4", 26 * S, MID, 0.9, "middle", ls=6 * S)
 
 # ------------------------------------------------------------------ satellites: triangles, squares, nodes
-nodes = [(760, 170), (330, 640), (520, 1500), (1980, 380), (2130, 1180), (1040, 1730), (170, 1080)]
+nodes = [(1120, 170), (520, 600), (760, 1500), (2280, 330), (2250, 1200), (1400, 1730), (330, 1080)]
 nodes = [(a * S, b * S) for a, b in nodes]
 # dotted links only between neighbouring outer nodes (never across the emblem)
 for a, b in [(1, 6), (6, 2), (0, 3), (3, 4)]:
@@ -170,10 +169,10 @@ for k in (0, 3, 4):
     line(x0, y0, x, y, DIM, 1.4 * S, 0.8)
 
 # big filled triangle accent (solid grey) + hollow twin
-tri(2010 * S, 760 * S, 120 * S, 30, MID, 2 * S, 0.9)
-tri(2010 * S, 760 * S, 70 * S, 30, WHITE, 0, 0.12, fill=WHITE)
-rsquare(470 * S, 1290 * S, 150 * S, 20, LIGHT, 2 * S, 0.6)
-rsquare(470 * S, 1290 * S, 90 * S, 20, WHITE, 0, 0.1, fill=WHITE)
+tri(2370 * S, 760 * S, 120 * S, 30, MID, 2 * S, 0.9)
+tri(2370 * S, 760 * S, 70 * S, 30, WHITE, 0, 0.12, fill=WHITE)
+rsquare(760 * S, 1290 * S, 150 * S, 20, LIGHT, 2 * S, 0.6)
+rsquare(760 * S, 1290 * S, 90 * S, 20, WHITE, 0, 0.1, fill=WHITE)
 
 # ------------------------------------------------------------------ data fragments
 for k in range(9):
@@ -181,7 +180,7 @@ for k in range(9):
     text(130 * S, (210 + k * 34) * S, bits, 20 * S, DIM, 0.85)
 for k in range(7):
     hx = " ".join(f"{int(v):02X}" for v in rng.integers(0, 256, 8))
-    text(1720 * S, (1540 + k * 32) * S, f"0x{0x7780 + k * 16:05X}  {hx}", 20 * S, DIM, 0.85)
+    text(2040 * S, (1540 + k * 32) * S, f"0x{0x7780 + k * 16:05X}  {hx}", 20 * S, DIM, 0.85)
 # vertical scale on the left edge
 for k in range(40):
     y = (420 + k * 26) * S
