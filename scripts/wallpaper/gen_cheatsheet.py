@@ -21,7 +21,7 @@ W, H, K = 1600, 900, 2                      # logical size, supersample factor
 FONTS = ROOT / "assets/fonts/AtkinsonHyperlegibleMono"
 CJK = "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc"
 
-WHITE, LIGHT, MID, DIM, FAINT = (242, 239, 233), (201, 198, 192), (142, 144, 153), (75, 77, 85), (38, 39, 43)
+WHITE, LIGHT, MID, DIM, FAINT = (252, 250, 246), (232, 229, 223), (188, 190, 198), (128, 130, 138), (38, 39, 43)
 
 img = Image.new("RGB", (W * K, H * K), (10, 10, 12))
 d = ImageDraw.Draw(img)
