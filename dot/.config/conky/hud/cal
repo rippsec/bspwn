@@ -1,0 +1,14 @@
+#!/bin/sh
+# conky: month calendar, today in amber (Monday first)
+today=$(date +%-d)
+ncal -bMh 2>/dev/null | tail -n +2 | awk -v d="$today" 'NF {
+  line = sprintf("%-20s", $0)
+  if (NR == 1) { printf "${alignc}${color3}%s\n", line; next }
+  out = ""
+  for (i = 1; i <= 20; i += 3) {
+    cell = substr(line, i, 2); sep = substr(line, i + 2, 1)
+    if (cell + 0 == d && cell ~ /[0-9]/) out = out "${color1}" cell "${color}" sep
+    else out = out cell sep
+  }
+  printf "${alignc}${color}%s\n", out
+}'

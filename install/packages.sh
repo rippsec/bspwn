@@ -40,6 +40,18 @@ install_packages() {
     # X11 utilities
     xbindkeys
 
+    # Screen lock, screenshots, media keys, helpers used by sxhkd/bspwm/polybar/xlock
+    i3lock-color imagemagick maim playerctl jq bc
+    # troll BSOD lock screen (xlock-bsod): QR code + screen size
+    qrencode x11-utils
+    # polybar clock calendar dropdown (scripts/calendar-popup.py)
+    python3-gi gir1.2-gtk-3.0
+    xscreensaver unclutter vmtouch gsimplecal xfce4-notes xfce4-clipman
+    conky-all alacritty gnome-keyring mousepad
+
+    # yazi previews/search helpers (yazi itself: install.sh -yazi)
+    ffmpeg 7zip poppler-utils fd-find ripgrep fzf zoxide chafa
+
     # Shell
     zsh zsh-syntax-highlighting zsh-autosuggestions
 
@@ -51,6 +63,8 @@ install_packages() {
     fonts-liberation fonts-crosextra-caladea fonts-crosextra-carlito
     fonts-freefont-ttf fonts-ipafont-gothic fonts-wqy-zenhei
     fonts-tlwg-loma-otf fonts-unifont fontconfig
+    # Atkinson Hyperlegible (dunst/UI text of the cockpit rice)
+    fonts-atkinson-hyperlegible-next
 
     # Python utilities (polybar key-indicator module)
     python3-pynput
@@ -62,17 +76,20 @@ install_packages() {
     tlp tlp-rdw                  # ThinkPad power management (battery life, charging thresholds)
     thermald                     # Intel thermal daemon — prevents throttling
     intel-microcode              # CPU microcode updates (security + stability)
-    xserver-xorg-video-intel     # Intel Broadwell GPU driver (modesetting fallback is fine but this adds TearFree)
-    vainfo intel-media-va-driver # VA-API hardware video decode (H.264/H.265 via i965)
+    xserver-xorg-video-intel     # Intel Broadwell GPU driver (adds TearFree)
+    vainfo intel-media-va-driver # VA-API hardware video decode
     firmware-misc-nonfree        # Miscellaneous firmware blobs
+    firmware-iwlwifi             # Intel WiFi firmware
 
     # Performance / reliability daemons
-    irqbalance                   # Spread NIC/USB interrupts across all 4 CPUs (default: all on CPU0)
+    irqbalance                   # Spread NIC/USB interrupts across all CPUs (default: all on CPU0)
     earlyoom                     # Kill runaway processes fast before kernel OOM thrash-kills the wrong one
     systemd-zram-generator       # 2GB zstd compressed RAM swap buffer — absorbs bursts before touching SSD
   )
 
-  # ttf-mscorefonts-installer (Arial, Comic Sans, ...) needs contrib/non-free and an EULA preseed
+  # Microsoft fonts to process word documents
+  # (Arial, Times New Roman, Verdana, ...; Calibri/Cambria are covered by the metric-compatible
+  # Carlito/Caladea above). Needs contrib/non-free and an EULA preseed.
   echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" \
     | sudo debconf-set-selections 2>/dev/null || true
   required_packages+=(ttf-mscorefonts-installer)
@@ -98,6 +115,22 @@ install_packages() {
       log "zsh already the default shell"
     fi
   fi
+
+  install_zsh_autocomplete
+}
+
+# zsh-autocomplete (live completion menu) is not packaged in Kali: clone it,
+# pinned to the last STABLE tag. The development branch after 26.08.04 needs
+# the separate "zasync" library and its live menu does not appear.
+install_zsh_autocomplete() {
+  local dir=/usr/share/zsh-autocomplete tag=26.08.04
+  if [[ ! -d $dir/.git ]]; then
+    sudo git clone -q https://github.com/marlonrichert/zsh-autocomplete.git "$dir" \
+      || { log_warn "Could not clone zsh-autocomplete"; return 0; }
+  fi
+  sudo git -c safe.directory='*' -C "$dir" fetch -q --tags 2>/dev/null
+  sudo git -c safe.directory='*' -C "$dir" checkout -q "$tag" \
+    && log "zsh-autocomplete pinned to $tag" || log_warn "Could not checkout zsh-autocomplete $tag"
 }
 
 # Run if executed directly

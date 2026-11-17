@@ -45,7 +45,6 @@ PROMPT_EOL_MARK=''
 if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
     debian_chroot=$(cat /etc/debian_chroot)
 fi
-export lhost="$(get_ipaddr)"
 # Firefox optimized for older hardware
 alias firefox-fast='firefox-esr --no-remote'
 
@@ -61,19 +60,6 @@ fi
 export PATH=$PATH:/home/rip/.pdtm/go/bin
 
 
-# >>> conda initialize >>>
-# !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('/home/rip/.miniconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
-if [ $? -eq 0 ]; then
-    eval "$__conda_setup"
-else
-    if [ -f "/home/rip/.miniconda3/etc/profile.d/conda.sh" ]; then
-        . "/home/rip/.miniconda3/etc/profile.d/conda.sh"
-    else
-        export PATH="/home/rip/.miniconda3/bin:$PATH"
-    fi
-fi
-unset __conda_setup
-# <<< conda initialize <<<
 
 export RUSTICL_ENABLE=iris
+export rhost="192.168.1.1"

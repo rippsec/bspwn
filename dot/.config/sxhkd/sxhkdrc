@@ -34,17 +34,17 @@ super + C
 
 # terminal emulator with tmux session
 super + Return
-# kitty -e bash -c "tmux attach-session -t 0 || tmux new-session -s 0"
+# alacritty -e bash -c "tmux attach-session -t 0 || tmux new-session -s 0"
 # uxterm
 # uxterm -e "tmux attach-session -t uxterm || tmux new-session -s uxterm"
-  alacritty -e bash -c "tmux attach-session -t 0 || tmux new-session -s 0"
+  kitty -e bash -c "tmux attach-session -t 0 || tmux new-session -s 0"
 # ghostty -e bash -c "tmux attach-session -t 0 || tmux new-session -s 0"
 
 # plain terminal
 super + shift + Return
-  alacritty
+  kitty
 #  ghostty
-#  kitty
+#  alacritty
 
 # menu
 
@@ -59,6 +59,13 @@ super + r
 super + Tab
 # rofi -show window -selected-row 1 -theme "$HOME/.config/rofi/window.rasi"
   skippy-xd --paging
+
+# Windows-style alt+tab: hold alt, tab cycles through windows, release alt to focus
+alt + Tab
+  skippy-xd --switch --next --pivot Alt_L
+
+alt + shift + Tab
+  skippy-xd --switch --prev --pivot Alt_L
 
 # file explorer (rofi)
 #super + f
@@ -137,6 +144,18 @@ super + shift + r
 #lock the screen
 super + x 
   xlock
+
+# JARVIS voice assistant (~/.bspwn/jarvis): talk / finish / shut up
+super + a
+  jarvis listen
+
+# JARVIS: toggle "hey jarvis" wake word (mic always on while enabled)
+super + shift + a
+  jarvis wake
+
+# JARVIS: cancel whatever it is doing
+super + ctrl + a
+  jarvis stop
 
 #brightness volume microphone etc...
 
@@ -283,3 +302,13 @@ super + alt + shift + {h,j,k,l}
 super + shift + {Left,Down,Up,Right}
 	bspc node -v {-20 0,0 20,0 -20,20 0}
 
+
+# desktop notes widget (conky/notes): edit / quick-add todo / tick a task
+super + n
+  python3 ~/.config/conky/notes/notes.py edit
+
+super + shift + n
+  python3 ~/.config/conky/notes/notes.py add
+
+super + ctrl + n
+  python3 ~/.config/conky/notes/notes.py toggle

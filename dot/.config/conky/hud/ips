@@ -1,0 +1,4 @@
+#!/bin/sh
+# conky: one line per interface that has an IPv4 (skips docker/veth noise)
+ip -4 -o addr show 2>/dev/null | awk '$2 !~ /^(lo|docker|br-|veth)/ {
+  split($4, a, "/"); printf "${color3}%s${alignr}${color}%s\n", toupper($2), a[1] }'

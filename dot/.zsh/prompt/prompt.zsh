@@ -58,12 +58,12 @@ update_prompt() {
 
     case $PROMPT_STYLE in
         detailed)
-            local ipaddr=$(get_ipaddr)
+            local REPLY; _ipaddr_cached; local ipaddr=$REPLY
             #PROMPT="${BGCOLOR}${FGCOLOR}[%n${symbol}$ipaddr:%~]%(#.#.$)${ENDCOLOR} "
             PROMPT="${BGCOLOR}${FGCOLOR}${RED}%n${symbol}$ipaddr${WHITE}:${BLUE}%1~${WHITE}%(#.#.$)${ENDCOLOR} "
             ;;
         ipdir)
-            local ipaddr=$(get_ipaddr)
+            local REPLY; _ipaddr_cached; local ipaddr=$REPLY
             #PROMPT="${BGCOLOR}${FGCOLOR}[$ipaddr:%~]%(#.#.$)${ENDCOLOR} "
             PROMPT="${BGCOLOR}${RED}$ipaddr${WHITE}:${BLUE}%1~${RED}${WHITE}%(#.#.$)${ENDCOLOR} "
             ;;

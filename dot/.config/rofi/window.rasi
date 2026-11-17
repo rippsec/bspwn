@@ -84,7 +84,7 @@ listview {
 element {
     orientation:               vertical;
     padding:                   12px;
-    border-radius:             14px;
+    border-radius:             0px;
     border:                    0px solid;
     border-color:              @border-colour;
     background-color:          transparent;
@@ -162,7 +162,7 @@ element-text {
     cursor:                    inherit;
     vertical-align:            0.5;
     horizontal-align:          0.5;
-    font:                     "BlexMono Nerd Font Mono Regular 9";
+    font:                     "Atkinson Hyperlegible Mono Medium 11";
     width:                    180px;               /* Fixed width */
     max-chars:                20;                  /* Maximum characters before trimming */
     wrap:                     false;               /* Prevent text wrapping */

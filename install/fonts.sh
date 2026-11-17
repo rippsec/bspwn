@@ -10,12 +10,22 @@ source "$SCRIPT_DIR/utils.sh"
 NERD_FONTS_VERSION="v3.4.0"
 
 install_fonts() {
+  # Bundled fonts (assets/fonts): Atkinson Hyperlegible Mono,
+  # used by the cockpit rice (polybar, kitty, conky, rofi)
+  local bundled="$SCRIPT_DIR/../assets/fonts"
+  if [[ -d "$bundled" ]]; then
+    log "Installing bundled fonts from assets/fonts..."
+    mkdir -p "$HOME/.local/share/fonts"
+    cp -r "$bundled"/* "$HOME/.local/share/fonts/"
+    fc-cache -f "$HOME/.local/share/fonts" >/dev/null
+  fi
+
   # Each entry: "DisplayName|ZipFilename|fc-list grep pattern"
   # DisplayName   — used for the install dir and log messages
   # ZipFilename   — actual filename on the GitHub release (without .zip)
   # grep pattern  — passed to `fc-list | grep -qi` to detect if already installed
   local font_specs=(
-    "BlexMono|BlexMono|BlexMono Nerd Font"
+    "BlexMono|IBMPlexMono|BlexMono Nerd Font"
     "Symbols|NerdFontsSymbolsOnly|Symbols Nerd Font"
     "FiraCode|FiraCode|FiraCode Nerd Font"
     "Hack|Hack|Hack Nerd Font"
@@ -69,11 +79,14 @@ install_fonts() {
   for spec in "${to_install[@]}"; do
     local name="${spec%%|*}"
     local zip_file="$tmp_dir/${name}.zip"
-    if [[ -f "$zip_file" ]]; then
+    if [[ -s "$zip_file" ]]; then
       log "Extracting $name..."
       sudo mkdir -p "$font_dir/$name"
-      sudo unzip -q -o "$zip_file" -d "$font_dir/$name"
-      log "Installed: $name"
+      if sudo unzip -q -o "$zip_file" -d "$font_dir/$name"; then
+        log "Installed: $name"
+      else
+        log_warn "Failed to extract $name — skipping"
+      fi
     else
       log_warn "Skipping $name — download failed"
     fi

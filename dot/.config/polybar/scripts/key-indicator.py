@@ -1,68 +1,89 @@
 #!/usr/bin/env python3
-import subprocess
+"""Polybar keyboard indicator — ONE key-cap slot.
+
+  idle: a dim keyboard glyph
+  held modifier(s): their glyph(s) lit white with an underline
+                    (combos show every key involved, e.g. Super+Shift)
+  Caps Lock latched: caps glyph with a line above AND below ("engaged")
+
+Caps Lock state comes from the keyboard LED in sysfs (no `xset` per keypress),
+and a line is printed only when the state actually changes.
+"""
+import glob
+import sys
+
 from pynput import keyboard
 
-caps_on = False
-shift_pressed = False
-ctrl_pressed = False
-alt_pressed = False
-super_pressed = False
-tab_pressed = False
+OFF = "#4b4d55"        # idle keyboard glyph (dim)
+IDLE = "\U000f030c"    # 󰌌 keyboard
+ON = "#f2efe9"         # lit key
+LINE = "#f2efe9"       # underline / overline colour
 
-def get_caps_state():
-    result = subprocess.run(["xset", "q"], capture_output=True, text=True)
-    return "Caps Lock:   on" in result.stdout
+SLOTS = [  # (name, glyph)
+    ("caps", "\U000f030e"),   # 󰌎
+    ("shift", "\U000f0636"),  # 󰘶
+    ("ctrl", "\U000f0634"),   # 󰘴
+    ("alt", "\U000f0635"),    # 󰘵
+    ("super", "\U000f0633"),  # 󰘳
+]
 
-def on_press(key):
-    global shift_pressed, ctrl_pressed, alt_pressed, super_pressed, tab_pressed, caps_on
-    caps_on = get_caps_state()
+KEYMAP = {
+    keyboard.Key.shift: "shift", keyboard.Key.shift_l: "shift", keyboard.Key.shift_r: "shift",
+    keyboard.Key.ctrl: "ctrl", keyboard.Key.ctrl_l: "ctrl", keyboard.Key.ctrl_r: "ctrl",
+    keyboard.Key.alt: "alt", keyboard.Key.alt_l: "alt", keyboard.Key.alt_r: "alt", keyboard.Key.alt_gr: "alt",
+    keyboard.Key.cmd: "super", keyboard.Key.cmd_l: "super", keyboard.Key.cmd_r: "super",
+}
 
-    if key in [keyboard.Key.shift_l, keyboard.Key.shift_r]:
-        shift_pressed = True
-    elif key in [keyboard.Key.ctrl_l, keyboard.Key.ctrl_r]:
-        ctrl_pressed = True
-    elif key in [keyboard.Key.alt_l, keyboard.Key.alt_r]:
-        alt_pressed = True
-    elif key in [keyboard.Key.cmd, keyboard.Key.cmd_l, keyboard.Key.cmd_r]:
-        super_pressed = True
-    elif key == keyboard.Key.tab:
-        tab_pressed = True
-    print_status()
+CAPS_LEDS = glob.glob("/sys/class/leds/*capslock*/brightness")
+held = set()
+last = None
 
-def on_release(key):
-    global shift_pressed, ctrl_pressed, alt_pressed, super_pressed, tab_pressed, caps_on
-    caps_on = get_caps_state()
 
-    if key in [keyboard.Key.shift_l, keyboard.Key.shift_r]:
-        shift_pressed = False
-    elif key in [keyboard.Key.ctrl_l, keyboard.Key.ctrl_r]:
-        ctrl_pressed = False
-    elif key in [keyboard.Key.alt_l, keyboard.Key.alt_r]:
-        alt_pressed = False
-    elif key in [keyboard.Key.cmd, keyboard.Key.cmd_l, keyboard.Key.cmd_r]:
-        super_pressed = False
-    elif key == keyboard.Key.tab:
-        tab_pressed = False
-    print_status()
+def caps_on():
+    for path in CAPS_LEDS:
+        try:
+            with open(path) as f:
+                if f.read().strip() not in ("", "0"):
+                    return True
+        except OSError:
+            pass
+    return False
 
-def print_status():
-    output = ""
-    if caps_on:
-        output += "%{F#FFFFFF} 󰌎 %{F-}%{B-}"
-    elif tab_pressed:
-        output += "%{F#FFFFFF} 󰌒 %{F-}%{B-}"
-    elif shift_pressed:
-        output += "%{F#FFFFFF} 󰜷 %{F-}%{B-}"
-    elif ctrl_pressed:
-        output += "%{F#FFFFFF} 󰘴 %{F-}%{B-}"
-    elif alt_pressed:
-        output += "%{F#FFFFFF} 󰘵 %{F-}%{B-}"
-    elif super_pressed:
-        output += "%{F#FFFFFF} 󰘳 %{F-}%{B-}"
+
+def render():
+    global last
+    state = set(held)
+    if caps_on():
+        state.add("caps")
+    key = frozenset(state)
+    if key == last:
+        return
+    last = key
+    lit = [(n, g) for n, g in SLOTS if n in state]
+    if not lit:
+        out = f"%{{F{OFF}}} {IDLE} %{{F-}}"
     else:
-        output += "%{F#7c8fa5} 󰌌 %{F-}"
-    print(output, flush=True)
+        parts = []
+        for name, glyph in lit:
+            deco, undeco = ("%{+o}%{+u}", "%{-o}%{-u}") if name == "caps" else ("%{+u}", "%{-u}")
+            parts.append(f"%{{u{LINE}}}%{{o{LINE}}}{deco}%{{F{ON}}} {glyph} %{{F-}}{undeco}")
+        out = "".join(parts)
+    sys.stdout.write(out + "\n")
+    sys.stdout.flush()
 
-print_status()
+
+def on_press(k):
+    name = KEYMAP.get(k)
+    if name:
+        held.add(name)
+    render()           # also re-checks Caps Lock (LED toggles on press)
+
+
+def on_release(k):
+    held.discard(KEYMAP.get(k))
+    render()
+
+
+render()
 with keyboard.Listener(on_press=on_press, on_release=on_release) as listener:
     listener.join()

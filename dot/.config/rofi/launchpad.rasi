@@ -1,0 +1,100 @@
+/*
+ * launchpad.rasi — full-screen app launcher (macOS Launchpad style)
+ * Opened by the 四 button at the start of the left polybar island
+ * (scripts/launchpad.sh). Type to search, arrows / mouse to pick,
+ * Enter or click to launch, Esc or click on an empty area to close.
+ * picom blurs the desktop behind the translucent background.
+ * Cockpit palette, sharp corners.
+ */
+configuration {
+    modi:                 "drun";
+    show-icons:           true;
+    icon-theme:           "Flat-Remix-Blue-Dark";
+    drun-display-format:  "{name}";
+    display-drun:         "󰍉";   /* magnifier shown in the search bar */
+    click-to-exit:        true;
+    hover-select:         true;
+    me-select-entry:      "";
+    me-accept-entry:      "MousePrimary";
+    scroll-method:        0;
+    kb-cancel:            "Escape,Control+g,Control+bracketleft";   /* Esc closes */
+}
+
+* {
+    bg:      #0b0c0ed9;     /* translucent: blurred desktop shows through */
+    fg:      #e6e3dd;
+    dim:     #6f7178;
+    accent:  #f2efe9;
+    sel:     #f2efe914;
+    font:    "Atkinson Hyperlegible Mono Medium 11";
+    background-color: transparent;
+    text-color: @fg;
+}
+
+window {
+    fullscreen:       true;
+    transparency:     "real";
+    background-color: @bg;
+    border:           0px;
+}
+
+mainbox {
+    children: [ "inputbar", "listview" ];
+    padding:  110px 170px 60px 170px;
+    spacing:  56px;
+}
+
+inputbar {
+    children: [ "prompt", "entry" ];
+    margin:   0px 330px;            /* centred search field (~600 px wide) */
+    padding:  12px 16px;
+    spacing:  14px;
+    border:   0px 0px 2px 0px;
+    border-color: @accent;
+    background-color: #ffffff0a;
+}
+prompt { text-color: @dim; font: "Symbols Nerd Font Mono 16"; }
+entry  {
+    placeholder: "search apps";
+    placeholder-color: @dim;
+    cursor-color: @accent;
+    font: "Atkinson Hyperlegible Mono Medium 15";
+    vertical-align: 0.5;
+}
+
+listview {
+    columns:       7;
+    lines:         4;
+    fixed-columns: true;
+    fixed-height:  true;
+    spacing:       14px;
+    flow:          horizontal;
+    scrollbar:     false;
+    cycle:         false;
+}
+
+element {
+    orientation: vertical;
+    padding:     16px 8px 12px 8px;
+    spacing:     12px;
+    border:      0px 0px 2px 0px;
+    border-color: transparent;
+    cursor:      pointer;
+}
+element-icon {
+    size:  64px;
+    horizontal-align: 0.5;
+    cursor: inherit;
+}
+element-text {
+    horizontal-align: 0.5;
+    vertical-align:   0.5;
+    text-color: inherit;
+    cursor: inherit;
+}
+element normal.normal, element alternate.normal { background-color: transparent; text-color: @dim; }
+element selected.normal {
+    background-color: @sel;
+    text-color:       @accent;
+    border-color:     @accent;
+}
