@@ -1,0 +1,107 @@
+#!/usr/bin/env python3
+"""Background for the 'troll' lock screen: a fake blue-screen-of-death parody.
+
+Renders the static parts (sad face, message, fake QR, stop code, host info,
+lock timestamp) to a PNG at the screen resolution, and prints shell variables
+with the positions/sizes xlock passes to i3lock-color for the LIVE parts
+(error time/date clock, the 'recovery code' progress bar, verify/wrong text).
+
+usage: xlock-bsod OUT.png WIDTH HEIGHT      -> prints KEY=VALUE lines
+"""
+import io
+import os
+import platform
+import secrets
+import subprocess
+import sys
+from datetime import datetime
+
+from PIL import Image, ImageDraw, ImageFont
+
+out, W, H = sys.argv[1], int(sys.argv[2]), int(sys.argv[3])
+s = H / 900                                   # layout is designed for 1600x900
+X = int(150 * s)                              # left margin, like the real thing
+
+BLUE = (0, 120, 215)
+WHITE = (255, 255, 255)
+SOFT = (214, 233, 250)
+
+F_LIGHT = "/usr/share/fonts/truetype/noto/NotoSans-Light.ttf"
+F_REG = "/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf"
+
+
+def font(path, px):
+    return ImageFont.truetype(path, max(8, int(px * s)))
+
+
+img = Image.new("RGB", (W, H), BLUE)
+d = ImageDraw.Draw(img)
+
+d.text((X - int(6 * s), int(40 * s)), ":(", font=font(F_LIGHT, 150), fill=WHITE)
+
+y = int(255 * s)
+for line in ("Widnows ran into a problem and your PC needs to reboot.",
+             "Enter the recovery code to restart the machine."):
+    d.text((X, y), line, font=font(F_LIGHT, 27), fill=WHITE)
+    y += int(42 * s)
+
+d.text((X, int(372 * s)), "Recovery code", font=font(F_REG, 17), fill=WHITE)
+bar_y = int(402 * s)          # i3lock bars hang DOWN from this line
+bar_w = int(520 * s)
+# the track line + bars are drawn live by i3lock (--bar-color = track)
+d.text((X, int(446 * s)), "0% complete", font=font(F_LIGHT, 22), fill=WHITE)
+
+# real QR code with a little message for whoever scans it
+qr_size = int(118 * s)
+qy = int(540 * s)
+try:
+    png = subprocess.run(["qrencode", "-o", "-", "-s", "6", "-m", "1", "-l", "M",
+                          "nice try :) the only stop code that works is the password"],
+                         capture_output=True, check=True).stdout
+    qr = Image.open(io.BytesIO(png)).convert("RGBA").convert("L").point(lambda v: 255 if v > 128 else 0)
+    qr = qr.resize((qr_size, qr_size), Image.NEAREST)
+    # QR as white modules on blue, like the original
+    qr_rgb = Image.new("RGB", qr.size, WHITE)
+    qr_rgb.paste(BLUE, mask=Image.eval(qr, lambda v: 255 - v))
+    img.paste(qr_rgb, (X, qy))
+except Exception:
+    d.rectangle([X, qy, X + qr_size, qy + qr_size], outline=WHITE, width=2)
+
+tx = X + qr_size + int(26 * s)
+small, tiny = font(F_REG, 15), font(F_REG, 13)
+d.text((tx, qy - int(4 * s)), "For more information about this issue and possible fixes, try turning yourself off and on again.",
+       font=small, fill=WHITE)
+d.text((tx, qy + int(30 * s)), "If you call a support person, give them this info:", font=tiny, fill=SOFT)
+lines = [
+    "Stop code: USER_LEFT_THE_DESK (0x0000004E)",
+    "What failed: human.sys",
+]
+ly = qy + int(52 * s)
+lh = int(21 * s)
+for ln in lines:
+    d.text((tx, ly), ln, font=tiny, fill=WHITE)
+    ly += lh
+time_y, date_y = ly, ly + lh                  # live lines drawn by i3lock
+ly += 2 * lh
+now = datetime.now()
+uname = platform.uname()
+for ln in (f"Locked at: {now:%Y-%m-%d %H:%M:%S}   ·   Error ID: 0x{secrets.token_hex(4).upper()}",
+           f"Host: {uname.node}   ·   Session: {os.environ.get('USER', 'user')}@bspwm   ·   Kernel {uname.release.split('-')[0]}"):
+    d.text((tx, ly), ln, font=tiny, fill=SOFT)
+    ly += lh
+
+img.save(out)
+
+# positions for the live i3lock elements (i3lock y = text baseline)
+asc = int(13 * s)
+print(f"BAR_X={X - int(5 * s)}")       # i3lock draws the bar ~5px right of bar-pos
+print(f"BAR_Y={bar_y}")
+print(f"BAR_W={bar_w}")
+print(f"BAR_H={int(20 * s)}")
+print(f"TEXT_X={tx - int(9 * s)}")      # i3lock adds a small left bearing
+print(f"TIME_Y={time_y + asc - int(21 * s)}")   # i3lock y sits ~21px below the baseline we expect
+print(f"DATE_Y={date_y + asc - int(21 * s)}")
+print(f"TINY={int(13 * s)}")
+print(f"STATUS_X={X + int(160 * s)}")
+print(f"STATUS_Y={int(442 * s) + int(22 * s)}")
+print(f"STATUS_SIZE={int(18 * s)}")

@@ -42,6 +42,8 @@ install_packages() {
 
     # Screen lock, screenshots, media keys, helpers used by sxhkd/bspwm/polybar/xlock
     i3lock-color imagemagick maim playerctl jq bc
+    # troll BSOD lock screen (xlock-bsod): QR code + screen size
+    qrencode x11-utils
     xscreensaver unclutter vmtouch gsimplecal xfce4-notes xfce4-clipman
     conky-all alacritty gnome-keyring mousepad
 

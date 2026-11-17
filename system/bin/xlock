@@ -1,5 +1,6 @@
 #!/bin/bash
-# Screen locker: i3lock-color with clock + blurred desktop (betterlockscreen-style).
+# Screen locker (i3lock-color): troll blue-screen parody by default, or a
+# monochrome clock + ring with XLOCK_STYLE=classic.
 # Used by sxhkd (super+x), polybar power menu and /etc/acpi/lid.sh.
 
 # i3lock authenticates the user it RUNS AS. Started as root it would only accept
@@ -26,29 +27,75 @@ playerctl --all-players pause 2>/dev/null
 dunstctl set-paused true 2>/dev/null
 trap 'dunstctl set-paused false 2>/dev/null' EXIT
 
-font="Atkinson Hyperlegible Mono"
-fg=e6e3ddff
-accent=f2efe9ff
-red=ffffffff
-dim=11121499
+# Style: "bsod" (default) = troll blue-screen parody with live error clock and
+# a 'recovery code' progress bar; "classic" = monochrome clock + ring.
+# Override with XLOCK_STYLE=classic.
+style=${XLOCK_STYLE:-bsod}
 
-# Solid slate background (cockpit palette): no screenshot of the desktop is ever used, so nothing
-# of what was open (even blurred) is visible while locked.
-i3lock --nofork \
-  --color=111214 \
-  --clock --indicator \
-  --time-str="%H:%M" --date-str="%A, %d %B" \
-  --time-font="$font" --date-font="$font" --verif-font="$font" --wrong-font="$font" --layout-font="$font" \
-  --time-size=64 --date-size=18 --verif-size=16 --wrong-size=16 \
-  --time-color=$fg --date-color=$fg \
-  --radius=120 --ring-width=8 \
-  --inside-color=$dim --ring-color=ffffff33 --line-uses-inside \
-  --keyhl-color=$accent --bshl-color=8e9099ff --separator-color=00000000 \
-  --insidever-color=$dim --ringver-color=b0ada7ff --verif-color=$fg --verif-text="..." \
-  --insidewrong-color=$dim --ringwrong-color=$red --wrong-color=$red --wrong-text="Wrong" \
-  --noinput-text="" \
-  --ignore-empty-password --show-failed-attempts \
-  --pass-media-keys --pass-volume-keys --pass-screen-keys
+lock_classic() {
+  local font="Atkinson Hyperlegible Mono" fg=e6e3ddff accent=f2efe9ff red=ffffffff dim=11121499
+  # Solid background: no screenshot of the desktop is ever used, so nothing
+  # of what was open (even blurred) is visible while locked.
+  i3lock --nofork \
+    --color=111214 \
+    --clock --indicator \
+    --time-str="%H:%M" --date-str="%A, %d %B" \
+    --time-font="$font" --date-font="$font" --verif-font="$font" --wrong-font="$font" --layout-font="$font" \
+    --time-size=64 --date-size=18 --verif-size=16 --wrong-size=16 \
+    --time-color=$fg --date-color=$fg \
+    --radius=120 --ring-width=8 \
+    --inside-color=$dim --ring-color=ffffff33 --line-uses-inside \
+    --keyhl-color=$accent --bshl-color=8e9099ff --separator-color=00000000 \
+    --insidever-color=$dim --ringver-color=b0ada7ff --verif-color=$fg --verif-text="..." \
+    --insidewrong-color=$dim --ringwrong-color=$red --wrong-color=$red --wrong-text="Wrong" \
+    --noinput-text="" \
+    --ignore-empty-password --show-failed-attempts \
+    --pass-media-keys --pass-volume-keys --pass-screen-keys
+}
+
+lock_bsod() {
+  local dir="${XDG_RUNTIME_DIR:-/tmp}/xlock" geo w h vars
+  mkdir -p "$dir" && chmod 700 "$dir"
+  # whole X screen (all monitors): the image is laid out for its size
+  geo=$(xdpyinfo 2>/dev/null | awk '/dimensions:/ {print $2; exit}')
+  w=${geo%x*}; h=${geo#*x}
+  [[ -n $w && -n $h ]] || { w=1600; h=900; }
+  vars=$(/usr/local/bin/xlock-bsod "$dir/bsod.png" "$w" "$h") || return 1
+  local BAR_X BAR_Y BAR_W BAR_H TEXT_X TIME_Y DATE_Y TINY STATUS_X STATUS_Y STATUS_SIZE
+  eval "$vars"
+  local font="Noto Sans" white=ffffffff soft=d6e9faff none=00000000
+
+  i3lock --nofork \
+    --image="$dir/bsod.png" --color=0078d7 \
+    --bar-indicator --bar-orientation=horizontal \
+    --bar-pos="$BAR_X:$BAR_Y" --bar-total-width="$BAR_W" --bar-max-height="$BAR_H" \
+    --bar-base-width=3 --bar-count=64 --bar-step=2 --bar-periodic-step=8 \
+    --bar-color=4da0e6ff --keyhl-color=$white --bshl-color=$soft \
+    --ringver-color=$white --ringwrong-color=$white \
+    --clock --force-clock \
+    --time-str="Error time: %H:%M:%S" --date-str="Error date: %A, %d %B %Y" \
+    --time-font="$font" --date-font="$font" --time-size="$TINY" --date-size="$TINY" \
+    --time-color=$white --date-color=$white \
+    --time-align=1 --date-align=1 \
+    --time-pos="$TEXT_X:$TIME_Y" --date-pos="$TEXT_X:$DATE_Y" \
+    --verif-font="$font" --wrong-font="$font" --verif-size="$STATUS_SIZE" --wrong-size="$STATUS_SIZE" \
+    --verif-align=1 --wrong-align=1 \
+    --verif-pos="$STATUS_X:$STATUS_Y" --wrong-pos="$STATUS_X:$STATUS_Y" \
+    --verif-color=$white --wrong-color=$white \
+    --verif-text="checking recovery code..." --wrong-text="invalid recovery code" \
+    --noinput-text="" --lock-text="" --lockfailed-text="" \
+    --ignore-empty-password \
+    --pass-media-keys --pass-volume-keys --pass-screen-keys
+  local rc=$?
+  rm -f "$dir/bsod.png"
+  return $rc
+}
+
+if [[ $style == classic ]]; then
+  lock_classic
+else
+  lock_bsod || lock_classic        # never leave the screen unlocked
+fi
 
 [[ $was_muted == false ]] && pamixer -u 2>/dev/null
 [[ $playing -gt 0 ]] && playerctl --all-players play 2>/dev/null
