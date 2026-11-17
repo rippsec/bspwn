@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# conky: NVIDIA dGPU line. Never calls nvidia-smi while the dGPU is
+# runtime-suspended (that would wake it up and drain battery).
+PCI=/sys/bus/pci/devices/0000:01:00.0
+if [[ "$(cat "$PCI/power/runtime_status" 2>/dev/null)" == "suspended" ]]; then
+  echo '${color3}RTX 1000 Ada${alignr}${color4}suspended · 0 W'
+  exit 0
+fi
+IFS=', ' read -r util temp mu mt pw < <(nvidia-smi \
+  --query-gpu=utilization.gpu,temperature.gpu,memory.used,memory.total,power.draw \
+  --format=csv,noheader,nounits 2>/dev/null)
+[[ -z "$util" ]] && { echo '${color4}n/a'; exit 0; }
+c='${color}'; (( util >= 50 || temp >= 75 )) && c='${color1}'; (( util >= 90 || temp >= 85 )) && c='${color5}'
+printf '%sUTIL %3d%%%s${alignr}%s%d°C  %.0f W\n' "$c" "$util" '${color}' "$c" "$temp" "$pw"
+printf '${color3}VRAM${alignr}${color}%d / %d MiB\n' "$mu" "$mt"

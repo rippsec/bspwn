@@ -12,9 +12,9 @@ get_mic_status() {
     muted=$(pactl get-source-mute "$source" | grep -o "yes\|no")
 
     if [ "$muted" = "yes" ]; then
-        echo "%{A1:$HOME/.config/polybar/scripts/micvol.sh --toggle:} 󰍭 %{A}"
+        echo "%{A1:$HOME/.config/polybar/scripts/micvol.sh --toggle:}%{F#4a5260} 󰍭 %{F-}%{A}"
     else
-        echo "%{A1:$HOME/.config/polybar/scripts/micvol.sh --toggle:}%{F#FFFFFF}%{B#FF0000} 󰍬 %{B-}%{F-}%{A}"
+        echo "%{A1:$HOME/.config/polybar/scripts/micvol.sh --toggle:}%{F#ef6a5a} 󰍬 %{F-}%{A}"
     fi
 }
 

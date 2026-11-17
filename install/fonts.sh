@@ -10,6 +10,16 @@ source "$SCRIPT_DIR/utils.sh"
 NERD_FONTS_VERSION="v3.4.0"
 
 install_fonts() {
+  # Bundled fonts (assets/fonts): Atkinson Hyperlegible Mono,
+  # used by the cockpit rice (polybar, kitty, conky, rofi)
+  local bundled="$SCRIPT_DIR/../assets/fonts"
+  if [[ -d "$bundled" ]]; then
+    log "Installing bundled fonts from assets/fonts..."
+    mkdir -p "$HOME/.local/share/fonts"
+    cp -r "$bundled"/* "$HOME/.local/share/fonts/"
+    fc-cache -f "$HOME/.local/share/fonts" >/dev/null
+  fi
+
   # Each entry: "DisplayName|ZipFilename|fc-list grep pattern"
   # DisplayName   — used for the install dir and log messages
   # ZipFilename   — actual filename on the GitHub release (without .zip)

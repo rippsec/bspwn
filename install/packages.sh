@@ -59,6 +59,8 @@ install_packages() {
     fonts-liberation fonts-crosextra-caladea fonts-crosextra-carlito
     fonts-freefont-ttf fonts-ipafont-gothic fonts-wqy-zenhei
     fonts-tlwg-loma-otf fonts-unifont fontconfig
+    # Atkinson Hyperlegible (dunst/UI text of the cockpit rice)
+    fonts-atkinson-hyperlegible-next
 
     # Python utilities (polybar key-indicator module)
     python3-pynput
