@@ -94,55 +94,42 @@ validate_ip() {
   fi
 }
 
+# Inline editor: a small rofi box dropped right under the clicked module
+# (x from the mouse position), prefilled, no messages. Prints the text typed;
+# returns 1 on Esc.  inline_edit ICON PREFILL PLACEHOLDER [ERROR] < suggestions
+inline_edit() {
+  local icon=$1 prefill=$2 placeholder=$3 err=$4 x lines
+  x=$(xdotool getmouselocation --shell 2>/dev/null | sed -n 's/^X=//p')
+  x=$(( ${x:-1200} - 30 )); (( x < 0 )) && x=0
+  (( x > 1350 )) && x=1350
+  local input; input=$(cat)
+  lines=$(printf '%s' "$input" | grep -c .)
+  local ts="window { x-offset: ${x}px; } listview { lines: ${lines}; } entry { placeholder: \"${placeholder}\"; }"
+  [[ -n $err ]] && ts+=" entry { text-color: #e5383b; } window { border-color: #e5383b; }"
+  printf '%s' "$input" | rofi -dmenu -i -theme "$HOME/.config/rofi/inline.rasi" \
+    -p "$icon" -filter "$prefill" -theme-str "$ts"
+}
+
+# Right click: edit the target inline. Enter = save · empty Enter = clear ·
+# Esc = cancel · an invalid IP turns the box red and stays open.
 handle_edit() {
-  current_target=$(cat "$TARGET_FILE" 2>/dev/null || echo "none")
-  local message="Enter a valid IPv4 address"
-  local prompt
-  local initial_text
-  local invalid_attempt=false
-  local last_invalid_ip
-
+  local current prefill val err=
+  current=$(cat "$TARGET_FILE" 2>/dev/null)
+  [[ $current == none ]] && current=
+  prefill=$current
   while true; do
-    # Determine initial text and prompt based on state
-    if $invalid_attempt; then
-      message="Enter a valid IPv4 address"
-      prompt=""
-      initial_text="$last_invalid_ip"
-      invalid_attempt=false  # Reset for next iteration
-    elif [ -n "$last_action" ]; then
-      initial_text="$last_action"
-      prompt=""
-    else
-      if [ "$current_target" = "none" ]; then
-        message="Type a target"
-        initial_text=""
-      else
-        message="RHOST: $current_target"
-        initial_text="$current_target"
-      fi
-    fi
-
-    # Present Rofi dialog
-    action=$(printf "clear" | rofi_theme -dmenu -p "$prompt" -mesg "$message" -selected-row 1)
-
-    # Exit if user cancels
-    [ -z "$action" ] && exit 0
-
-    if [ "$action" = "clear" ]; then
-      unsetg_zshrc rhost
-      notify-send -u low "Target cleared"
+    val=$(printf '' | inline_edit $'\U000f04fe' "$prefill" "target ip" "$err") || exit 0
+    val=$(echo "$val" | tr -d '[:space:]')
+    if [[ -z $val || $val == clear ]]; then
+      [[ -n $current ]] && { unsetg_zshrc rhost >/dev/null; notify-send -u low "RHOST cleared"; }
       exit 0
     fi
-
-    # Validate IP and handle result
-    if validate_ip "$action"; then
-      setg_zshrc rhost "$action"
-      notify-send -u low "Target set to $action"
+    if validate_ip "$val"; then
+      setg_zshrc rhost "$val" >/dev/null
+      notify-send -u low "RHOST $val"
       exit 0
-    else
-      invalid_attempt=true
-      last_invalid_ip="$action"
     fi
+    prefill=$val err=1
   done
 }
 

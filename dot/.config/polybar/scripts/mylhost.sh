@@ -207,71 +207,42 @@ set_lhost() {
   notify-send -u low "LHOST set to $actual_ip (mode: $mode)"
 }
 
-# Handle Edit
-handle_edit() {
-  local current_ip=$(get_ipaddr)
-  local current_mode=$(get_lhost_mode | cut -d':' -f1)
-  local current_value=$(get_lhost_mode | cut -d':' -f2)
-  local prompt=""
-  local message=""
-  local menu_options=""
-  local invalid_attempt=false
-  local last_invalid_input=""
-
-  while true; do
-    # Update message and prompt based on state
-    if $invalid_attempt; then
-      message="Invalid: '$last_invalid_input'. Current: $current_ip"
-      prompt="(Invalid):"
-      invalid_attempt=false
-    else
-      if [[ "$current_mode" == "custom" ]]; then
-        message="Current: $current_ip (custom)"
-      elif [[ "$current_mode" == "interface" ]]; then
-        message="Current: $current_ip ($current_value)"
-      else
-        message="Current: $current_ip (auto)"
-      fi
-      prompt=""
-    fi
-
-    # Generate menu options
-    menu_options=$(get_interfaces_with_ips)
-    menu_options="Clear LHOST\n${menu_options}"
-
-    # Show Rofi dialog
-    selected=$(echo -e "$menu_options" | rofi_theme -dmenu -p "$prompt" -mesg "$message" -selected-row 1)
-
-    # Exit on cancel
-    [ -z "$selected" ] && exit 0
-
-    # Handle clear action
-    if [[ "$selected" == "[!] Clear lhost (resets to default)" ]]; then
-      clear_lhost
-      exit 0
-    fi
-
-    # Process input
-    if [[ "$selected" =~ ^[a-zA-Z0-9]+:\ .* ]]; then
-      input_value=$(echo "$selected" | cut -d':' -f1)
-    else
-      input_value="$selected"
-    fi
-
-    # Validate and set LHOST
-    if set_lhost "$input_value"; then
-      exit 0
-    else
-      invalid_attempt=true
-      last_invalid_input="$input_value"
-      # Refresh current IP and mode after failed attempt
-      current_ip=$(get_ipaddr)
-      current_mode=$(get_lhost_mode | cut -d':' -f1)
-      current_value=$(get_lhost_mode | cut -d':' -f2)
-    fi
-  done
+# Inline editor: a small rofi box dropped right under the clicked module
+# (x from the mouse position), prefilled, no messages. Prints the text typed;
+# returns 1 on Esc.  inline_edit ICON PREFILL PLACEHOLDER [ERROR] < suggestions
+inline_edit() {
+  local icon=$1 prefill=$2 placeholder=$3 err=$4 x lines
+  x=$(xdotool getmouselocation --shell 2>/dev/null | sed -n 's/^X=//p')
+  x=$(( ${x:-1200} - 30 )); (( x < 0 )) && x=0
+  (( x > 1350 )) && x=1350
+  local input; input=$(cat)
+  lines=$(printf '%s' "$input" | grep -c .)
+  local ts="window { x-offset: ${x}px; } listview { lines: ${lines}; } entry { placeholder: \"${placeholder}\"; }"
+  [[ -n $err ]] && ts+=" entry { text-color: #e5383b; } window { border-color: #e5383b; }"
+  printf '%s' "$input" | rofi -dmenu -i -theme "$HOME/.config/rofi/inline.rasi" \
+    -p "$icon" -filter "$prefill" -theme-str "$ts"
 }
 
+# Right click: pick an interface or type an IP inline.
+# Suggestions: "auto" + every interface with an IPv4 (docker bridges hidden).
+# Typed IP = custom LHOST.
+# Esc = cancel · invalid input turns the box red and stays open.
+handle_edit() {
+  local current prefill= val err= sugg
+  current=$(get_ipaddr)
+  while true; do
+    sugg=$( { echo "auto"; ip -4 -o addr show 2>/dev/null | awk '$2 !~ /^(br-|docker|veth)/ {split($4,a,"/"); printf "%-11s %s\n", $2, a[1]}'; } )
+    val=$(printf '%s\n' "$sugg" | inline_edit $'\U000f0318' "$prefill" "$current" "$err") || exit 0
+    val=$(echo "$val" | sed 's/^ *//; s/ *$//')
+    [[ -z $val ]] && exit 0
+    if [[ $val == auto ]]; then
+      clear_lhost >/dev/null; exit 0
+    fi
+    val=${val%% *}                      # "wlan0   192.168.1.5" -> "wlan0"
+    if set_lhost "$val" >/dev/null; then exit 0; fi
+    prefill=$val err=1
+  done
+}
 
 # Handle copy mode
 handle_copy() {
