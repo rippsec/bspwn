@@ -33,3 +33,6 @@ _adapt_display() {
 _adapt_display
 autoload -Uz add-zsh-hook
 add-zsh-hook precmd _adapt_display
+
+# default terminal for scripts/launchers that honour $TERMINAL
+export TERMINAL=alacritty
