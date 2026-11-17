@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
-"""Polybar keyboard indicator — a fixed strip of 'key caps'.
+"""Polybar keyboard indicator — ONE key-cap slot.
 
-  ⇪ ⇧ ⌃ ⌥ ❖   (Caps Lock, Shift, Ctrl, Alt, Super)
-
-All five are always there in a barely-visible grey, so the bar never shifts.
-  * a held modifier lights up white with an underline (like a lit key)
-  * Caps Lock (latched) lights up with a line above AND below ("engaged")
-  * combos show every key involved (e.g. Super+Shift lights both)
+  idle: a dim keyboard glyph
+  held modifier(s): their glyph(s) lit white with an underline
+                    (combos show every key involved, e.g. Super+Shift)
+  Caps Lock latched: caps glyph with a line above AND below ("engaged")
 
 Caps Lock state comes from the keyboard LED in sysfs (no `xset` per keypress),
 and a line is printed only when the state actually changes.
@@ -16,7 +14,8 @@ import sys
 
 from pynput import keyboard
 
-OFF = "#2e3036"        # resting key: almost invisible on the bar background
+OFF = "#4b4d55"        # idle keyboard glyph (dim)
+IDLE = "\U000f030c"    # 󰌌 keyboard
 ON = "#f2efe9"         # lit key
 LINE = "#f2efe9"       # underline / overline colour
 
@@ -60,15 +59,16 @@ def render():
     if key == last:
         return
     last = key
-    parts = []
-    for name, glyph in SLOTS:
-        if name in state:
-            deco = "%{+o}%{+u}" if name == "caps" else "%{+u}"
-            undeco = "%{-o}%{-u}" if name == "caps" else "%{-u}"
+    lit = [(n, g) for n, g in SLOTS if n in state]
+    if not lit:
+        out = f"%{{F{OFF}}} {IDLE} %{{F-}}"
+    else:
+        parts = []
+        for name, glyph in lit:
+            deco, undeco = ("%{+o}%{+u}", "%{-o}%{-u}") if name == "caps" else ("%{+u}", "%{-u}")
             parts.append(f"%{{u{LINE}}}%{{o{LINE}}}{deco}%{{F{ON}}} {glyph} %{{F-}}{undeco}")
-        else:
-            parts.append(f"%{{F{OFF}}} {glyph} %{{F-}}")
-    sys.stdout.write("".join(parts) + "\n")
+        out = "".join(parts)
+    sys.stdout.write(out + "\n")
     sys.stdout.flush()
 
 
