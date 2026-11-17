@@ -28,15 +28,16 @@ case "${1:-}" in
   audit)     tail -n "${2:-40}" "$HOME/.local/share/jarvis/audit.log" 2>/dev/null || echo "sin registros aún" ;;
   restart)   systemctl --user restart jarvis ;;
   polybar)
-    # polybar module: icon reflecting state; click handled in polybar config
+    # polybar module: icon reflecting state (cockpit palette: grey idle, white
+    # wake-word armed, red listening/speaking); click handled in polybar config
     s=$(cat "${XDG_RUNTIME_DIR:-/tmp}/jarvis/state" 2>/dev/null)
-    systemctl --user is-active -q jarvis || { echo "%{F#555}󰚩%{F-}"; exit; }
+    systemctl --user is-active -q jarvis || { echo "%{F#4b4d55}󰚩%{F-}"; exit; }
     case "$s" in
-      listening*) echo "%{F#ffb340}󰍬 escuchando%{F-}" ;;
-      thinking*)  echo "%{F#b78bff}󰚩 pensando%{F-}" ;;
-      speaking*)  echo "%{F#3fd8ff}󰚩 hablando%{F-}" ;;
-      *wake*)     echo "%{F#3fd8ff}󰚩%{F-}" ;;
-      *)          echo "%{F#1b7fa3}󰚩%{F-}" ;;
+      listening*) echo "%{F#e5383b}󰍬 escuchando%{F-}" ;;
+      thinking*)  echo "%{F#f08080}󰚩 pensando%{F-}" ;;
+      speaking*)  echo "%{F#ff6b6e}󰚩 hablando%{F-}" ;;
+      *wake*)     echo "%{F#f2efe9}󰚩%{F-}" ;;
+      *)          echo "%{F#8e9099}󰚩%{F-}" ;;
     esac ;;
   *) cat <<USAGE
 jarvis listen        hablarle por el micrófono de la PC (o terminar / callarlo)

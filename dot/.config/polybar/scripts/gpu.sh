@@ -4,17 +4,17 @@
 PCI=/sys/bus/pci/devices/0000:01:00.0
 WARN=50
 
-LBL='%{T2}%{F#8b919c}GPU%{F-}%{T-}'
+LBL='%{T2}%{F#8e9099}GPU%{F-}%{T-}'
 if [[ "$(cat "$PCI/power/runtime_status" 2>/dev/null)" == "suspended" ]]; then
-    echo "$LBL %{F#4a5260}off%{F-}"; exit 0
+    echo "$LBL %{F#4b4d55}off%{F-}"; exit 0
 fi
 
 IFS=', ' read -r util temp < <(nvidia-smi --query-gpu=utilization.gpu,temperature.gpu \
     --format=csv,noheader,nounits 2>/dev/null)
-[[ -z "$util" ]] && { echo "$LBL %{F#4a5260}n/a%{F-}"; exit 0; }
+[[ -z "$util" ]] && { echo "$LBL %{F#4b4d55}n/a%{F-}"; exit 0; }
 
 # value colour: normal / busy (amber) / hot or maxed (red)
-col="#d8d4c7"
-(( util >= WARN || temp >= 75 )) && col="#e8b04b"
-(( util >= 90 || temp >= 85 )) && col="#ef6a5a"
+col="#e6e3dd"
+(( util >= WARN || temp >= 75 )) && col="#e5383b"
+(( util >= 90 || temp >= 85 )) && col="#ff4d4f"
 printf '%s %%{F%s}%2d%% %s°%%{F-}\n' "$LBL" "$col" "$util" "$temp"

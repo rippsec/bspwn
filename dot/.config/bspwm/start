@@ -4,8 +4,8 @@
 # Dell 1600x900 (this branch only)
 xrandr --output eDP-1 --mode 1600x900
 
-# Cockpit wallpaper (generated: ~/.bspwn/scripts/wallpaper/gen_wallpaper.py)
-feh --no-fehbg --bg-fill "$HOME/.bspwn/assets/wallpaper/cockpit.jpg" 2>/dev/null || hsetroot -solid '#141820'
+# Dragon wallpaper (generated: ~/.bspwn/scripts/wallpaper/gen_dragon.py; old: gen_wallpaper.py -> cockpit.jpg)
+feh --no-fehbg --bg-fill "$HOME/.bspwn/assets/wallpaper/dragon.jpg" 2>/dev/null || hsetroot -solid "#111214"
 #feh --bg-fill "/usr/share/backgrounds/kali-16x9/black-kali-2025-4-3840x2160.png"
 #feh --bg-fill /usr/share/backgrounds/kali-16x9/kali-layers.png
 #feh --bg-fill /usr/share/backgrounds/kali-16x9/kali-layers.png
