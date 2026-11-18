@@ -65,6 +65,7 @@ edita el script, no los archivos generados).
 
 ```sh
 python3 scripts/grub/gen_theme.py   # regenerar el tema
+./scripts/grub/preview.sh           # previsualizar: GRUB real en una ventana QEMU
 ./install.sh -boot                  # instalar + activar el enforcer
 ```
 

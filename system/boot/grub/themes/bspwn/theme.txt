@@ -5,17 +5,17 @@ desktop-image: "background.png"
 desktop-color: "#0a0a0c"
 terminal-font: "bspwn Mono Regular 16"
 terminal-box: "terminal_box_*.png"
-terminal-left: "47.92%"
-terminal-top: "20.37%"
-terminal-width: "45.31%"
-terminal-height: "56.48%"
+terminal-left: "47%+18"
+terminal-top: "20%+4"
+terminal-width: "45%+6"
+terminal-height: "56%+5"
 terminal-border: "0"
 
 + boot_menu {
-  left = 48.96%
-  top = 25.93%
-  width = 43.75%
-  height = 37.04%
+  left = 48%+18
+  top = 25%+10
+  width = 43%+14
+  height = 37%
   item_font = "bspwn Mono Regular 20"
   selected_item_font = "bspwn Mono Bold 20"
   item_color = "#8e9099"
@@ -32,10 +32,10 @@ terminal-border: "0"
 
 + label {
   id = "__timeout__"
-  left = 50.10%
-  top = 71.30%
-  width = 36.46%
-  height = 2.41%
+  left = 50%+2
+  top = 71%+3
+  width = 36%+9
+  height = 2%+4
   align = "left"
   font = "bspwn Mono Regular 20"
   color = "#c9c6c0"

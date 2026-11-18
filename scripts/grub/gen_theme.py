@@ -180,7 +180,10 @@ for path, style, size in [(MONO, "Regular", 16), (MONO, "Regular", 20), (MONO_B,
 
 # ------------------------------------------------------------------ theme.txt
 def pct(v, total):
-    return f"{100 * v / total:.2f}%"
+    """GRUB only parses integer percentages: whole % + pixel remainder."""
+    p = int(100 * v / total)
+    rest = round(v - p * total / 100)
+    return f"{p}%+{rest}" if rest else f"{p}%"
 
 
 (OUT / "theme.txt").write_text(f"""# bspwn GRUB theme: monochrome ASCII terminal, 四 sigil.
