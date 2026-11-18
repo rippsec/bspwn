@@ -1,3 +1,8 @@
+/*
+ * window.rasi — window switcher grid (cockpit style): translucent #111214,
+ * sharp corners, one accent line, selected card = soft grey block + accent
+ * underline. Typed matches are bold + underlined (never white-on-white).
+ */
 configuration {
     modi:                "window";
     show-icons:          true;
@@ -6,164 +11,79 @@ configuration {
     window-thumbnail:    true;
 }
 
-/* ============================================================ */
-/* Import shared configurations */
-@import                          "shared/colors.rasi"
-@import                          "shared/fonts.rasi"
+@import "shared/colors.rasi"
+@import "shared/fonts.rasi"
 
-/*****----- Global Properties -----*****/
 * {
-    border-colour:               var(selected);
-    handle-colour:               var(foreground);
-    background-colour:           var(background);
-    foreground-colour:           var(foreground);
-    alternate-background:        var(background-alt);
-    normal-background:           var(background);
-    normal-foreground:           var(foreground);
-    urgent-background:           var(urgent);
-    urgent-foreground:           var(background);
-    active-background:           var(active);
-    active-foreground:           var(background);
-    selected-normal-background:  var(selected);
-    selected-normal-foreground:  var(background);
-    selected-urgent-background:  var(active);
-    selected-urgent-foreground:  var(background);
-    selected-active-background:  var(urgent);
-    selected-active-foreground:  var(background);
-    alternate-normal-background: var(background);
-    alternate-normal-foreground: var(foreground);
-    alternate-urgent-background: var(urgent);
-    alternate-urgent-foreground: var(background);
-    alternate-active-background: var(active);
-    alternate-active-foreground: var(background);
+    dim:      #6f7178;
+    sel-bg:   #f2efe91c;
+    font:     "Atkinson Hyperlegible Mono Medium 11";
+    background-color: transparent;
+    text-color:       @foreground;
 }
-
-/* ============================================================ */
 
 window {
-    transparency:                "real";
-    location:                    center;
-    anchor:                      center;
-    fullscreen:                  false;
-    width:                       100%;
-    height:                      30%;
-    border-radius:               0px;
-    border:                      2px solid;
-    border-color:                @border-colour;
-    background-color:            @background-colour;
-    cursor:                      "default";
+    transparency:     "real";
+    location:         center;
+    anchor:           center;
+    fullscreen:       false;
+    width:            100%;
+    height:           30%;
+    border:           0px 0px 2px 0px;
+    border-color:     @selected;
+    border-radius:    0px;
+    background-color: #111214e6;
+    cursor:           "default";
 }
-
-/* ============================================================ */
 
 mainbox {
-    padding:                    10px;
-    background-color:           transparent;
-    children:                   [ listview ];
+    padding:  14px 18px;
+    children: [ listview ];
 }
-
-/* ============================================================ */
-/* GRID VIEW */
 
 listview {
-    layout:                     vertical;
-    columns:                    9;      /* how many windows per row */
-    lines:                      3;      /* rows */
-    fixed-columns:             true;
-    fixed-height:              true;
-    spacing:                   26px;
-    scrollbar:                 false;
-    background-color:          transparent;
-    text-color:                @foreground-colour;
-    cursor:                    "default";
+    layout:        vertical;
+    columns:       9;          /* windows per row */
+    lines:         3;          /* rows */
+    fixed-columns: true;
+    fixed-height:  true;
+    spacing:       14px;
+    scrollbar:     false;
 }
-
-/* ============================================================ */
-/* WINDOW CARD */
 
 element {
-    orientation:               vertical;
-    padding:                   12px;
-    border-radius:             0px;
-    border:                    0px solid;
-    border-color:              @border-colour;
-    background-color:          transparent;
-    text-color:                @foreground-colour;
-    cursor:                    pointer;
+    orientation:   vertical;
+    padding:       12px 8px 10px 8px;
+    border:        0px 0px 2px 0px;
+    border-color:  transparent;
+    border-radius: 0px;
+    cursor:        pointer;
 }
-
-element normal.normal {
-    background-color:          var(normal-background);
-    text-color:                var(normal-foreground);
-}
-
-element normal.urgent {
-    background-color:          var(urgent-background);
-    text-color:                var(urgent-foreground);
-}
-
-element normal.active {
-    background-color:          var(active-background);
-    text-color:                var(active-foreground);
-}
-
-element selected.normal {
-    background-color:          var(selected-normal-background);
-    text-color:                var(selected-normal-foreground);
-}
-
-element selected.urgent {
-    background-color:          var(selected-urgent-background);
-    text-color:                var(selected-urgent-foreground);
-}
-
-element selected.active {
-    background-color:          var(selected-active-background);
-    text-color:                var(selected-active-foreground);
-}
-
-element alternate.normal {
-    background-color:          var(alternate-normal-background);
-    text-color:                var(alternate-normal-foreground);
-}
-
-element alternate.urgent {
-    background-color:          var(alternate-urgent-background);
-    text-color:                var(alternate-urgent-foreground);
-}
-
-element alternate.active {
-    background-color:          var(alternate-active-background);
-    text-color:                var(alternate-active-foreground);
-}
-
-/* ============================================================ */
-/* BIG WINDOW PREVIEW / ICON */
 
 element-icon {
-    size:                      128px;   /* GNOME-like big previews */
-    horizontal-align:          0.5;
-    vertical-align:            0.5;
-    margin:                    0px 0px 10px 0px;
-    background-color:          transparent;
-    text-color:                inherit;
-    cursor:                    inherit;
+    size:             128px;
+    horizontal-align: 0.5;
+    vertical-align:   0.5;
+    margin:           0px 0px 10px 0px;
+    cursor:           inherit;
 }
 
-/* ============================================================ */
-/* SMALL LABEL UNDER ICON */
-
 element-text {
-    horizontal-align:          0.5;
-    vertical-align:            0.5;
-    background-color:          transparent;
-    text-color:                inherit;
-    highlight:                 inherit;
-    cursor:                    inherit;
-    vertical-align:            0.5;
-    horizontal-align:          0.5;
-    font:                     "Atkinson Hyperlegible Mono Medium 11";
-    width:                    180px;               /* Fixed width */
-    max-chars:                20;                  /* Maximum characters before trimming */
-    wrap:                     false;               /* Prevent text wrapping */
+    horizontal-align: 0.5;
+    vertical-align:   0.5;
+    text-color:       inherit;
+    highlight:        bold underline;
+    width:            180px;
+    max-chars:        20;
+    wrap:             false;
+    cursor:           inherit;
+}
+
+element normal.normal, element alternate.normal { background-color: transparent; text-color: @dim; }
+element normal.urgent,  element alternate.urgent  { background-color: transparent; text-color: @urgent; }
+element normal.active,  element alternate.active  { background-color: transparent; text-color: @active; }
+element selected.normal, element selected.active, element selected.urgent {
+    background-color: @sel-bg;
+    text-color:       @selected;
+    border-color:     @selected;
 }

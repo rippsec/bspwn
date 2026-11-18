@@ -1,8 +1,9 @@
 /*
- * launch.rasi — Super+R launcher: a centred floating "command palette".
- * Cockpit aesthetic (same as polybar / HUD / launchpad): translucent #111214,
- * sharp corners, one accent line, selected row inverted (like today in the HUD
- * calendar). Colours come from shared/colors.rasi.
+ * launch.rasi — Super+R launcher: a search bar that takes the place of the
+ * polybar (same height / top offset / full width, same translucent #111214).
+ * Apps run along it horizontally. Selected = soft grey block + accent underline;
+ * typed matches = bold + underline, so nothing is ever white-on-white.
+ * Colours come from shared/colors.rasi.
  */
 configuration {
     terminal:            "alacritty";
@@ -20,13 +21,14 @@ configuration {
 
 * {
     /* ===================== User Config ===================== */
-    font:      "Atkinson Hyperlegible Mono Medium 12";
-    row-lines: 8;          /* visible results */
-    icon-size: 22px;
+    bar-height: 28px;      /* = polybar height (config.ini: [bar/base] height)   */
+    bar-top:    6px;       /* = polybar offset-y                                  */
+    icon-size:  18px;
+    font:       "Atkinson Hyperlegible Mono Medium 11";
     /* ======================================================= */
 
-    dim:  #6f7178;
-    line: #2a2b30;
+    dim:      #6f7178;
+    sel-bg:   #f2efe91c;
     background-color: transparent;
     text-color:       @foreground;
 }
@@ -35,38 +37,35 @@ window {
     transparency:     "real";
     location:         north;
     anchor:           north;
-    y-offset:         72px;                 /* below the bar (6 + 28) with a gap */
-    width:            640px;
-    border:           0px 0px 2px 0px;
-    border-color:     @selected;
+    width:            calc(100% - 16px);    /* polybar islands span 8px..1592px */
+    height:           @bar-height;
+    x-offset:         0px;
+    y-offset:         @bar-top;
+    border:           0px;
     border-radius:    0px;
-    background-color: #111214e0;
     padding:          0px;
-    children:         [ mainbox ];
+    background-color: #111214e6;
+    children:         [ horibox ];
 }
 
-mainbox {
-    children: [ inputbar, listview ];
-    spacing:  0px;
-    padding:  0px;
-}
-
-inputbar {
-    children:     [ prompt, entry ];
-    spacing:      14px;
-    padding:      16px 18px;
-    border:       0px 0px 1px 0px;
-    border-color: @line;
-    background-color: #ffffff08;
+horibox {
+    orientation: horizontal;
+    spacing:     0px;
+    padding:     0px 8px;
+    children:    [ prompt, entry, listview ];
 }
 
 prompt {
-    font:       "Symbols Nerd Font Mono 15";
-    text-color: @dim;
+    font:           "Symbols Nerd Font Mono 14";
+    padding:        0px 10px 0px 6px;
+    text-color:     @dim;
     vertical-align: 0.5;
 }
 
 entry {
+    expand:            false;
+    width:             14em;
+    padding:           0px 10px 0px 0px;
     placeholder:       "run";
     placeholder-color: @dim;
     cursor-color:      @selected;
@@ -75,46 +74,48 @@ entry {
 }
 
 listview {
-    lines:         @row-lines;
+    layout:        horizontal;
+    lines:         100;
     columns:       1;
-    fixed-height:  true;
-    dynamic:       true;
     cycle:         true;
+    dynamic:       true;
     scrollbar:     false;
+    fixed-height:  false;
     spacing:       0px;
-    padding:       6px 0px;
-    background-color: transparent;
+    padding:       0px;
 }
 
 element {
-    padding:     9px 18px;
-    spacing:     14px;
-    border:      0px;
+    padding:       0px 12px;
+    spacing:       8px;
+    border:        0px 0px 2px 0px;
+    border-color:  transparent;
     border-radius: 0px;
-    cursor:      pointer;
+    cursor:        pointer;
+    orientation:   horizontal;
 }
 
 element-icon {
-    size:       @icon-size;
+    size:             @icon-size;
+    vertical-align:   0.5;
     background-color: transparent;
-    cursor:     inherit;
+    cursor:           inherit;
 }
 
 element-text {
     text-color:     inherit;
-    highlight:      bold #ffffff;
+    highlight:      bold underline;      /* matches: bold + underline, keeps the colour */
     vertical-align: 0.5;
     cursor:         inherit;
 }
 
-element normal.normal,
-element alternate.normal {
+element normal.normal, element alternate.normal {
     background-color: transparent;
     text-color:       @foreground;
 }
 
-/* selected row: inverted (off-white block, dark text) */
 element selected.normal {
-    background-color: @selected;
-    text-color:       #111214;
+    background-color: @sel-bg;
+    text-color:       @selected;
+    border-color:     @selected;
 }
