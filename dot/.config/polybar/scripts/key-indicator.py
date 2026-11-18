@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""Polybar keyboard indicator — ONE key-cap slot.
+"""Polybar keyboard indicator: ONE key-cap slot, one icon at a time.
 
-  idle: a dim keyboard glyph
-  held modifier(s): their glyph(s) lit white with an underline
-                    (combos show every key involved, e.g. Super+Shift)
-  Caps Lock latched: caps glyph with a line above AND below ("engaged")
+  idle:               a dim keyboard glyph
+  modifier(s) held:   ONE glyph, lit, with a line above AND below. With several keys held at
+                      once only the highest-priority one shows: super > ctrl > alt > shift > caps
+  Caps Lock latched:  shows the caps glyph (same lit + over/underline) when nothing else is held
 
 Caps Lock state comes from the keyboard LED in sysfs (no `xset` per keypress),
-and a line is printed only when the state actually changes.
+and a line is printed only when what is shown actually changes.
 """
 import glob
 import sys
@@ -36,7 +36,7 @@ KEYMAP = {
 
 CAPS_LEDS = glob.glob("/sys/class/leds/*capslock*/brightness")
 held = set()
-last = None
+last = "?"            # sentinel: forces the first render
 
 
 def caps_on():
@@ -50,24 +50,23 @@ def caps_on():
     return False
 
 
+PRIORITY = ["super", "ctrl", "alt", "shift", "caps"]
+GLYPH = dict(SLOTS)
+
+
 def render():
     global last
     state = set(held)
     if caps_on():
         state.add("caps")
-    key = frozenset(state)
-    if key == last:
+    top = next((n for n in PRIORITY if n in state), None)   # the single key we show
+    if top == last:
         return
-    last = key
-    lit = [(n, g) for n, g in SLOTS if n in state]
-    if not lit:
+    last = top
+    if top is None:
         out = f"%{{F{OFF}}} {IDLE} %{{F-}}"
     else:
-        parts = []
-        for name, glyph in lit:
-            deco, undeco = ("%{+o}%{+u}", "%{-o}%{-u}") if name == "caps" else ("%{+u}", "%{-u}")
-            parts.append(f"%{{u{LINE}}}%{{o{LINE}}}{deco}%{{F{ON}}} {glyph} %{{F-}}{undeco}")
-        out = "".join(parts)
+        out = f"%{{u{LINE}}}%{{o{LINE}}}%{{+o}}%{{+u}}%{{F{ON}}} {GLYPH[top]} %{{F-}}%{{-o}}%{{-u}}"
     sys.stdout.write(out + "\n")
     sys.stdout.flush()
 
