@@ -13,6 +13,8 @@ for bat in "$PS"/BAT*; do
   [[ -r $bat/capacity ]] || continue
   name=${bat##*/}
   cap=$(<"$bat/capacity"); st=$(<"$bat/status")
+  # charge threshold (Dell BAT0 stops at TLP's STOP_CHARGE_THRESH and reports "Not charging")
+  stop=$(cat "$bat/charge_control_end_threshold" 2>/dev/null); stop=${stop:-100}
   if [[ $st == Discharging ]]; then
     if (( cap <= CRIT )); then level=crit; elif (( cap <= LOW )); then level=low; else level=ok; fi
     if [[ $level != "${seen[$name]}" ]]; then
@@ -22,7 +24,7 @@ for bat in "$PS"/BAT*; do
       esac
       seen[$name]=$level
     fi
-  elif [[ $st == Full || ( $st == Charging && $cap -ge 100 ) ]]; then
+  elif [[ $st == Full || ( $st != Discharging && $cap -ge $stop ) || ( $st == Charging && $cap -ge 100 ) ]]; then
     if [[ ${seen[$name]} != full ]]; then
       notify-send -u low "Battery charged" "$name is full"
       seen[$name]=full
