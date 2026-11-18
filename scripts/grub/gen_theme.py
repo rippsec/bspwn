@@ -172,8 +172,9 @@ for side, size in {"n": (1, 2), "s": (1, 2), "e": (2, 1), "w": (2, 1),
 # ------------------------------------------------------------------ fonts
 RANGE = "0x20-0x7E,0xA0-0x17F,0x2190-0x21FF,0x2500-0x259F"
 for path, style, size in [(MONO, "Regular", 16), (MONO, "Regular", 20), (MONO_B, "Bold", 20)]:
-    name = f"bspwn Mono {style} {size}"
-    subprocess.run(["grub-mkfont", "-s", str(size), "-n", name, "-r", RANGE,
+    # -n is the family only; grub-mkfont appends style + size itself,
+    # giving e.g. "bspwn Mono Bold 20", the name theme.txt refers to
+    subprocess.run(["grub-mkfont", "-s", str(size), "-n", "bspwn Mono", "-r", RANGE,
                     "-o", str(OUT / f"mono-{style.lower()}-{size}.pf2"), path], check=True,
                    stderr=subprocess.DEVNULL)
 
