@@ -340,7 +340,7 @@ install_system_files() {
 
   # X11 monitor / GPU config (TearFree)
   if [[ -d "$project_root/system/etc/X11/xorg.conf.d" ]]; then
-    log "Installing X11 config (TearFree, 1600x900)..."
+    log "Installing X11 config (TearFree, 1920x1080)..."
     sudo mkdir -p /etc/X11/xorg.conf.d
     sudo cp "$project_root/system/etc/X11/xorg.conf.d/10-monitor.conf" \
             /etc/X11/xorg.conf.d/10-monitor.conf
