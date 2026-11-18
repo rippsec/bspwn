@@ -15,17 +15,8 @@ feh --no-fehbg --bg-fill "$HOME/.bspwn/assets/wallpaper/minimal.jpg" 2>/dev/null
 # TrackPoint settings, (keyboard model update)
 xinput set-prop 'TPPS/2 IBM TrackPoint' 'libinput Accel Speed' -0.7 &
 
-# TouchPad settings, using the id instead of name, preferably use the name
-# change this id in the ~/.config/sxhkd/sxhkdrc file for the on/off touchpad shortcut
-xinput set-prop 'SynPS/2 Synaptics TouchPad' 'libinput Accel Speed' -0.1 &
-xinput set-prop 'SynPS/2 Synaptics TouchPad' 'libinput Scroll Method Enabled' 0 1 0 &
-xinput set-prop 'SynPS/2 Synaptics TouchPad' 'libinput Horizontal Scroll Enabled' 1 &
-xinput set-prop 'SynPS/2 Synaptics TouchPad' 'libinput Tapping Enabled' 1 &
-xinput set-prop 'SynPS/2 Synaptics TouchPad' 'libinput Natural Scrolling Enabled' 1 &
-
-
-# Disable touchpad while typing (0 = off, so touchpad stays responsive after Super+E enable)
-xinput set-prop 'SynPS/2 Synaptics TouchPad' "libinput Disable While Typing Enabled" 1 &
+# TouchPad (RMI4/SMBus or legacy PS/2, found by name): speed, tap, scrolling, disable-while-typing
+"$HOME/.config/bspwm/scripts/touchpad.sh" apply &
 
 #syndaemon -i 2.0 -d
 
