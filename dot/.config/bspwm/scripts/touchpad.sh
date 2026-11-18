@@ -2,7 +2,8 @@
 # ThinkPad touchpad helper:  touchpad.sh apply | toggle | reset
 # Finds the touchpad by name whichever bus it uses: "Synaptics TM3053-003" (RMI4/SMBus,
 # psmouse.synaptics_intertouch=1) or the legacy "SynPS/2 Synaptics TouchPad" (PS/2).
-tp_name() { xinput list --name-only 2>/dev/null | grep -m1 'Synaptics'; }
+# a disabled (floating) device is listed as "∼ Name": strip any leading non-letters
+tp_name() { xinput list --name-only 2>/dev/null | grep -m1 'Synaptics' | sed 's/^[^A-Za-z]*//'; }
 
 apply() {
   local tp; tp=$(tp_name) || return 1
