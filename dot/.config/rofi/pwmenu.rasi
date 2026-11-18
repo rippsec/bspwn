@@ -1,102 +1,93 @@
 /*
- * pwmenu.rasi — power menu (polybar ⏻ button): a small floating panel that
- * drops under the right island. Cockpit style: translucent #111214, sharp
- * corners, accent line, selected row = soft grey block + accent underline.
- * The prompt shows the uptime (set by scripts/pwmenu.sh).
+ * pwmenu.rasi — power menu (polybar ⏻ button, scripts/pwmenu.sh): the whole
+ * screen dims (picom blurs what is behind the translucent layer) and the
+ * actions appear as big buttons in the middle, macOS / KDE style.
+ * Esc / Ctrl+g / click on the empty area closes it. Cockpit palette.
  */
 configuration {
-    modi:                "drun,run,window";
-    show-icons:          true;
-    display-drun:        "󰀻 Apps";
-    display-run:         " Run";
-    display-window:      " Windows";
-    drun-display-format: "{name}";
-    window-format:       "{w} · {c} · {t}";
+    click-to-exit:  true;
+    hover-select:   true;
+    me-select-entry: "";
+    me-accept-entry: "MousePrimary";
+    kb-cancel:      "Escape,Control+g,Control+bracketleft";
+    kb-accept-entry: "Return,KP_Enter";
+    /* Left/Right move between the buttons (free them from the text-entry bindings) */
+    kb-move-char-back:    "Control+b";
+    kb-move-char-forward: "Control+f";
+    kb-row-left:          "Left,Control+Page_Up";
+    kb-row-right:         "Right,Control+Page_Down";
 }
 
 @import "shared/colors.rasi"
-@import "shared/fonts.rasi"
 
 * {
-    dim:      #6f7178;
-    line:     #2a2b30;
-    sel-bg:   #f2efe91c;
-    font:     "Atkinson Hyperlegible Mono Medium 12";
+    dim:     #6f7178;
+    sel-bg:  #f2efe91c;
+    font:    "Atkinson Hyperlegible Mono Medium 14";
     background-color: transparent;
     text-color:       @foreground;
 }
 
 window {
+    fullscreen:       true;
     transparency:     "real";
-    location:         north east;
-    anchor:           north east;
-    x-offset:         -8px;
-    y-offset:         40px;                 /* just under the bar (6 + 28 + gap) */
-    width:            280px;
-    border:           0px 0px 2px 0px;
-    border-color:     @selected;
-    border-radius:    0px;
-    background-color: #111214e6;
-    padding:          0px;
+    background-color: #0b0c0ed9;        /* translucent: blurred desktop shows through */
+    border:           0px;
 }
 
 mainbox {
-    spacing:  0px;
+    children: [ message, listview ];
     padding:  0px;
-    children: [ inputbar, message, listview ];
+    spacing:  0px;
 }
-
-inputbar {
-    children:         [ prompt ];
-    padding:          14px 18px;
-    border:           0px 0px 1px 0px;
-    border-color:     @line;
-    background-color: #ffffff08;
-}
-prompt { text-color: @dim; }
 
 message {
+    margin:           300px 0px 36px 0px;
     padding:          0px;
     background-color: transparent;
 }
 textbox {
-    padding:          10px 18px;
-    background-color: transparent;
+    horizontal-align: 0.5;
     text-color:       @dim;
-    markup:           true;
+    background-color: transparent;
+    font:             "Atkinson Hyperlegible Mono Medium 12";
 }
 
 listview {
-    columns:      1;
-    lines:        8;
-    cycle:        true;
-    dynamic:      true;
-    scrollbar:    false;
-    fixed-height: false;
-    spacing:      0px;
-    padding:      6px 0px;
+    layout:        vertical;
+    flow:          horizontal;
+    columns:       5;
+    lines:         1;
+    fixed-columns: true;
+    fixed-height:  false;
+    spacing:       26px;
+    scrollbar:     false;
+    padding:       0px 330px;           /* five buttons centred in the middle */
+    cycle:         true;
 }
 
 element {
-    padding:       10px 18px;
-    spacing:       12px;
-    border:        0px 0px 0px 2px;        /* left marker on the selected row */
-    border-color:  transparent;
-    border-radius: 0px;
-    cursor:        pointer;
+    orientation:    vertical;
+    padding:        34px 10px 26px 10px;
+    spacing:        10px;
+    border:         0px 0px 2px 0px;
+    border-color:   transparent;
+    border-radius:  0px;
+    cursor:         pointer;
 }
-element-icon { size: 22px; cursor: inherit; }
 element-text {
-    text-color:     inherit;
-    highlight:      bold underline;
-    vertical-align: 0.5;
-    cursor:         inherit;
+    horizontal-align: 0.5;
+    vertical-align:   0.5;
+    text-color:       inherit;
+    markup:           true;
+    cursor:           inherit;
 }
 
-element normal.normal, element alternate.normal { background-color: transparent; text-color: @foreground; }
-element normal.urgent,  element alternate.urgent  { text-color: @urgent; }
-element normal.active,  element alternate.active  { text-color: @active; }
-element selected.normal, element selected.active, element selected.urgent {
+element normal.normal, element alternate.normal {
+    background-color: transparent;
+    text-color:       @dim;
+}
+element selected.normal {
     background-color: @sel-bg;
     text-color:       @selected;
     border-color:     @selected;
