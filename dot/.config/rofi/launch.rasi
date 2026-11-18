@@ -1,167 +1,120 @@
-/* launch.rasi -- top-bar application launcher */
-/* To change colors: edit shared/colors.rasi   */
-
+/*
+ * launch.rasi — Super+R launcher: a centred floating "command palette".
+ * Cockpit aesthetic (same as polybar / HUD / launchpad): translucent #111214,
+ * sharp corners, one accent line, selected row inverted (like today in the HUD
+ * calendar). Colours come from shared/colors.rasi.
+ */
 configuration {
     terminal:            "alacritty";
     run-shell-command:   "{terminal} -e {cmd}";
     modi:                "drun,run";
     show-icons:          true;
-    display-drun:        "";
+    icon-theme:          "Flat-Remix-Blue-Dark";
+    display-drun:        "󰍉";
     display-run:         "";
-    display-filebrowser: "";
-    display-window:      "";
     drun-display-format: "{name}";
-    window-format:       "{w} . {c} . {t}";
+    kb-cancel:           "Escape,Control+g,Control+bracketleft";
 }
 
 @import "shared/colors.rasi"
 
 * {
     /* ===================== User Config ===================== */
-    /* Bar row height                                         */
-    bar-height:  24px;
-    /* App icon size in pixels -- keep below bar-height      */
-    icon-size:   18px;
-    /* Font: "Family Style Size"                             */
-    font:        "Atkinson Hyperlegible Mono Medium 12";
-    /* Width is set directly on the window block below       */
+    font:      "Atkinson Hyperlegible Mono Medium 12";
+    row-lines: 8;          /* visible results */
+    icon-size: 22px;
     /* ======================================================= */
 
-    border-colour:               var(selected);
-    handle-colour:               var(foreground);
-    background-colour:           var(background);
-    foreground-colour:           var(foreground);
-    alternate-background:        var(background-alt);
-    normal-background:           var(background);
-    normal-foreground:           var(foreground);
-    urgent-background:           var(urgent);
-    urgent-foreground:           var(background);
-    active-background:           var(active);
-    active-foreground:           var(background);
-    selected-normal-background:  var(selected);
-    selected-normal-foreground:  var(background);
-    selected-urgent-background:  var(active);
-    selected-urgent-foreground:  var(background);
-    selected-active-background:  var(urgent);
-    selected-active-foreground:  var(background);
-    alternate-normal-background: var(background);
-    alternate-normal-foreground: var(foreground);
-    alternate-urgent-background: var(urgent);
-    alternate-urgent-foreground: var(background);
-    alternate-active-background: var(active);
-    alternate-active-foreground: var(background);
+    dim:  #6f7178;
+    line: #2a2b30;
+    background-color: transparent;
+    text-color:       @foreground;
 }
 
-/* To adjust width change the value below (px or %) */
 window {
     transparency:     "real";
     location:         north;
     anchor:           north;
-    fullscreen:       false;
-    width:            calc(100% - 12px);
-    height:           var(bar-height);
-    x-offset:         0px;
-    y-offset:         4px;
-    margin:           0px;
-    padding:          0px;
-    border:           0px;
+    y-offset:         72px;                 /* below the bar (6 + 28) with a gap */
+    width:            640px;
+    border:           0px 0px 2px 0px;
+    border-color:     @selected;
     border-radius:    0px;
-    background-color: @background-colour;
-    cursor:           "default";
-    children:         [ horibox ];
+    background-color: #111214e0;
+    padding:          0px;
+    children:         [ mainbox ];
 }
 
-horibox {
-    orientation:      horizontal;
-    spacing:          0px;
-    height:           var(bar-height);
-    background-color: @background-colour;
-    text-color:       @foreground-colour;
-    children:         [ prompt, textbox-prompt-colon, entry, listview ];
+mainbox {
+    children: [ inputbar, listview ];
+    spacing:  0px;
+    padding:  0px;
+}
+
+inputbar {
+    children:     [ prompt, entry ];
+    spacing:      14px;
+    padding:      16px 18px;
+    border:       0px 0px 1px 0px;
+    border-color: @line;
+    background-color: #ffffff08;
 }
 
 prompt {
-    enabled:          true;
-    padding:          0px 6px;
-    background-color: @background-colour;
-    text-color:       @foreground-colour;
-    vertical-align:   0.5;
-}
-
-textbox-prompt-colon {
-    enabled:          true;
-    expand:           false;
-    str:              "?";
-    padding:          0px 4px;
-    background-color: @background-colour;
-    text-color:       @foreground-colour;
-    vertical-align:   0.5;
+    font:       "Symbols Nerd Font Mono 15";
+    text-color: @dim;
+    vertical-align: 0.5;
 }
 
 entry {
-    enabled:           true;
-    expand:            false;
-    width:             5em;
-    padding:           0px;
-    background-color:  @background-colour;
-    text-color:        @foreground-colour;
-    cursor:            text;
-    placeholder:       "...";
-    placeholder-color: @foreground-colour;
+    placeholder:       "run";
+    placeholder-color: @dim;
+    cursor-color:      @selected;
+    text-color:        @selected;
     vertical-align:    0.5;
 }
 
 listview {
-    enabled:          true;
-    columns:          1;
-    lines:            100;
-    cycle:            true;
-    dynamic:          true;
-    scrollbar:        false;
-    layout:           horizontal;
-    fixed-height:     false;
-    fixed-columns:    true;
-    spacing:          0px;
-    margin:           0px;
-    padding:          0px;
-    border:           0px;
+    lines:         @row-lines;
+    columns:       1;
+    fixed-height:  true;
+    dynamic:       true;
+    cycle:         true;
+    scrollbar:     false;
+    spacing:       0px;
+    padding:       6px 0px;
     background-color: transparent;
-    text-color:       @foreground-colour;
-    cursor:           "default";
 }
 
 element {
-    enabled:          true;
-    spacing:          6px;
-    margin:           0px;
-    padding:          0px 10px;
-    border:           0px;
-    border-radius:    0px;
-    background-color: transparent;
-    text-color:       @foreground-colour;
-    cursor:           pointer;
-    height:           var(bar-height);
+    padding:     9px 18px;
+    spacing:     14px;
+    border:      0px;
+    border-radius: 0px;
+    cursor:      pointer;
 }
 
-element normal.normal   { background-color: @normal-background;          text-color: @normal-foreground;          }
-element normal.urgent   { background-color: @urgent-background;          text-color: @urgent-foreground;          }
-element normal.active   { background-color: @active-background;          text-color: @active-foreground;          }
-element selected.normal { background-color: @selected-normal-background; text-color: @selected-normal-foreground; }
-element selected.urgent { background-color: @selected-urgent-background; text-color: @selected-urgent-foreground; }
-element selected.active { background-color: @selected-active-background; text-color: @selected-active-foreground; }
-
 element-icon {
+    size:       @icon-size;
     background-color: transparent;
-    text-color:       inherit;
-    size:             var(icon-size);
-    cursor:           inherit;
+    cursor:     inherit;
 }
 
 element-text {
+    text-color:     inherit;
+    highlight:      bold #ffffff;
+    vertical-align: 0.5;
+    cursor:         inherit;
+}
+
+element normal.normal,
+element alternate.normal {
     background-color: transparent;
-    text-color:       inherit;
-    highlight:        inherit;
-    cursor:           inherit;
-    vertical-align:   0.5;
-    horizontal-align: 0.0;
+    text-color:       @foreground;
+}
+
+/* selected row: inverted (off-white block, dark text) */
+element selected.normal {
+    background-color: @selected;
+    text-color:       #111214;
 }
