@@ -303,6 +303,25 @@ install_xfce_lightdm() {
   log_info "LightDM enabled (reboot to use). XFCE is preselected; bspwm is in the session menu."
 }
 
+# GRUB theme (scripts/grub/gen_theme.py output) + pinned Plymouth theme, kept
+# across kali-themes/grub/plymouth upgrades by an apt Post-Invoke hook.
+install_boot_theme() {
+  local project_root; project_root="$(dirname "$INSTALL_DIR")"
+  log "Installing bspwn GRUB theme + boot-theme enforcer..."
+  sudo mkdir -p /usr/local/share/grub/themes
+  sudo rm -rf /usr/local/share/grub/themes/bspwn
+  sudo cp -r "$project_root/system/boot/grub/themes/bspwn" /usr/local/share/grub/themes/bspwn
+  sudo install -Dm644 "$project_root/system/etc/default/grub.d/zz-bspwn.cfg" /etc/default/grub.d/zz-bspwn.cfg
+  # keep an already-pinned plymouth theme; seed the default otherwise
+  [[ -f /etc/bspwn/boot-theme.conf ]] \
+    || sudo install -Dm644 "$project_root/system/etc/bspwn/boot-theme.conf" /etc/bspwn/boot-theme.conf
+  sudo install -Dm755 "$project_root/system/usr/local/sbin/enforce-boot-theme" /usr/local/sbin/enforce-boot-theme
+  sudo install -Dm644 "$project_root/system/etc/apt/apt.conf.d/99-enforce-boot-theme" \
+    /etc/apt/apt.conf.d/99-enforce-boot-theme
+  sudo /usr/local/sbin/enforce-boot-theme || log_warn "enforce-boot-theme failed"
+  log_info "Boot theme installed. Pin a Plymouth theme with: sudo enforce-boot-theme plymouth <name>"
+}
+
 # Add the current user to the groups bspwm needs for brightness, sound and input hotkeys:
 #   video  -> /sys/class/backlight (brightnessctl udev rule)
 #   audio  -> ALSA devices / PipeWire
@@ -505,6 +524,10 @@ full_install() {
   install_xfce_lightdm
   echo ""
 
+  log "=== Boot theme (GRUB + Plymouth, upgrade-proof) ==="
+  install_boot_theme
+  echo ""
+
   log "Full installation completed!"
   log_info "Backup available at: $BACKUP_DIR.tar.gz"
   echo ""
@@ -538,6 +561,7 @@ Options:
   -ly         Install Ly display manager only (do last; logout to use)
   -xfce       Install XFCE + LightDM as default DM/session (bspwm selectable)
   -system     Install system files (ACPI, X11, bspwm session, TLP, PipeWire)
+  -boot       Install GRUB theme + keep GRUB/Plymouth themes across upgrades
   -h, --help  Show this help message
 
 Examples:
@@ -558,7 +582,7 @@ EOF
 
 parse_arguments() {
   local has_options=0
-  local do_full=0 do_pkg=0 do_fonts=0 do_themes=0 do_config=0 do_nvim=0 do_obsidian=0 do_yazi=0 do_backup=0 do_ly=0 do_xfce=0 do_system=0
+  local do_full=0 do_pkg=0 do_fonts=0 do_themes=0 do_config=0 do_nvim=0 do_obsidian=0 do_yazi=0 do_backup=0 do_ly=0 do_xfce=0 do_system=0 do_boot=0
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -574,6 +598,7 @@ parse_arguments() {
       -ly)       do_ly=1; has_options=1 ;;
       -xfce)     do_xfce=1; has_options=1 ;;
       -system)   do_system=1; has_options=1 ;;
+      -boot)     do_boot=1; has_options=1 ;;
       -h|--help) show_usage; exit 0 ;;
       *) log_error "Unknown option: $1"; show_usage; exit 1 ;;
     esac
@@ -613,6 +638,7 @@ parse_arguments() {
   [[ $do_system -eq 1 ]]   && install_system_files
   [[ $do_ly -eq 1 ]]       && run_ly
   [[ $do_xfce -eq 1 ]]     && install_xfce_lightdm
+  [[ $do_boot -eq 1 ]]     && install_boot_theme
 
   log "Selected operations completed!"
 }
