@@ -122,15 +122,17 @@ install_packages() {
 }
 
 # zsh-autocomplete (live completion menu) is not packaged in Kali: clone it,
-# pinned to the last STABLE tag. The development branch after 26.08.04 needs
-# the separate "zasync" library and its live menu does not appear.
+# pinned to the last STABLE tag. Do NOT stay on the development branch (main):
+# it needs the separate "zasync" library, its live menu may not appear, and it
+# leaks a pipe fd per keystroke burst (a shell dies with "too many open files").
 install_zsh_autocomplete() {
   local dir=/usr/share/zsh-autocomplete tag=26.08.04
   if [[ ! -d $dir/.git ]]; then
     sudo git clone -q https://github.com/marlonrichert/zsh-autocomplete.git "$dir" \
       || { log_warn "Could not clone zsh-autocomplete"; return 0; }
   fi
-  sudo git -c safe.directory='*' -C "$dir" fetch -q --tags 2>/dev/null
+  sudo git -c safe.directory='*' -C "$dir" fetch -q --tags --force origin \
+    || log_warn "Could not fetch zsh-autocomplete tags"
   sudo git -c safe.directory='*' -C "$dir" checkout -q "$tag" \
     && log "zsh-autocomplete pinned to $tag" || log_warn "Could not checkout zsh-autocomplete $tag"
 }
