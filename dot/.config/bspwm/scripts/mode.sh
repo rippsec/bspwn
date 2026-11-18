@@ -78,9 +78,15 @@ bspc config active_border_color  "$ACTIVE_COLOR"
 bspc config normal_border_color  "$NORMAL_COLOR"
 
 # ---- window behaviour: floating (Windows-like) vs tiling
-bspc rule -r '*:*' 2>/dev/null
+# remove ONLY our wildcard rule, by index (bspc rule -r PATTERN treats '*' as a wildcard and would
+# delete every rule, including the ones from bspwmrc)
+for _ in $(seq 20); do                      # bounded: never loop forever
+  idx=$(bspc rule -l | grep -n -x '\*:\*:\* => state=floating' | head -1 | cut -d: -f1)
+  [[ -n $idx ]] || break
+  bspc rule -r "^$idx" || break             # ^N is 1-based and follows the `bspc rule -l` order
+done
 if [[ $FLOATING == 1 ]]; then
-  bspc rule -a '*:*' state=floating
+  bspc rule -a '*:*:*' state=floating
   : > "$FLOATED"
   for n in "${!RECT[@]}"; do
     read -r x y w h <<<"${RECT[$n]}"
