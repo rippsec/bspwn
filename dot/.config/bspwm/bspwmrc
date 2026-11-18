@@ -7,7 +7,8 @@ export _JAVA_AWT_WM_NONREPARENTING=1
 export XDG_CURRENT_DESKTOP=bspwm # or "KDE" if needed for some apps
 export XDG_DATA_DIRS="/usr/share:/usr/local/share:$HOME/.local/share"
 export QT_QPA_PLATFORMTHEME="qt5ct"
-export GTK_THEME=Flat-Remix-GTK-Red-Darkest
+# GTK theme is NOT forced via $GTK_THEME (it would override XSETTINGS and block live mode switching);
+# scripts/mode.sh sets it live through xsettingsd/gsettings.
 
 # VA-API hardware video decode (Intel iHD driver)
 # Ensures Firefox and Chromium use GPU decode instead of CPU

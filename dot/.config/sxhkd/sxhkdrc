@@ -56,8 +56,12 @@ super + d
   jgmenu_run
 
 # program launcher
-super + r 
-	rofi -show drun -theme "$HOME/.config/rofi/launch.rasi"
+super + r
+	~/.config/bspwm/scripts/launcher.sh
+
+# switch desktop mode live: cockpit <-> undercover (Windows 10 look)
+super + ctrl + u
+	~/.config/bspwm/scripts/mode.sh toggle
 
 #switch between window
 super + Tab

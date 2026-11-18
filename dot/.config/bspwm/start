@@ -99,11 +99,9 @@ $HOME/.config/bspwm/scripts/audio-wakeup.sh &
 for process in "${process_list[@]}"; do
   restart_process $process
 done
-# Power profile: stop picom/conky/kdeconnect on battery, restore on AC (event-driven watcher)
-"$HOME/.config/bspwm/scripts/power-mode.sh" auto --force &
+# Desktop mode (cockpit | undercover): theme, panel, geometry, wallpaper, picom/conky + power profile
+"$HOME/.config/bspwm/scripts/mode.sh" apply &
 setsid "$HOME/.config/bspwm/scripts/power-watch.sh" >/dev/null 2>&1 &
-# Cockpit polybar: three floating islands (left / center / right)
-"$HOME/.config/polybar/launch.sh" &
 # Notes widget: started after the loop because restart_process kills every "conky" by name
 #conky -q -c "$HOME/.config/conky/notes.conf" &
 # click the widget to edit, wheel over it to scroll (kill any old watcher first)
