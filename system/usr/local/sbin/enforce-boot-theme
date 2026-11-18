@@ -33,11 +33,15 @@ case "$1" in
 esac
 
 # ---- GRUB: theme files on /boot + grub.cfg pointing at them
+# mirror exactly (stale fonts must go) and regenerate grub.cfg on change, since
+# update-grub bakes the theme's *.pf2 list into grub.cfg as loadfont lines
+regen=
 if [ -d "$SRC" ] && ! diff -rq "$SRC" "$DST" >/dev/null 2>&1; then
-  mkdir -p "$DST" && cp -r "$SRC/." "$DST/"
+  rm -rf "$DST" && mkdir -p "$DST" && cp -r "$SRC/." "$DST/"
+  regen=1
 fi
-if [ -f /boot/grub/grub.cfg ] && ! grep -q 'themes/bspwn/theme.txt' /boot/grub/grub.cfg; then
-  echo "enforce-boot-theme: regenerating grub.cfg (theme was reset)"
+if [ -f /boot/grub/grub.cfg ] && { [ -n "$regen" ] || ! grep -q 'themes/bspwn/theme.txt' /boot/grub/grub.cfg; }; then
+  echo "enforce-boot-theme: regenerating grub.cfg (theme changed or was reset)"
   update-grub
 fi
 
