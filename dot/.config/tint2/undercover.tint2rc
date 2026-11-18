@@ -41,7 +41,7 @@ background_color_pressed = #4a4a4a 100
 border_color_pressed = #000000 0
 
 #---- panel
-panel_items = LTSC
+panel_items = LTSEC
 panel_size = 100% 40
 panel_margin = 0 0
 panel_padding = 0 0 0
@@ -102,3 +102,16 @@ time2_font = Segoe UI 9
 clock_font_color = #ffffff 100
 clock_padding = 12 0
 clock_background_id = 4
+
+#---- executor used as a button: 四 = back to cockpit mode (same as super+ctrl+u)
+execp = new
+execp_command = echo 四
+execp_interval = 0
+execp_has_icon = 0
+execp_centered = 1
+execp_font = Noto Sans CJK JP Bold 12
+execp_font_color = #ffffff 100
+execp_padding = 14 0
+execp_background_id = 4
+execp_tooltip = Back to cockpit mode
+execp_lclick_command = ~/.config/bspwm/scripts/mode.sh toggle
