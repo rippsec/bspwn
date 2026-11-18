@@ -1,0 +1,62 @@
+#!/bin/sh
+# Keep the bspwn GRUB theme and the pinned Plymouth theme across upgrades
+# (kali-themes / grub / plymouth postinsts reset them). Idempotent and cheap
+# when nothing drifted; run from apt's DPkg::Post-Invoke.
+#
+#   enforce-boot-theme                  check + repair
+#   enforce-boot-theme plymouth NAME    pin a new Plymouth theme and apply it
+#   enforce-boot-theme status           show what is pinned / active
+CONF=/etc/bspwn/boot-theme.conf
+SRC=/usr/local/share/grub/themes/bspwn
+DST=/boot/grub/themes/bspwn
+STAMP=/var/lib/bspwn/initrd.stamp
+[ "$(id -u)" = 0 ] || exec sudo "$0" "$@"
+
+PLYMOUTH_THEME=
+[ -f "$CONF" ] && . "$CONF"
+
+case "$1" in
+  status)
+    echo "grub   : $(grep -o 'themes/[^/]*/theme.txt' /boot/grub/grub.cfg 2>/dev/null || echo none)"
+    echo "plymouth pinned: ${PLYMOUTH_THEME:-<none>}  active: $(plymouth-set-default-theme 2>/dev/null)"
+    exit 0 ;;
+  plymouth)
+    if [ -z "$2" ] || [ ! -d "/usr/share/plymouth/themes/$2" ]; then
+      echo "unknown plymouth theme '$2'; installed:" >&2
+      plymouth-set-default-theme -l >&2
+      exit 1
+    fi
+    mkdir -p "${CONF%/*}"
+    sed -i "s/^PLYMOUTH_THEME=.*/PLYMOUTH_THEME=$2/" "$CONF" 2>/dev/null
+    grep -q '^PLYMOUTH_THEME=' "$CONF" 2>/dev/null || echo "PLYMOUTH_THEME=$2" >> "$CONF"
+    PLYMOUTH_THEME=$2 ;;
+esac
+
+# ---- GRUB: theme files on /boot + grub.cfg pointing at them
+if [ -d "$SRC" ] && ! diff -rq "$SRC" "$DST" >/dev/null 2>&1; then
+  mkdir -p "$DST" && cp -r "$SRC/." "$DST/"
+fi
+if [ -f /boot/grub/grub.cfg ] && ! grep -q 'themes/bspwn/theme.txt' /boot/grub/grub.cfg; then
+  echo "enforce-boot-theme: regenerating grub.cfg (theme was reset)"
+  update-grub
+fi
+
+# ---- Plymouth: configured default + baked into every initramfs built since last check
+[ -n "$PLYMOUTH_THEME" ] && [ -d "/usr/share/plymouth/themes/$PLYMOUTH_THEME" ] || exit 0
+command -v plymouth-set-default-theme >/dev/null || exit 0
+if [ "$(plymouth-set-default-theme)" != "$PLYMOUTH_THEME" ]; then
+  echo "enforce-boot-theme: plymouth -> $PLYMOUTH_THEME"
+  plymouth-set-default-theme "$PLYMOUTH_THEME"
+  rm -f "$STAMP"                       # force the initrd check below
+fi
+mkdir -p "${STAMP%/*}"
+for img in /boot/initrd.img-*; do
+  [ -f "$img" ] || continue
+  [ -f "$STAMP" ] && [ ! "$img" -nt "$STAMP" ] && continue
+  if ! lsinitramfs "$img" 2>/dev/null | grep -q "plymouth/themes/$PLYMOUTH_THEME/"; then
+    echo "enforce-boot-theme: rebuilding ${img##*/} with $PLYMOUTH_THEME"
+    update-initramfs -u -k "${img#/boot/initrd.img-}"
+  fi
+done
+touch "$STAMP"
+exit 0

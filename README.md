@@ -56,3 +56,29 @@ fc-match -v 'BlexMono Nerd Font Mono:prgname=alacritty' | grep -E 'antialias|hin
 
 `antialias: True` = suavizado activo; `False` = desactivado.
 `xmllint --noout ~/.config/fontconfig/fonts.conf` valida que el XML no esté roto.
+
+### Tema de arranque (GRUB + Plymouth)
+
+Tema GRUB monocromo estilo terminal ASCII con el sigilo 四, en
+`system/boot/grub/themes/bspwn/` (generado por `scripts/grub/gen_theme.py`;
+edita el script, no los archivos generados).
+
+```sh
+python3 scripts/grub/gen_theme.py   # regenerar el tema
+./install.sh -boot                  # instalar + activar el enforcer
+```
+
+**Sobrevive a las actualizaciones:** `/etc/default/grub.d/zz-bspwn.cfg` se lee
+después de `kali-themes.cfg`, y el hook de apt
+`/etc/apt/apt.conf.d/99-enforce-boot-theme` ejecuta
+`/usr/local/sbin/enforce-boot-theme` tras cada `apt`: si `grub.cfg` ya no usa el
+tema bspwn ejecuta `update-grub`, y si Plymouth cambió de tema (o un initramfs
+nuevo no lo incluye) lo reaplica.
+
+```sh
+sudo enforce-boot-theme status            # qué está fijado / activo
+sudo enforce-boot-theme plymouth <tema>   # fijar otro tema de Plymouth
+```
+
+Los temas de Plymouth se copian a `/usr/share/plymouth/themes/<tema>/` antes de
+fijarlos (p. ej. de github.com/adi1090x/plymouth-themes).
