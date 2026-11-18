@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parents[2]
 SRC = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "assets/wallpaper/src/bat-emblem.png"
 OUT = Path(sys.argv[2]) if len(sys.argv) > 2 else ROOT / "assets/wallpaper/batlogo.jpg"
 W, H = 1600, 900
-LOGO_W = 940                       # emblem width (keeps clear of the conky HUD column on the right)
+LOGO_W = 870                       # emblem width: keeps the right wing tip clear of the conky HUD (starts x~1258)
 
 BG = np.array((31, 32, 36), np.float32)      # page
 INK = np.array((19, 20, 23), np.float32)     # emblem body + outline
