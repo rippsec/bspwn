@@ -48,6 +48,8 @@ install_packages() {
     python3-gi gir1.2-gtk-3.0
     xscreensaver unclutter vmtouch gsimplecal xfce4-notes xfce4-clipman
     conky-all alacritty gnome-keyring mousepad
+    # undercover mode (Windows 10 look): taskbar + Windows-10 theme/icons/wallpaper
+    tint2 kali-undercover
 
     # yazi previews/search helpers (yazi itself: install.sh -yazi)
     ffmpeg 7zip poppler-utils fd-find ripgrep fzf zoxide chafa

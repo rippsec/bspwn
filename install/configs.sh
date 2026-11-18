@@ -65,6 +65,7 @@ link_config_dirs() {
     "jgmenu"
     "conky"
     "flameshot"
+    "tint2"
   )
   
   mkdir -p "$HOME/.config"

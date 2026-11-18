@@ -1,0 +1,85 @@
+/*
+ * start-menu.rasi — undercover mode start menu (Windows 10 style): a flat dark
+ * panel anchored above the bottom-left of the taskbar, app list + search box at
+ * the bottom. Opened by the tint2 start button or Super+R in undercover mode.
+ */
+configuration {
+    modi:                "drun";
+    show-icons:          true;
+    icon-theme:          "Windows-10-Icons";
+    display-drun:        "󰍉";
+    drun-display-format: "{name}";
+    kb-cancel:           "Escape,Control+g,Control+bracketleft";
+}
+
+* {
+    bg:      #1f1f1fff;
+    bg-alt:  #2b2b2bff;
+    fg:      #ffffffff;
+    dim:     #a0a0a0ff;
+    accent:  #0078d7ff;
+    sel:     #3b3b3bff;
+    font:    "Liberation Sans 11";
+    background-color: transparent;
+    text-color:       @fg;
+}
+
+window {
+    location:         south west;
+    anchor:           south west;
+    x-offset:         0px;
+    y-offset:         -40px;                /* taskbar height */
+    width:            400px;
+    height:           580px;
+    border:           0px;
+    border-radius:    0px;
+    background-color: @bg;
+    padding:          0px;
+}
+
+mainbox {
+    children: [ listview, inputbar ];
+    spacing:  0px;
+    padding:  0px;
+}
+
+listview {
+    lines:         12;
+    columns:       1;
+    fixed-height:  true;
+    scrollbar:     false;
+    spacing:       0px;
+    padding:       8px 0px;
+    cycle:         false;
+}
+
+element {
+    padding:  9px 20px;
+    spacing:  14px;
+    border:   0px 0px 0px 3px;
+    border-color: transparent;
+}
+element-icon { size: 26px; }
+element-text { vertical-align: 0.5; highlight: bold; text-color: inherit; }
+element normal.normal, element alternate.normal { background-color: transparent; text-color: @fg; }
+element selected.normal {
+    background-color: @sel;
+    text-color:       @fg;
+    border-color:     @accent;
+}
+
+inputbar {
+    children:         [ prompt, entry ];
+    padding:          16px 20px;
+    spacing:          12px;
+    background-color: @bg-alt;
+    border:           2px 0px 0px 0px;
+    border-color:     @accent;
+}
+prompt { text-color: @dim; font: "Symbols Nerd Font Mono 14"; vertical-align: 0.5; }
+entry {
+    placeholder:       "Type here to search";
+    placeholder-color: @dim;
+    cursor-color:      @fg;
+    vertical-align:    0.5;
+}

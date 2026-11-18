@@ -1,0 +1,104 @@
+#---- tint2: Windows 10 style taskbar for undercover mode (bottom, 40 px) ----
+# 1: panel
+rounded = 0
+border_width = 0
+border_sides = TBLR
+background_color = #1f1f1f 100
+border_color = #000000 0
+background_color_hover = #1f1f1f 100
+border_color_hover = #000000 0
+background_color_pressed = #1f1f1f 100
+border_color_pressed = #000000 0
+# 2: task (idle)
+rounded = 0
+border_width = 0
+border_sides = TBLR
+background_color = #1f1f1f 0
+border_color = #000000 0
+background_color_hover = #3b3b3b 100
+border_color_hover = #000000 0
+background_color_pressed = #4a4a4a 100
+border_color_pressed = #000000 0
+# 3: task (active window): lighter block + blue underline
+rounded = 0
+border_width = 2
+border_sides = B
+background_color = #3b3b3b 100
+border_color = #76b9ed 100
+background_color_hover = #4a4a4a 100
+border_color_hover = #76b9ed 100
+background_color_pressed = #4a4a4a 100
+border_color_pressed = #76b9ed 100
+# 4: start button / clock hover
+rounded = 0
+border_width = 0
+border_sides = TBLR
+background_color = #1f1f1f 0
+border_color = #000000 0
+background_color_hover = #3b3b3b 100
+border_color_hover = #000000 0
+background_color_pressed = #4a4a4a 100
+border_color_pressed = #000000 0
+
+#---- panel
+panel_items = LTSC
+panel_size = 100% 40
+panel_margin = 0 0
+panel_padding = 0 0 0
+panel_background_id = 1
+panel_position = bottom center horizontal
+panel_layer = top
+panel_dock = 0
+wm_menu = 0
+strut_policy = follow_size
+autohide = 0
+mouse_effects = 1
+
+#---- launcher (start button)
+launcher_padding = 6 0 0
+launcher_background_id = 4
+launcher_icon_size = 28
+launcher_icon_asb = 100 0 0
+launcher_icon_theme = Windows-10-Icons
+launcher_item_app = ~/.cache/bspwn/start-menu.desktop
+
+#---- taskbar
+taskbar_mode = multi_desktop
+taskbar_padding = 0 0 0
+taskbar_background_id = 0
+taskbar_active_background_id = 0
+taskbar_name = 0
+task_icon = 1
+task_text = 1
+task_centered = 0
+task_maximum_size = 200 40
+task_padding = 12 0 8
+task_icon_asb = 100 0 0
+task_font = Segoe UI 10
+task_font_color = #ffffff 100
+task_active_font_color = #ffffff 100
+task_background_id = 2
+task_active_background_id = 3
+task_urgent_background_id = 3
+task_iconified_background_id = 2
+mouse_left = toggle_iconify
+mouse_middle = none
+mouse_right = close
+mouse_scroll_up = prev_task
+mouse_scroll_down = next_task
+
+#---- systray
+systray_padding = 6 0 6
+systray_background_id = 0
+systray_sort = ascending
+systray_icon_size = 20
+systray_icon_asb = 100 0 0
+
+#---- clock (time over date, like the Windows taskbar)
+time1_format = %H:%M
+time2_format = %d/%m/%Y
+time1_font = Segoe UI 10
+time2_font = Segoe UI 9
+clock_font_color = #ffffff 100
+clock_padding = 12 0
+clock_background_id = 4
