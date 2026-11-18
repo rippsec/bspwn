@@ -69,7 +69,6 @@ systemctl --user import-environment DISPLAY XAUTHORITY DBUS_SESSION_BUS_ADDRESS 
 # Define processes (use quotes for commands with arguments)
 process_list=(
   "kdeconnectd"
-  "kdeconnect-indicator"
   "lxpolkit"
   "xfce4-clipman"
   "nm-applet"
@@ -81,7 +80,6 @@ process_list=(
   "conky -q -c $HOME/.config/conky/hud.conf"
   "xfce4-notes"
   "picom -b --config $HOME/.config/picom/picom.conf"
-  "cbatticon"
   "xbindkeys"
 )
 

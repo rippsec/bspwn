@@ -28,7 +28,7 @@ if [[ $mode == battery ]]; then
   fi
   pkill -x picom
   pkill -x conky
-  pkill -f '^kdeconnect-indicator'; pkill -x kdeconnectd
+  pkill -x kdeconnectd
   systemctl --user stop jarvis 2>/dev/null
   printf 'battery\n' > "$STATE"; [[ -n $saved ]] && echo "brightness=$saved" >> "$STATE"
   [[ $2 != --force ]] && notify-send -u low "Power saver" "On battery: picom, conky and kdeconnect stopped" 2>/dev/null
@@ -38,7 +38,6 @@ else
   pgrep -x picom >/dev/null || picom -b --config "$PICOM_CONF"
   [[ $CONKY == 1 ]] && { pgrep -x conky >/dev/null || setsid conky -q -c "$HOME/.config/conky/hud.conf" >/dev/null 2>&1 & }
   pgrep -x kdeconnectd >/dev/null || { setsid kdeconnectd >/dev/null 2>&1 & }
-  pgrep -f '^kdeconnect-indicator' >/dev/null || { setsid kdeconnect-indicator >/dev/null 2>&1 & }
   [[ -f ~/.config/jarvis/config.toml ]] && systemctl --user start jarvis 2>/dev/null
   printf 'ac\n' > "$STATE"
   [[ $2 != --force ]] && notify-send -u low "Full power" "AC connected: picom, conky and kdeconnect started" 2>/dev/null
