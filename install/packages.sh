@@ -74,13 +74,13 @@ install_packages() {
     # Qt/GTK theming
     qt5ct qt6ct
 
-    # ThinkPad T450 / Intel Broadwell hardware support
-    tlp tlp-rdw                  # ThinkPad power management (battery life, charging thresholds)
+    # Dell Precision 7780 / Intel Raptor Lake hardware support
+    tlp tlp-rdw                  # Power management (battery life, charging thresholds via Dell BAT0 sysfs)
     thermald                     # Intel thermal daemon — prevents throttling
     intel-microcode              # CPU microcode updates (security + stability)
-    xserver-xorg-video-intel     # Intel Broadwell GPU driver (adds TearFree)
-    vainfo intel-media-va-driver # VA-API hardware video decode
+    vainfo intel-media-va-driver # VA-API hardware video decode (iHD driver, Gen12+)
     firmware-misc-nonfree        # Miscellaneous firmware blobs
+    firmware-sof-signed          # Intel Sound Open Firmware (Raptor Lake HDA/DSP audio)
     firmware-iwlwifi             # Intel WiFi firmware
 
     # Performance / reliability daemons

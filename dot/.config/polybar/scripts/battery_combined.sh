@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Combines every BAT* under /sys/class/power_supply (BAT0 + slice BAT1 on the T450)
+# Combines every BAT* under /sys/class/power_supply (one on the Dell, two on a ThinkPad)
 AC="/sys/class/power_supply/AC"
 
 ac_status=0

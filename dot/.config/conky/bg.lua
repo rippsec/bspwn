@@ -1,11 +1,13 @@
 require 'cairo'
 require 'cairo_xlib'
 
-local block_y = 0
-local block_h = 900
-local width   = 1600
-local radius  = 32
-local color   = {0, 0, 0, 0.90}
+-- Dell Precision 7780 (1600x900, scaled 5/6 from 1920x1080): the conky window is taller than on the ThinkPad, so the
+-- box is centred on the window and nudged down by block_dy to hug clock + date + calendar.
+local block_dy = 15
+local block_h = 404
+local width   = 408
+local radius  = 12
+local color   = {0, 0, 0, 0.60}
 
 function conky_draw_bg()
   if conky_window == nil then return end
@@ -14,6 +16,7 @@ function conky_draw_bg()
   local cr = cairo_create(cs)
 
   local x = (conky_window.width - width) / 2
+  local block_y = (conky_window.height - block_h) / 2 + block_dy
 
   cairo_set_source_rgba(cr, color[1], color[2], color[3], color[4])
   cairo_new_sub_path(cr)
