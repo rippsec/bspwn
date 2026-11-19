@@ -9,7 +9,7 @@
 configuration {
     modi:                 "drun";
     show-icons:           true;
-    icon-theme:           "Flat-Remix-Blue-Dark";
+    icon-theme:           "Flat-Remix-Black-Dark";
     drun-display-format:  "{name}";
     display-drun:         "󰍉";   /* magnifier shown in the search bar */
     click-to-exit:        true;
