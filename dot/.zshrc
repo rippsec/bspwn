@@ -63,3 +63,6 @@ export PATH=$PATH:/home/rip/.pdtm/go/bin
 
 export RUSTICL_ENABLE=iris
 export rhost="192.168.1.1"
+
+# readable world-writable dirs (default 34;42 blue-on-green is unreadable in this palette)
+export LS_COLORS="${LS_COLORS}:ow=01;34:tw=01;34"
