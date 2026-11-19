@@ -56,9 +56,8 @@ def tri(cx, cy, r, deg, fill):
           for k in range(3)], fill=fill)
 
 
-# ---- large diamond + inner square (sharp, thin)
+# ---- large diamond + small inner diamond (sharp, thin); no square around the glyph
 poly(rot_square(CX, CY, 262, 45), outline=DIM, w=1.2)          # diamond, vertices ~ +-370
-poly(rot_square(CX, CY, 205, 0), outline=FAINT, w=1.0)
 poly(rot_square(CX, CY, 150, 45), outline=FAINT, w=1.0)
 
 # ---- broken crosshair along the axes (gap around the glyph)
@@ -68,13 +67,6 @@ for sx in (-1, 1):
 for sy in (-1, 1):
     ln(CX, CY + sy * 215, CX, CY + sy * 400, MID, 1.2)
     ln(CX, CY + sy * 415, CX, CY + sy * 440, DIM, 1.2)
-
-# ---- corner brackets around the glyph
-B, L = 205, 46
-for sx, sy in ((-1, -1), (1, -1), (-1, 1), (1, 1)):
-    x, y = CX + sx * B, CY + sy * B
-    ln(x, y, x - sx * L, y, WHITE, 2.4)
-    ln(x, y, x, y - sy * L, WHITE, 2.4)
 
 # ---- triangles on the diamond vertices (solid, sharp)
 vr = 262 * math.sqrt(2)
