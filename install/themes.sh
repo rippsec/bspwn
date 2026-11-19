@@ -95,8 +95,20 @@ setup_qt_theme() {
   log_info "Use qt5ct or qt6ct to modify if needed"
 }
 
+install_themer() {
+  # live GTK/icon theme switcher (scripts/themer): `themer` on PATH + an app-menu entry
+  local src="$PROJECT_ROOT/scripts/themer"
+  [[ -f "$src/themer.py" ]] || return 0
+  mkdir -p "$HOME/.local/bin" "$HOME/.local/share/applications"
+  chmod +x "$src/themer.py"
+  ln -sfn "$src/themer.py" "$HOME/.local/bin/themer"
+  cp "$src/themer.desktop" "$HOME/.local/share/applications/"
+  log "Installed themer (run: themer)"
+}
+
 install_themes() {
   install_gtk_theme
+  install_themer
   install_cursor_theme
   setup_qt_theme
   
