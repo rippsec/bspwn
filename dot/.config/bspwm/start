@@ -6,8 +6,9 @@ xrandr --output eDP-1 --mode 1600x900
 
 # Emblem wallpaper 四 (generated: ~/.bspwn/scripts/wallpaper/gen_emblem.py)
 # alternatives in assets/wallpaper: dragon.jpg (gen_dragon.py), cockpit.jpg (gen_wallpaper.py)
-# Minimal flat wallpaper (centred 四): scripts/wallpaper/gen_minimal.py
+# Minimal flat wallpaper (centred 四): scripts/wallpaper/gen_minimal.py (mode.sh sets it too, from modes/cockpit.conf)
 feh --no-fehbg --bg-fill "$HOME/.bspwn/assets/wallpaper/minimal.jpg" 2>/dev/null || hsetroot -solid "#111214"
+#feh --no-fehbg --bg-fill "$HOME/.bspwn/assets/wallpaper/batascii.jpg"     # ASCII bat: scripts/wallpaper/gen_batascii.py
 #feh --no-fehbg --bg-fill "$HOME/.bspwn/assets/wallpaper/cheatsheet.jpg"   # cheatsheet: scripts/wallpaper/gen_cheatsheet.py
 #feh --no-fehbg --bg-fill "$HOME/.bspwn/assets/wallpaper/emblem.jpg"
 #feh --bg-fill "/usr/share/backgrounds/kali-16x9/black-kali-2025-4-3840x2160.png"
@@ -15,17 +16,10 @@ feh --no-fehbg --bg-fill "$HOME/.bspwn/assets/wallpaper/minimal.jpg" 2>/dev/null
 #feh --bg-fill /usr/share/backgrounds/kali-16x9/kali-layers.png
 
 ### Mouse and TouchPad Settings
-# Dell Precision 7780: I2C-HID touchpad (no TrackPoint). Use the name, not the id;
-# the same name is used by ~/.config/sxhkd/sxhkdrc (super+e) and scripts/touchpad-reset.sh
-TOUCHPAD='VEN_0488:00 0488:1064 Touchpad'
-xinput set-prop "$TOUCHPAD" 'libinput Accel Speed' -0.1 &
-xinput set-prop "$TOUCHPAD" 'libinput Scroll Method Enabled' 0 1 0 &
-xinput set-prop "$TOUCHPAD" 'libinput Horizontal Scroll Enabled' 1 &
-xinput set-prop "$TOUCHPAD" 'libinput Tapping Enabled' 1 &
-xinput set-prop "$TOUCHPAD" 'libinput Natural Scrolling Enabled' 1 &
-
-# Disable touchpad while typing (0 = off, so touchpad stays responsive after Super+E enable)
-xinput set-prop "$TOUCHPAD" "libinput Disable While Typing Enabled" 1 &
+# Dell Precision 7780: I2C-HID touchpad "VEN_0488:00 0488:1064 Touchpad" (no TrackPoint);
+# touchpad.sh finds it by name (also handles the ThinkPad Synaptics pads):
+# speed, tap, scrolling, disable-while-typing
+"$HOME/.config/bspwm/scripts/touchpad.sh" apply &
 
 # US English layout with AltGr dead keys (á é í ó ú ñ ¿ ¡) for Spanish text
 setxkbmap -layout us -variant altgr-intl
