@@ -1,0 +1,7 @@
+#!/bin/sh
+# Excalidraw as a standalone app: Chromium app window (no browser UI) with its own
+# profile, so drawings (browser storage) stay in ~/.local/share/excalidraw, apart
+# from normal browsing. Works offline after the first load.
+exec chromium --app=https://excalidraw.com --class=Excalidraw \
+  --user-data-dir="$HOME/.local/share/excalidraw" \
+  --no-first-run --no-default-browser-check "$@"

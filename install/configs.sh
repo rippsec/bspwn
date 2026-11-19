@@ -80,6 +80,19 @@ link_config_dirs() {
   done
 }
 
+# App launchers (.desktop) from dot/.local/share/applications, e.g. Excalidraw
+link_desktop_entries() {
+  local src="$CONFIG_DIR/.local/share/applications"
+  [[ -d "$src" ]] || return 0
+  log "Linking desktop entries..."
+  mkdir -p "$HOME/.local/share/applications"
+  for f in "$src"/*.desktop; do
+    safe_symlink "$f" "$HOME/.local/share/applications/${f##*/}"
+  done
+  command -v update-desktop-database >/dev/null \
+    && update-desktop-database "$HOME/.local/share/applications" 2>/dev/null || true
+}
+
 link_nvim_config() {
   log "Linking Neovim configuration..."
   
@@ -124,6 +137,7 @@ setup_permissions() {
 link_configs() {
   link_dotfiles
   link_config_dirs
+  link_desktop_entries
   link_nvim_config
   setup_permissions
   

@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Excalidraw
+GenericName=Whiteboard
+Comment=Hand-drawn style diagrams and whiteboard (excalidraw.com as a standalone app)
+Exec=excalidraw
+Icon=applications-graphics
+Terminal=false
+Categories=Graphics;
+Keywords=diagram;whiteboard;drawing;sketch;
+StartupWMClass=Excalidraw
