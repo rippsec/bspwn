@@ -8,7 +8,7 @@ source "$SCRIPT_DIR/utils.sh"
 
 PROJECT_ROOT="$(get_project_root)"
 
-# Flat-Remix icons are not in Debian/Kali apt: fetch the variant from the upstream repo
+# Fallback only: fetch the icon variant from the upstream repo when it is not bundled
 _download_flat_remix_icons() {
   local dest="$1" variant="Flat-Remix-Black-Dark"
   if [[ -d "$dest/$variant" ]]; then
@@ -45,7 +45,17 @@ install_gtk_theme() {
     log_warn "Theme source not found: $theme_source"
   fi
 
-  _download_flat_remix_icons "$icon_dest"
+  # Bundled icons (Flat-Remix-Black-Dark); fall back to upstream if missing
+  local icon_source="$PROJECT_ROOT/dot/theme/icons"
+  if [[ -d "$icon_source" ]]; then
+    cp -a "$icon_source"/* "$icon_dest/"
+    command -v gtk-update-icon-cache &>/dev/null \
+      && gtk-update-icon-cache -f -t "$icon_dest/Flat-Remix-Black-Dark" &>/dev/null || true
+    log "Icons installed (Flat-Remix-Black-Dark)"
+  else
+    log_warn "Icon source not found: $icon_source"
+    _download_flat_remix_icons "$icon_dest"
+  fi
 }
 
 install_cursor_theme() {
