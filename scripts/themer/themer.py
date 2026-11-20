@@ -157,10 +157,21 @@ def apply(gtk=None, icons=None):
         note(_rewrite(_current_mode(), r'^ICON_THEME=.*$', f'ICON_THEME="{icons}"'),
              "bspwm mode profile (icons)")
 
-    # reload: xsettingsd re-reads on SIGHUP and pushes the change to every running GTK app
+    # XFCE keeps its own copy in xfconf (used by xfsettingsd in XFCE sessions): keep it in
+    # sync so both sessions show the same theme
+    for prop, val in (("/Net/ThemeName", gtk), ("/Net/IconThemeName", icons)):
+        if val:
+            try:
+                subprocess.run(["xfconf-query", "-c", "xsettings", "-p", prop, "-s", val],
+                               capture_output=True, timeout=5)
+            except (OSError, subprocess.SubprocessError):
+                pass                                  # no XFCE installed
+    # reload: xsettingsd re-reads on SIGHUP and pushes the change to every running GTK app.
+    # In an XFCE session xfsettingsd owns XSETTINGS (and applies the xfconf change itself):
+    # never start a competing xsettingsd there.
     if subprocess.run(["pgrep", "-x", "xsettingsd"], capture_output=True).returncode == 0:
         subprocess.run(["pkill", "-HUP", "-x", "xsettingsd"])
-    else:
+    elif subprocess.run(["pgrep", "-x", "xfsettingsd"], capture_output=True).returncode != 0:
         subprocess.Popen(["xsettingsd"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                          start_new_session=True)
     for key, val in (("gtk-theme", gtk), ("icon-theme", icons)):  # GTK4 / libadwaita via dconf
