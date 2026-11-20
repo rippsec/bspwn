@@ -44,38 +44,39 @@ y = 0
 x = 0
 y = 0
 
-# Cockpit palette (same as kitty/cockpit.conf): monochrome, low-halation
+# Cockpit palette (same as kitty/cockpit.conf): muted but distinguishable, low-halation.
+# Design notes and the checker: see the header of kitty/cockpit.conf, `python3 scripts/palette_check.py`.
 [colors.cursor]
-text = "#111214"
-cursor = "#f2efe9"
+text = "#1d2024"
+cursor = "#ebe8e2"
 
 [colors.primary]
-background = "#111214"
-foreground = "#e6e3dd"
+background = "#1d2024"
+foreground = "#dddad3"
 
 [colors.normal]
-black = "#1c1d21"
-red = "#c98a84"
-green = "#a3b88f"
-yellow = "#c9b68e"
-blue = "#98abb8"
-magenta = "#b9a3bf"
-cyan = "#93b5b0"
-white = "#c9c6c0"
+black = "#2e3135"
+red = "#d78a7b"
+green = "#92a883"
+yellow = "#d2aa6c"
+blue = "#839ecd"
+magenta = "#c9a6c7"
+cyan = "#66bec5"
+white = "#c4c1ba"
 
 [colors.bright]
-black = "#5e6068"
-red = "#ddaaa4"
-green = "#bfcfae"
-yellow = "#ddcfae"
-blue = "#b7c5cf"
-magenta = "#cfbfd3"
-cyan = "#b2ccc8"
-white = "#f2efe9"
+black = "#888c92"
+red = "#f8b3a5"
+green = "#bbcdad"
+yellow = "#f9d49e"
+blue = "#aec4ed"
+magenta = "#f0d1ed"
+cyan = "#9ee6ec"
+white = "#ebe8e2"
 
 [colors.selection]
-text = "#f2efe9"
-background = "#34363c"
+text = "#ebe8e2"
+background = "#41454a"
 
 
 [bell]
