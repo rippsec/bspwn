@@ -56,6 +56,10 @@ super + r
 super + ctrl + u
 	~/.config/bspwm/scripts/mode.sh toggle
 
+# server mode: keep running with the lid closed (screen locks and goes dark); ends on low battery / overheat
+super + ctrl + s
+	~/.config/bspwm/scripts/servermode.py toggle
+
 #switch between window
 super + Tab
 # rofi -show window -selected-row 1 -theme "$HOME/.config/rofi/window.rasi"
