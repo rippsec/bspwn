@@ -51,7 +51,7 @@ text = "#1d2024"
 cursor = "#ebe8e2"
 
 [colors.primary]
-background = "#22242A"
+background = "#272A34"
 foreground = "#dddad3"
 
 [colors.normal]
