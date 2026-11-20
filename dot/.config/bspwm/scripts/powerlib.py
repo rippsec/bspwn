@@ -26,10 +26,12 @@ RUN_DIR = Path(os.environ.get("BSPWN_RUNTIME_DIR") or os.environ.get("XDG_RUNTIM
 
 DEFAULTS = {
     "KBD_AUTO": "1",              # keyboard backlight idle-off (0 disables the daemon)
-    "KBD_IDLE_AC": "30",          # seconds of inactivity before the backlight turns off, on AC
-    "KBD_IDLE_BAT": "10",         # ... on battery
+    "KBD_IDLE_AC": "5",           # seconds after the last keypress before the backlight turns off, on AC
+    "KBD_IDLE_BAT": "5",          # ... on battery
+    "KBD_LEVEL": "1",             # level used when a key lights it (1 = minimal; 0 = the level it had before)
+    "KBD_WAKE_POINTER": "0",      # 1 = touchpad/mouse input also lights it (default: keyboard only)
     "SERVER_BATTERY_MIN": "auto",  # server mode ends below this % on battery; auto = 20 (2+ batteries) or 55
-    "SERVER_TEMP_MAX": "88",      # server mode ends (and the laptop suspends) at this temperature, degrees C
+    "SERVER_TEMP_MAX": "0",       # >0: server mode ends (and the laptop suspends) at this temperature, degrees C; 0 = off
     "SERVER_LOCK": "1",           # lock the screen when the lid closes in server mode
     "SERVER_SCREEN_OFF": "1",     # turn the display off while the lid is closed in server mode
 }
