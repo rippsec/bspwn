@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Themer
+Comment=Live GTK and icon theme switcher
+Exec=themer
+Icon=preferences-desktop-theme
+Terminal=false
+Categories=Settings;GTK;

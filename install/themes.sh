@@ -8,54 +8,53 @@ source "$SCRIPT_DIR/utils.sh"
 
 PROJECT_ROOT="$(get_project_root)"
 
-# Flat-Remix GTK is not in Debian/Kali apt: fetch it from the upstream repo
-_download_flat_remix_gtk() {
-  local dest="$1" variant
-  if [[ -d "$dest/Flat-Remix-GTK-Red-Darkest" ]]; then
-    log "Flat-Remix-GTK-Red-Darkest already installed"
+# Fallback only: fetch the icon variant from the upstream repo when it is not bundled
+_download_flat_remix_icons() {
+  local dest="$1" variant="Flat-Remix-Black-Dark"
+  if [[ -d "$dest/$variant" ]]; then
+    log "$variant already installed"
     return 0
   fi
-  log "Downloading Flat-Remix GTK theme from GitHub..."
+  log "Downloading $variant icons from GitHub..."
   local tmp; tmp=$(mktemp -d)
-  if git clone -q --depth=1 https://github.com/daniruiz/flat-remix-gtk "$tmp/frgtk"; then
-    for variant in Flat-Remix-GTK-Red-Darkest Flat-Remix-GTK-Red-Darkest-Solid; do
-      cp -r "$tmp/frgtk/themes/$variant" "$dest/"
-    done
-    log "Installed Flat-Remix-GTK-Red-Darkest"
+  if git clone -q --depth=1 https://github.com/daniruiz/flat-remix "$tmp/fr"; then
+    cp -r "$tmp/fr/$variant" "$dest/"
+    command -v gtk-update-icon-cache &>/dev/null \
+      && gtk-update-icon-cache -f -t "$dest/$variant" &>/dev/null || true
+    log "Installed $variant"
   else
-    log_warn "Could not download Flat-Remix GTK; install it manually"
+    log_warn "Could not download Flat-Remix icons; install $variant manually"
   fi
   rm -rf "$tmp"
 }
 
 install_gtk_theme() {
-  log "Installing GTK themes..."
-  
+  log "Installing GTK theme and icons..."
+
   local theme_source="$PROJECT_ROOT/dot/theme/themes"
-  local icon_source="$PROJECT_ROOT/dot/theme/icons"
   local theme_dest="$HOME/.local/share/themes"
   local icon_dest="$HOME/.local/share/icons"
-  
-  # Create directories
+
   mkdir -p "$theme_dest" "$icon_dest"
-  
-  # Copy themes if they exist
+
+  # Custom Flat-Remix-GTK-Slate-Darkest ships in the repo
   if [[ -d "$theme_source" ]]; then
-    cp -r "$theme_source"/* "$theme_dest/" 2>/dev/null || true
-    log "GTK themes installed"
+    cp -r "$theme_source"/* "$theme_dest/"
+    log "GTK theme installed (Flat-Remix-GTK-Slate-Darkest)"
   else
     log_warn "Theme source not found: $theme_source"
-    _download_flat_remix_gtk "$theme_dest"
   fi
 
-  # Copy icons if they exist
+  # Bundled icons (Flat-Remix-Black-Dark); fall back to upstream if missing
+  local icon_source="$PROJECT_ROOT/dot/theme/icons"
   if [[ -d "$icon_source" ]]; then
-    cp -r "$icon_source"/* "$icon_dest/" 2>/dev/null || true
-    log "Icons installed"
+    cp -a "$icon_source"/* "$icon_dest/"
+    command -v gtk-update-icon-cache &>/dev/null \
+      && gtk-update-icon-cache -f -t "$icon_dest/Flat-Remix-Black-Dark" &>/dev/null || true
+    log "Icons installed (Flat-Remix-Black-Dark)"
   else
     log_warn "Icon source not found: $icon_source"
-    log_info "Install icons manually or use lxappearance"
-    log_info "Current icon theme: Flat-Remix-Red-Dark"
+    _download_flat_remix_icons "$icon_dest"
   fi
 }
 
@@ -96,15 +95,27 @@ setup_qt_theme() {
   log_info "Use qt5ct or qt6ct to modify if needed"
 }
 
+install_themer() {
+  # live GTK/icon theme switcher (scripts/themer): `themer` on PATH + an app-menu entry
+  local src="$PROJECT_ROOT/scripts/themer"
+  [[ -f "$src/themer.py" ]] || return 0
+  mkdir -p "$HOME/.local/bin" "$HOME/.local/share/applications"
+  chmod +x "$src/themer.py"
+  ln -sfn "$src/themer.py" "$HOME/.local/bin/themer"
+  cp "$src/themer.desktop" "$HOME/.local/share/applications/"
+  log "Installed themer (run: themer)"
+}
+
 install_themes() {
   install_gtk_theme
+  install_themer
   install_cursor_theme
   setup_qt_theme
   
   log "Theme installation completed!"
   log_info "Current configuration:"
-  log_info "  GTK Theme: Flat-Remix-GTK-Red-Darkest"
-  log_info "  Icon Theme: Flat-Remix-Red-Dark"
+  log_info "  GTK Theme: Flat-Remix-GTK-Slate-Darkest"
+  log_info "  Icon Theme: Flat-Remix-Black-Dark"
   log_info "  Cursor Theme: Adwaita"
   log_info "  Font: FiraCode Nerd Font Mono Medium 11"
 }
