@@ -6,7 +6,7 @@ off, and everything else keeps running. It ends by itself (and the laptop then d
 i.e. suspends if the lid is closed) when:
   * on battery and the charge drops below SERVER_BATTERY_MIN (power.conf; auto = 20% with a slice/second
     battery, 55% on a single-battery laptop), or
-  * the machine gets hotter than SERVER_TEMP_MAX (a closed lid in a bag is a heat risk).
+  * (optional, off by default) the machine gets hotter than SERVER_TEMP_MAX.
 On AC it runs until you turn it off. State lives in $XDG_RUNTIME_DIR, so it is OFF again after a reboot/logout.
 
 How: the daemon holds a logind "handle-lid-switch" inhibitor lock (an open file descriptor). If the daemon
@@ -47,11 +47,19 @@ def battery_min(c):
         return 20
 
 
+def temp_limit(c):
+    """SERVER_TEMP_MAX in degrees C, 0 = disabled (the default)."""
+    try:
+        return max(0.0, float(c["SERVER_TEMP_MAX"]))
+    except ValueError:
+        return 0.0
+
+
 def evaluate(on, ac, pct, min_pct, temp, temp_max):
     """-> (effective, reason). reason: off | ac | battery (still running) | low-battery | overheat (must end)."""
     if not on:
         return False, "off"
-    if temp is not None and temp >= temp_max:
+    if temp_max > 0 and temp is not None and temp >= temp_max:     # temp_max 0 = guard disabled
         return False, "overheat"
     if not ac and pct is not None and pct < min_pct:
         return False, "low-battery"
@@ -135,13 +143,14 @@ class Daemon:
         on = STATE.exists()
         ac, pct, lid, temp = pl.ac_online(), pl.battery_pct(), pl.lid_closed(), pl.max_temp()
         min_pct = battery_min(c)
-        eff, why = evaluate(on, ac, pct, min_pct, temp, float(c["SERVER_TEMP_MAX"]))
+        temp_max = temp_limit(c)
+        eff, why = evaluate(on, ac, pct, min_pct, temp, temp_max)
 
         if on and why in ("low-battery", "overheat"):            # must end: fall back to normal power behaviour
             STATE.unlink(missing_ok=True)
             on = False
             msg = (f"battery at {pct:.0f}% (minimum {min_pct}%)" if why == "low-battery"
-                   else f"temperature {temp:.0f} C (limit {float(c['SERVER_TEMP_MAX']):.0f} C)")
+                   else f"temperature {temp:.0f} C (limit {temp_max:.0f} C)")
             pl.log(f"servermode: ended, {msg}")
             pl.notify("Server mode ended", msg + ". Back to normal power behaviour.", "critical")
         want = on and eff

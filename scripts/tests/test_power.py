@@ -140,6 +140,7 @@ class PowerTest(unittest.TestCase):
         self.assertEqual(ev(True, False, 19.9, 20, 40, 88), (False, "low-battery"))
         self.assertEqual(ev(True, False, 20, 20, 40, 88), (True, "battery"))   # boundary: still running at exactly min
         self.assertEqual(ev(True, True, 90, 20, 88, 88), (False, "overheat"))
+        self.assertEqual(ev(True, True, 90, 20, 99, 0), (True, "ac"))          # temp_max 0 = guard disabled
         self.assertEqual(ev(True, True, None, 20, None, 88), (True, "ac"))     # no battery / no sensor
 
     # --- daemon behaviour
@@ -218,7 +219,15 @@ class PowerTest(unittest.TestCase):
         self.assertFalse(self.inh.held)
         self.assertTrue(self.rec.has("systemctl suspend"))
 
-    def test_overheat_ends_server_mode(self):
+    def test_heat_is_ignored_by_default(self):
+        sm.STATE.write_text("on"); self.d.tick()
+        w(TMP / "thermal/thermal_zone0/temp", 99000)                           # this ThinkPad often runs this hot
+        info = self.d.tick()
+        self.assertTrue(info["effective"] and self.inh.held)
+        self.assertEqual(info["reason"], "ac")
+
+    def test_overheat_guard_when_enabled(self):
+        w(TMP / "power.conf", "SERVER_TEMP_MAX=88\n")
         sm.STATE.write_text("on"); self.d.tick()
         w(TMP / "thermal/thermal_zone0/temp", 91000)
         info = self.d.tick()
@@ -245,32 +254,83 @@ class PowerTest(unittest.TestCase):
 
 
 class KbdTest(unittest.TestCase):
-    def test_dims_after_timeout_and_wakes_on_input(self):
-        k = kb.Kbd()
-        self.assertIsNone(k.step(2, 5000, 30, False))                          # active enough: stays lit
-        self.assertEqual(k.step(2, 31000, 30, False), 0)                       # idle >= 30 s: off
-        self.assertIsNone(k.step(0, 40000, 30, False))                         # still idle: stays off
-        self.assertEqual(k.step(0, 100, 30, False), 2)                         # key pressed: back to the previous level
+    """New behaviour: a keypress lights the keyboard (minimal level), 5 s after the last keypress it turns off."""
 
-    def test_lid_closed_keeps_it_off_even_with_input(self):
-        k = kb.Kbd()
-        self.assertEqual(k.step(1, 0, 30, True), 0)
-        self.assertIsNone(k.step(0, 50, 30, True))
-        self.assertEqual(k.step(0, 50, 30, False), 1)
+    def run_steps(self, k, steps, timeout=5, level=1, lid=False):
+        """steps: [(time, cur_level, key_pressed_now)] -> list of returned levels."""
+        out = []
+        for t, cur, pressed in steps:
+            if pressed:
+                k.key(t)
+            out.append(k.step(t, cur, timeout, lid, level))
+        return out
 
-    def test_user_change_while_dimmed_is_respected(self):
-        k = kb.Kbd()
-        k.step(1, 99999, 30, False)
-        self.assertIsNone(k.step(2, 99999, 30, False))                         # Fn+Space raised it: adopt, do not fight
-        self.assertFalse(k.dimmed)
+    def test_keypress_lights_minimal_then_off_after_five_seconds(self):
+        k = kb.Kbd(0.0)
+        # long idle, light already off: stays off
+        self.assertEqual(self.run_steps(k, [(100, 0, False)]), [None])
+        # key pressed: lit at the minimal level
+        self.assertEqual(self.run_steps(k, [(101, 0, True)]), [1])
+        # still within 5 s of the last key: stays lit
+        self.assertEqual(self.run_steps(k, [(103, 1, False), (105.9, 1, False)]), [None, None])
+        # more typing extends it
+        self.assertEqual(self.run_steps(k, [(106, 1, True), (110, 1, False)]), [None, None])
+        # 5 s after the last keypress: off
+        self.assertEqual(self.run_steps(k, [(111.0, 1, False)]), [0])
 
-    def test_already_off_is_left_alone(self):
-        k = kb.Kbd()
-        self.assertIsNone(k.step(0, 99999, 30, False))
-        self.assertFalse(k.dimmed)
+    def test_off_exactly_at_timeout_boundary(self):
+        k = kb.Kbd(0.0); k.key(10.0)
+        self.assertIsNone(k.step(14.99, 1, 5, False, 1))
+        self.assertEqual(k.step(15.0, 1, 5, False, 1), 0)
 
-    def test_no_x_idle_never_dims(self):
-        self.assertIsNone(kb.Kbd().step(2, None, 30, False))
+    def test_startup_grace_then_off(self):
+        k = kb.Kbd(50.0)                                                       # daemon starts with the light on
+        self.assertIsNone(k.step(52, 1, 5, False, 1))
+        self.assertEqual(k.step(55.1, 1, 5, False, 1), 0)
+
+    def test_lid_closed_keeps_it_off_even_when_typing(self):
+        k = kb.Kbd(0.0); k.key(1.0)
+        self.assertEqual(k.step(1.5, 1, 5, True, 1), 0)
+        k.key(2.0)
+        self.assertIsNone(k.step(2.1, 0, 5, True, 1))
+        k.key(3.0)
+        self.assertEqual(k.step(3.1, 0, 5, False, 1), 1)                       # lid open again: typing lights it
+
+    def test_user_chosen_brighter_level_is_kept_while_typing(self):
+        k = kb.Kbd(0.0); k.key(1.0)
+        self.assertIsNone(k.step(1.0, 2, 5, False, 1))                         # user has level 2 (Fn+Space): no lowering to 1
+        self.assertEqual(k.step(7.0, 2, 5, False, 1), 0)                       # still turns off when typing stops
+
+    def test_manual_toggle_counts_as_activity(self):
+        k = kb.Kbd(0.0)
+        self.assertEqual(k.step(100, 1, 5, False, 1), 0)                       # idle: turned off, we asked for 0
+        self.assertIsNone(k.step(101, 0, 5, False, 1))
+        self.assertIsNone(k.step(102, 2, 5, False, 1))                         # Fn+Space changed it behind our back: leave it
+        self.assertIsNone(k.step(106, 2, 5, False, 1))                         # ... for the timeout
+        self.assertEqual(k.step(107.1, 2, 5, False, 1), 0)
+
+    def test_level_zero_restores_the_previous_level(self):
+        k = kb.Kbd(0.0); k.step(1.0, 2, 5, False, 0)                           # saw level 2 earlier
+        self.assertEqual(k.step(20, 2, 5, False, 0), 0)
+        k.key(30.0)
+        self.assertEqual(k.step(30.0, 0, 5, False, 0), 2)
+
+    def test_timeout_zero_never_turns_off(self):
+        k = kb.Kbd(0.0)
+        self.assertIsNone(k.step(9999, 1, 0, False, 1))
+
+    def test_wait_is_short_only_while_lit(self):
+        k = kb.Kbd(0.0); k.key(10.0)
+        self.assertAlmostEqual(k.wait(12.0, 1, 5), 1.0)
+        self.assertAlmostEqual(k.wait(14.5, 1, 5), 0.5)
+        self.assertEqual(k.wait(20.0, 0, 5), 1.0)
+
+    def test_only_keyboard_events_count_by_default(self):
+        key = "EVENT type 13 (RawKeyPress)\n    device: 12"
+        self.assertTrue(kb.is_activity(key))
+        self.assertFalse(kb.is_activity("EVENT type 14 (RawKeyRelease)\nEVENT type 17 (RawMotion)\nEVENT type 15 (RawButtonPress)"))
+        self.assertTrue(kb.is_activity("EVENT type 17 (RawMotion)", pointer=True))
+        self.assertFalse(kb.is_activity("EVENT type 17 (RawMotion)", pointer=False))
 
     def test_led_discovery_and_set(self):
         w(TMP / "leds/dell::kbd_backlight/brightness", 1); w(TMP / "leds/dell::kbd_backlight/max_brightness", 3)
