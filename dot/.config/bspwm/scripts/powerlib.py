@@ -33,12 +33,6 @@ DEFAULTS = {
     "SERVER_BATTERY_MIN": "auto",  # server mode ends below this % on battery; auto = 20 (2+ batteries) or 55
     "SERVER_BATTERY": "total",     # which charge to watch: auto | total | lowest | a battery name (BAT0, BAT1, ...)
     "SERVER_TEMP_MAX": "0",       # >0: server mode ends (and the laptop suspends) at this temperature, degrees C; 0 = off
-    "SWITCH_ENABLED": "1",         # two-battery laptops: switch to the second battery BEFORE the first one runs dry
-    "SWITCH_FROM": "auto",         # battery the firmware drains first (auto = BAT1, a ThinkPad's external battery)
-    "SWITCH_TO": "auto",           # battery to switch to (auto = BAT0, the internal one)
-    "SWITCH_AT_PCT": "15",         # switch when SWITCH_FROM is at or below this % ...
-    "SWITCH_AT_MIN": "10",         # ... or has this many minutes left at the current draw
-    "SWITCH_TO_MIN": "10",         # only if SWITCH_TO has more than this %
     "GUARD_ENABLED": "1",          # battery guard: warn, then shut down cleanly before the battery dies
     "GUARD_BATTERY": "active",     # which battery it watches: active (the one powering the laptop) or SERVER_BATTERY values
     "GUARD_WARN_PCT": "15",        # warn at or below this %
@@ -46,6 +40,7 @@ DEFAULTS = {
     "GUARD_ACT_PCT": "7",          # act at or below this %
     "GUARD_ACT_MIN": "4",          # ... or with this many minutes left
     "GUARD_ACTION": "poweroff",    # poweroff | hibernate | none (notify only)
+    "GUARD_SWAP_HINT": "1",        # two batteries: suggest pulling the low one out (a clean switch) in the warnings
     "GUARD_GRACE": "30",           # seconds of countdown before acting; plugging in AC cancels
     "GUARD_NO_SUSPEND_BELOW": "30",  # on battery below this %, do not suspend (stay awake so the guard can act)
     "SERVER_LOCK": "1",           # lock the screen when the lid closes in server mode
@@ -146,9 +141,6 @@ def battery_minutes_left(name=None):
     return 60.0 * e / p if p > 0 else None
 
 
-CHARGE_OPTIONS = ["auto", "inhibit-charge", "force-discharge"]
-
-
 def charge_mode(name):
     """Selected charge_behaviour of a battery ("auto", "force-discharge", ...) or None if unsupported."""
     text = read(PS_DIR / name / "charge_behaviour")
@@ -158,29 +150,6 @@ def charge_mode(name):
         if tok.startswith("[") and tok.endswith("]"):
             return tok[1:-1]
     return text.strip()
-
-
-def charge_options(name):
-    text = read(PS_DIR / name / "charge_behaviour") or ""
-    return [t.strip("[]") for t in text.split()]
-
-
-def set_charge_behaviour(name, value):
-    """Tell the battery firmware what to do with one battery (needs the udev rule 90-bspwn-battery.rules).
-    Returns True on success."""
-    f = PS_DIR / name / "charge_behaviour"
-    if DRY and PS_DIR == Path("/sys/class/power_supply"):
-        print(f"DRY: {f} <- {value}", file=sys.stderr)
-        return True
-    try:
-        if PS_DIR != Path("/sys/class/power_supply"):              # fake sysfs (tests): keep the kernel's format
-            opts = charge_options(name) or CHARGE_OPTIONS
-            f.write_text(" ".join(f"[{o}]" if o == value else o for o in opts))
-        else:
-            f.write_text(value)
-        return True
-    except OSError:
-        return False
 
 
 def pick_battery(spec):

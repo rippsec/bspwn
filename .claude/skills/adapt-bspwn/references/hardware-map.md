@@ -32,9 +32,8 @@ Everything below is a place where that shows. **Find your value first, then chan
 - The **battery guard** (`GUARD_*` in `power.conf`) exists because on the original ThinkPad the hand-over from a drained external battery to the internal one
   has cut the power (the internal battery itself works). On a laptop with one healthy battery, Linux's own
   low-battery action already works; keep the guard (it is harmless) or set `GUARD_ENABLED=0`. `GUARD_ACTION=hibernate` only if hibernation with resume is configured.
-- The **battery switch** (`SWITCH_*`) only acts on laptops with two batteries whose firmware supports `charge_behaviour` = `force-discharge` (ThinkPads with
-  `thinkpad_acpi`). It needs `system/etc/udev/rules.d/90-bspwn-battery.rules` + `system/usr/local/sbin/bspwn-battery-auto`; the rule grants the group `sudo`
-  (use `wheel` on Arch/Fedora). Check support with `cat /sys/class/power_supply/BAT*/charge_behaviour`.
+- Two-battery ThinkPads: `thinkpad_acpi` exposes `charge_behaviour` = `force-discharge`, but on the original T450 the firmware **rejects it while on battery** (EIO), so the
+  discharge order cannot be changed off AC. Test before relying on it: `echo force-discharge > /sys/class/power_supply/BAT0/charge_behaviour` (as root, on battery), then `auto`.
 - Run `python3 scripts/tests/test_power.py` after any change to the power scripts.
 
 ## Things not tested on other hardware
