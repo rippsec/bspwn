@@ -18,6 +18,7 @@ Your job: discover what the user's machine has, change only what differs, verify
 5. **Keep the repo public-safe**: never commit IP addresses, Wi-Fi names, hostnames, e-mail or tokens. Screenshots must be redacted (the bar and HUD show the IP and SSID).
 6. **Publishing**: the maintainer of this repo has given standing permission to **commit and push every completed change** (code, configs, docs) to GitHub
    without asking again. If you are working for someone else on their own clone, follow their wishes instead (default: commit/push only when asked).
+   **Every behaviour change also updates the README manual in the same commit** (and `references/hardware-map.md` if it is hardware related).
    Either way: `git add` only the files you changed (never unrelated diffs the user left), scan the staged diff for secrets first, and never force-push.
 7. Be honest about what you could not test (a lid-close, another laptop's keyboard LED, a different distro).
 

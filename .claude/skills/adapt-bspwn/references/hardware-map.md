@@ -38,3 +38,9 @@ Everything below is a place where that shows. **Find your value first, then chan
 
 ## Things not tested on other hardware
 This repo has only been run on the ThinkPad above. A Dell (or any other laptop) is expected to need the items in the table; verify each one, do not assume.
+
+## Shell (not hardware, but often tuned)
+
+- `dot/.zsh/plugins/fzf.zsh`: Ctrl+F file finder, exact + case-insensitive; quote a term (`'word'`) for whole-word matching.
+- `dot/.zsh/config/completion.zsh`: needs the `zsh-autocomplete` package (`/usr/share/zsh-autocomplete`); Left/Right move the cursor, Tab/Shift-Tab cycle the menu.
+  `config/keybindings.zsh` loads after it, so never rebind `^[[Z` there.
