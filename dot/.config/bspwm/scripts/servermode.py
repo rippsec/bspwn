@@ -4,8 +4,8 @@
 While ON, closing the lid does NOT suspend. The screen locks and goes dark, the keyboard backlight turns
 off, and everything else keeps running. It ends by itself (and the laptop then does the normal thing,
 i.e. suspends if the lid is closed) when:
-  * on battery and the charge drops below SERVER_BATTERY_MIN (power.conf; auto = 20% with a slice/second
-    battery, 55% on a single-battery laptop), or
+  * on battery and the watched charge drops below SERVER_BATTERY_MIN (power.conf; auto = 20% with a slice/second
+    battery, 55% on a single-battery laptop). SERVER_BATTERY picks the charge: total, lowest or one battery (BAT1), or
   * (optional, off by default) the machine gets hotter than SERVER_TEMP_MAX.
 On AC it runs until you turn it off. State lives in $XDG_RUNTIME_DIR, so it is OFF again after a reboot/logout.
 
@@ -45,6 +45,22 @@ def battery_min(c):
         return max(0, min(100, int(v)))
     except ValueError:
         return 20
+
+
+def watched_battery(c):
+    """-> (percent or None, label). SERVER_BATTERY = auto | total | lowest | <battery name>; unknown name -> total.
+    auto: two or more batteries -> BAT1 (a ThinkPad's slice/external battery); one battery -> that battery."""
+    src = c.get("SERVER_BATTERY", "total").strip() or "total"
+    if src == "auto":
+        names = pl.battery_names()
+        src = "BAT1" if len(names) >= 2 and "BAT1" in names else (names[0] if len(names) == 1 else "total")
+    if src == "lowest":
+        return pl.battery_pct_lowest(), "lowest battery"
+    if src != "total":
+        p = pl.battery_pct_of(src)
+        if p is not None:
+            return p, src
+    return pl.battery_pct(), "battery"
 
 
 def temp_limit(c):
@@ -137,11 +153,14 @@ class Daemon:
         self.ac_prev = None
         self.closed_at = None
         self.lock_tried = False
+        self.lock_seen_at = None       # when a running locker was first seen after the lid closed
+        self.refresh_at = None         # second repaint after the lid reopened
 
     def tick(self):
         c = pl.conf()
         on = STATE.exists()
-        ac, pct, lid, temp = pl.ac_online(), pl.battery_pct(), pl.lid_closed(), pl.max_temp()
+        ac, lid, temp = pl.ac_online(), pl.lid_closed(), pl.max_temp()
+        pct, bat_label = watched_battery(c)
         min_pct = battery_min(c)
         temp_max = temp_limit(c)
         eff, why = evaluate(on, ac, pct, min_pct, temp, temp_max)
@@ -149,14 +168,14 @@ class Daemon:
         if on and why in ("low-battery", "overheat"):            # must end: fall back to normal power behaviour
             STATE.unlink(missing_ok=True)
             on = False
-            msg = (f"battery at {pct:.0f}% (minimum {min_pct}%)" if why == "low-battery"
+            msg = (f"{bat_label} at {pct:.0f}% (minimum {min_pct}%)" if why == "low-battery"
                    else f"temperature {temp:.0f} C (limit {temp_max:.0f} C)")
             pl.log(f"servermode: ended, {msg}")
             pl.notify("Server mode ended", msg + ". Back to normal power behaviour.", "critical")
         want = on and eff
 
         if on and self.ac_prev is True and not ac and want:
-            pl.notify("Server mode on battery", f"Keeps running until the battery drops below {min_pct}%.")
+            pl.notify("Server mode on battery", f"Keeps running until {bat_label} drops below {min_pct}%.")
         self.ac_prev = ac
 
         if want and not self.inh.held:
@@ -172,19 +191,37 @@ class Daemon:
         if want and lid:                                          # lid closed in server mode: lock + dark
             now = time.monotonic()
             if not self.lid_prev:
-                self.closed_at, self.lock_tried = now, False
+                self.closed_at, self.lock_tried, self.lock_seen_at = now, False, None
                 pl.log("servermode: lid closed, staying awake")
-            if (c["SERVER_LOCK"] == "1" and not self.lock_tried and now - self.closed_at >= 2):
-                self.lock_tried = True                            # acpid's lid.sh usually locked already
-                if not i3lock_running() and shutil.which("xlock"):
+            locked = i3lock_running()                             # acpid's lid.sh usually locked already
+            if (c["SERVER_LOCK"] == "1" and not locked and not self.lock_tried and now - self.closed_at >= 2):
+                self.lock_tried = True
+                if shutil.which("xlock"):
                     spawn(["xlock"])
-            if c["SERVER_SCREEN_OFF"] == "1":
+            if locked and self.lock_seen_at is None:
+                self.lock_seen_at = now
+            # Blank only once the lock has been up for 2 s, so the compositor has painted it. Blanking in the same
+            # instant as the lock maps can leave picom showing its last frame (the unlocked desktop) on wake.
+            # Without any locker, still blank after 10 s rather than leave the desktop showing.
+            lock_painted = c["SERVER_LOCK"] != "1" or (self.lock_seen_at is not None and now - self.lock_seen_at >= 2)
+            if c["SERVER_SCREEN_OFF"] == "1" and (lock_painted or now - self.closed_at >= 10):
                 pl.act(["xset", "dpms", "force", "off"])
         elif want and self.lid_prev:                              # lid reopened: wake the (locked) screen
+            # Reset X's idle timer first: after a long closed-lid period X still counts the machine as idle past
+            # the DPMS timeout and would blank the panel again right after "force on" (a black, frozen-looking screen).
+            pl.act(["xset", "s", "reset"])
             pl.act(["xset", "dpms", "force", "on"])
+            # Force every window (the lock included) to repaint: a compositor that idled while the panel was off can
+            # otherwise keep showing a stale frame. Repeat once shortly after, when the panel is surely up.
+            pl.act(["xrefresh"])
+            self.refresh_at = time.monotonic() + 1.5
+            pl.log("servermode: lid opened, screen woken and repainted")
+        if self.refresh_at is not None and not lid and time.monotonic() >= self.refresh_at:
+            pl.act(["xrefresh"])
+            self.refresh_at = None
         self.lid_prev = lid
 
-        info = {"on": on, "effective": want, "reason": why, "ac": ac, "pct": None if pct is None else round(pct, 1),
+        info = {"on": on, "effective": want, "reason": why, "ac": ac, "pct": None if pct is None else round(pct, 1), "battery": bat_label,
                 "min": min_pct, "lid": lid, "temp": temp}
         try:
             tmp = INFO.with_suffix(".tmp")
@@ -206,7 +243,10 @@ def run_daemon():
     try:
         while True:
             info = d.tick()
-            signal.sigtimedwait({signal.SIGUSR1}, 2 if info["on"] else 5)
+            wait = 2 if info["on"] else 5
+            if d.refresh_at is not None:
+                wait = max(0.2, min(wait, d.refresh_at - time.monotonic()))
+            signal.sigtimedwait({signal.SIGUSR1}, wait)
     finally:
         d.inh.release()
         INFO.unlink(missing_ok=True)
@@ -275,7 +315,7 @@ def status():
         print("server mode: " + ("requested but the daemon is NOT running (lid will suspend)" if STATE.exists() else "OFF"))
         return
     print(f"server mode: {'ON' if i['on'] else 'OFF'}   power: {'AC' if i['ac'] else 'battery'}   "
-          f"battery: {i['pct']}% (ends below {i['min']}% on battery)   lid: {'closed' if i['lid'] else 'open'}   "
+          f"{i.get('battery', 'battery')}: {i['pct']}% (ends below {i['min']}% on battery)   lid: {'closed' if i['lid'] else 'open'}   "
           f"temp: {i['temp']}")
 
 

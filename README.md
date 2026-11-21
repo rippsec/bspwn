@@ -138,14 +138,15 @@ The screen locks and goes dark and the keyboard light turns off, but the system 
 ![server mode button](docs/screenshots/polybar-server-mode.png)
 
 - **Turn it on/off**: click the server icon in the bar (14), press `super+ctrl+s`, or run `~/.config/bspwm/scripts/servermode.py on|off|toggle|status`.
-- **On AC** it runs until you turn it off. **On battery** it keeps running until the total charge drops below a threshold, then it turns itself off and the laptop behaves normally
-  (it suspends if the lid is closed). The charge is summed over all batteries (internal + slice).
+- **On AC** it runs until you turn it off. **On battery** it keeps running until the watched charge drops below a threshold, then it turns itself off and the laptop behaves normally
+  (it suspends if the lid is closed). Which charge is watched is `SERVER_BATTERY` (shipped `auto`: the slice battery on a two-battery ThinkPad, the internal battery on a one-battery laptop).
 - It is **off after every reboot/logout** on purpose (state lives in `$XDG_RUNTIME_DIR`).
 - **Safe by design**: the lid is ignored only while the daemon holds an inhibitor lock, which the kernel releases the moment the daemon exits or crashes.
 
 | Setting | Shipped | Meaning |
 | --- | --- | --- |
 | `SERVER_BATTERY_MIN` | `auto` | battery % below which server mode ends. `auto` = 20 on laptops with two batteries (ThinkPad with the slice), 55 on single-battery laptops; or a number, e.g. `60` |
+| `SERVER_BATTERY` | `auto` | which charge is compared with the minimum. `auto` = the slice (`BAT1`) on a two-battery ThinkPad, the only battery on a one-battery laptop; or `total` (all batteries, the default when unset), `lowest`, or one battery by name (`ls /sys/class/power_supply`). A name that does not exist falls back to `total` |
 | `SERVER_TEMP_MAX` | *(commented out)* | uncomment (e.g. `88`) to also end server mode, and suspend, above a temperature in °C. Off by default |
 | `SERVER_LOCK` | `1` | lock the screen when the lid closes (the ACPI lid handler usually does it first; this is the fallback) |
 | `SERVER_SCREEN_OFF` | `1` | turn the display off while the lid is closed |
