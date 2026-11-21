@@ -165,8 +165,8 @@ Never lets the battery run out with the laptop on (or asleep). On battery it wat
 3. below 30% **does not suspend** (lid, idle timeout or the power menu): a laptop that runs out of battery *while asleep* just loses power. With the lid closed it locks and blanks the screen
    like server mode and stays awake until it is safe to shut down.
 
-It uses minutes as well as % because a small or worn battery's percentage is unreliable. It was built for this ThinkPad, whose internal battery can no longer power it: when the external
-battery runs out the laptop cuts off instead of switching batteries, so Linux's own low-battery action (which averages both batteries) never fires.
+It uses minutes as well as % because a small or worn battery's percentage is unreliable. It was built for this ThinkPad: when its external battery *runs out*, the laptop has sometimes
+cut off instead of switching to the internal one (which works fine on its own, tested), and Linux's own low-battery action never fires because it averages both batteries.
 
 | Setting | Shipped | Meaning |
 | --- | --- | --- |
