@@ -48,19 +48,16 @@ def battery_min(c):
 
 
 def watched_battery(c):
-    """-> (percent or None, label). SERVER_BATTERY = auto | total | lowest | <battery name>; unknown name -> total.
-    auto: two or more batteries -> BAT1 (a ThinkPad's slice/external battery); one battery -> that battery."""
-    src = c.get("SERVER_BATTERY", "total").strip() or "total"
-    if src == "auto":
-        names = pl.battery_names()
-        src = "BAT1" if len(names) >= 2 and "BAT1" in names else (names[0] if len(names) == 1 else "total")
-    if src == "lowest":
-        return pl.battery_pct_lowest(), "lowest battery"
-    if src != "total":
-        p = pl.battery_pct_of(src)
-        if p is not None:
-            return p, src
-    return pl.battery_pct(), "battery"
+    """-> (percent or None, label). SERVER_BATTERY = auto | total | lowest | <battery name>; unknown name -> total."""
+    pct, label, _ = pl.pick_battery(c.get("SERVER_BATTERY", "total"))
+    return pct, label
+
+
+def num(c, key, default=0.0):
+    try:
+        return float(c[key])
+    except (KeyError, ValueError):
+        return default
 
 
 def temp_limit(c):
@@ -86,7 +83,8 @@ def evaluate(on, ac, pct, min_pct, temp, temp_max):
 class Inhibitor:
     WHAT, WHO, WHY = "handle-lid-switch:idle", "bspwn-servermode", "Server mode: keep running with the lid closed"
 
-    def __init__(self):
+    def __init__(self, what=None, who=None, why=None):
+        self.WHAT, self.WHO, self.WHY = what or self.WHAT, who or self.WHO, why or self.WHY
         self.fd = None
         self.proc = None
 
@@ -147,14 +145,88 @@ def i3lock_running():
 
 
 class Daemon:
-    def __init__(self, inhibitor=None):
+    def __init__(self, inhibitor=None, guard_inhibitor=None):
         self.inh = inhibitor or Inhibitor()
+        # battery guard: keeps the laptop awake (no lid/idle/manual suspend) while the battery is low on battery power,
+        # so it can shut down cleanly instead of dying inside suspend
+        self.ginh = guard_inhibitor or Inhibitor("handle-lid-switch:sleep", "bspwn-battery-guard",
+                                                 "Battery guard: low battery, staying awake to shut down cleanly")
+        self.countdown_at = None
+        self.warned = False
+        self.acted = False
+        self.min_ema = None
         self.lid_prev = False
         self.ac_prev = None
         self.closed_at = None
         self.lock_tried = False
         self.lock_seen_at = None       # when a running locker was first seen after the lid closed
         self.refresh_at = None         # second repaint after the lid reopened
+
+    def _guard_reset(self):
+        if self.ginh.held:
+            self.ginh.release()
+            pl.log("battery guard: released")
+        self.countdown_at, self.warned, self.acted, self.min_ema = None, False, False, None
+
+    def guard(self, c, ac, now):
+        """Battery guard: warn when the watched battery is low, then shut down cleanly (after a countdown that
+        plugging in AC cancels). Below GUARD_NO_SUSPEND_BELOW it keeps the laptop awake, because on this kind of
+        hardware a battery that runs out *inside suspend* cuts the power with no shutdown at all."""
+        if c.get("GUARD_ENABLED", "1") != "1":
+            self._guard_reset()
+            return {"guard": "off"}
+        pct, label, name = pl.pick_battery(c.get("GUARD_BATTERY", "auto"))
+        if ac or pct is None:
+            if self.countdown_at is not None and not self.acted:
+                pl.notify("Battery guard", "Power connected: shutdown cancelled.", "normal")
+                pl.log("battery guard: AC connected, countdown cancelled")
+            self._guard_reset()
+            return {"guard": "ac" if ac else "no battery"}
+        m = pl.battery_minutes_left(name)
+        if m is not None:
+            self.min_ema = m if self.min_ema is None else 0.7 * self.min_ema + 0.3 * m
+        mins = self.min_ema
+
+        if pct < num(c, "GUARD_NO_SUSPEND_BELOW", 30):
+            if not self.ginh.held and self.ginh.acquire():
+                pl.log(f"battery guard: {label} at {pct:.0f}%, suspend blocked until AC")
+        elif self.ginh.held:
+            self.ginh.release()
+
+        def low(pct_key, min_key):
+            return pct <= num(c, pct_key) or (mins is not None and mins <= num(c, min_key))
+
+        state = "armed"
+        left = "" if mins is None else f", about {mins:.0f} min left"
+        if low("GUARD_ACT_PCT", "GUARD_ACT_MIN"):
+            state = "countdown"
+            action = c.get("GUARD_ACTION", "poweroff")
+            if self.countdown_at is None:
+                grace = num(c, "GUARD_GRACE", 30)
+                self.countdown_at = now + grace
+                verb = {"poweroff": "Shutting down", "hibernate": "Hibernating"}.get(action)
+                pl.log(f"battery guard: {label} at {pct:.0f}%{left}; action {action} in {grace:.0f} s")
+                pl.notify("Battery critical", f"{label} at {pct:.0f}%{left}. "
+                          + (f"{verb} in {grace:.0f} s. Plug in power to cancel." if verb else "Plug in power now."), "critical")
+            elif not self.acted and now >= self.countdown_at and action in ("poweroff", "hibernate"):
+                self.acted = True
+                pl.log(f"battery guard: {action} now ({label} at {pct:.0f}%{left})")
+                if action == "hibernate":
+                    self.ginh.release()                           # our own sleep block would refuse it
+                pl.act(["systemctl", action])
+        else:
+            if self.countdown_at is not None and not self.acted:   # reading recovered: stand down
+                self.countdown_at = None
+                pl.log("battery guard: level recovered, countdown cancelled")
+            if low("GUARD_WARN_PCT", "GUARD_WARN_MIN"):
+                state = "warned"
+                if not self.warned:
+                    self.warned = True
+                    pl.log(f"battery guard: low, {label} at {pct:.0f}%{left}")
+                    pl.notify("Battery low", f"{label} at {pct:.0f}%{left}. Plug in power; the laptop shuts down "
+                              f"cleanly at {num(c, 'GUARD_ACT_PCT'):.0f}%.", "critical")
+        return {"guard": state, "guard_battery": label, "guard_pct": round(pct, 1),
+                "guard_min": None if mins is None else round(mins, 1)}
 
     def tick(self):
         c = pl.conf()
@@ -164,6 +236,8 @@ class Daemon:
         min_pct = battery_min(c)
         temp_max = temp_limit(c)
         eff, why = evaluate(on, ac, pct, min_pct, temp, temp_max)
+        ginfo = self.guard(c, ac, time.monotonic())
+        guarding = self.ginh.held                                 # the guard is keeping the laptop awake
 
         if on and why in ("low-battery", "overheat"):            # must end: fall back to normal power behaviour
             STATE.unlink(missing_ok=True)
@@ -185,14 +259,17 @@ class Daemon:
         elif not want and self.inh.held:
             self.inh.release()
             pl.log("servermode: off")
-            if lid:                                               # lid already shut: do what a closed lid normally does
+            if lid and guarding:                                  # low battery: suspending could end in a power cut
+                pl.log("servermode: lid closed but not suspending, the battery guard keeps the laptop awake")
+            elif lid:                                             # lid already shut: do what a closed lid normally does
                 pl.act(["systemctl", "suspend"])
 
-        if want and lid:                                          # lid closed in server mode: lock + dark
+        lid_mode = want or guarding                               # someone is keeping the laptop awake: handle the lid
+        if lid_mode and lid:                                      # lid closed and staying awake: lock + dark
             now = time.monotonic()
             if not self.lid_prev:
                 self.closed_at, self.lock_tried, self.lock_seen_at = now, False, None
-                pl.log("servermode: lid closed, staying awake")
+                pl.log("servermode: lid closed, staying awake" + ("" if want else " (battery guard)"))
             locked = i3lock_running()                             # acpid's lid.sh usually locked already
             if (c["SERVER_LOCK"] == "1" and not locked and not self.lock_tried and now - self.closed_at >= 2):
                 self.lock_tried = True
@@ -206,7 +283,7 @@ class Daemon:
             lock_painted = c["SERVER_LOCK"] != "1" or (self.lock_seen_at is not None and now - self.lock_seen_at >= 2)
             if c["SERVER_SCREEN_OFF"] == "1" and (lock_painted or now - self.closed_at >= 10):
                 pl.act(["xset", "dpms", "force", "off"])
-        elif want and self.lid_prev:                              # lid reopened: wake the (locked) screen
+        elif lid_mode and self.lid_prev:                          # lid reopened: wake the (locked) screen
             # Reset X's idle timer first: after a long closed-lid period X still counts the machine as idle past
             # the DPMS timeout and would blank the panel again right after "force on" (a black, frozen-looking screen).
             pl.act(["xset", "s", "reset"])
@@ -222,7 +299,7 @@ class Daemon:
         self.lid_prev = lid
 
         info = {"on": on, "effective": want, "reason": why, "ac": ac, "pct": None if pct is None else round(pct, 1), "battery": bat_label,
-                "min": min_pct, "lid": lid, "temp": temp}
+                "min": min_pct, "lid": lid, "temp": temp, **ginfo}
         try:
             tmp = INFO.with_suffix(".tmp")
             tmp.write_text(json.dumps(info))
@@ -243,12 +320,13 @@ def run_daemon():
     try:
         while True:
             info = d.tick()
-            wait = 2 if info["on"] else 5
+            wait = 2 if (info["on"] or not info["ac"]) else 5     # on battery: the guard needs a close eye
             if d.refresh_at is not None:
                 wait = max(0.2, min(wait, d.refresh_at - time.monotonic()))
             signal.sigtimedwait({signal.SIGUSR1}, wait)
     finally:
         d.inh.release()
+        d.ginh.release()
         INFO.unlink(missing_ok=True)
         PIDF.unlink(missing_ok=True)
 
@@ -317,6 +395,12 @@ def status():
     print(f"server mode: {'ON' if i['on'] else 'OFF'}   power: {'AC' if i['ac'] else 'battery'}   "
           f"{i.get('battery', 'battery')}: {i['pct']}% (ends below {i['min']}% on battery)   lid: {'closed' if i['lid'] else 'open'}   "
           f"temp: {i['temp']}")
+    g = i.get("guard")
+    if g:
+        extra = ""
+        if i.get("guard_pct") is not None:
+            extra = f" ({i['guard_battery']} {i['guard_pct']}%" + (f", ~{i['guard_min']:.0f} min" if i.get("guard_min") else "") + ")"
+        print(f"battery guard: {g}{extra}")
 
 
 def main(argv):

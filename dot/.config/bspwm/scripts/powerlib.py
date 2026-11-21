@@ -33,6 +33,15 @@ DEFAULTS = {
     "SERVER_BATTERY_MIN": "auto",  # server mode ends below this % on battery; auto = 20 (2+ batteries) or 55
     "SERVER_BATTERY": "total",     # which charge to watch: auto | total | lowest | a battery name (BAT0, BAT1, ...)
     "SERVER_TEMP_MAX": "0",       # >0: server mode ends (and the laptop suspends) at this temperature, degrees C; 0 = off
+    "GUARD_ENABLED": "1",          # battery guard: warn, then shut down cleanly before the battery dies
+    "GUARD_BATTERY": "auto",       # which battery it watches (same values as SERVER_BATTERY)
+    "GUARD_WARN_PCT": "15",        # warn at or below this %
+    "GUARD_WARN_MIN": "8",         # ... or when this many minutes are left at the current draw
+    "GUARD_ACT_PCT": "7",          # act at or below this %
+    "GUARD_ACT_MIN": "4",          # ... or with this many minutes left
+    "GUARD_ACTION": "poweroff",    # poweroff | hibernate | none (notify only)
+    "GUARD_GRACE": "30",           # seconds of countdown before acting; plugging in AC cancels
+    "GUARD_NO_SUSPEND_BELOW": "30",  # on battery below this %, do not suspend (stay awake so the guard can act)
     "SERVER_LOCK": "1",           # lock the screen when the lid closes in server mode
     "SERVER_SCREEN_OFF": "1",     # turn the display off while the lid is closed in server mode
 }
@@ -114,6 +123,41 @@ def battery_pct_of(name):
 def battery_pct_lowest():
     vals = [p for p in (battery_pct_of(n) for n in battery_names()) if p is not None]
     return min(vals) if vals else None
+
+
+def battery_minutes_left(name=None):
+    """Minutes left at the current draw for one battery (or all discharging ones), None if not discharging/unknown."""
+    dirs = [PS_DIR / name] if name else _supplies("Battery")
+    e = p = 0
+    for d in dirs:
+        if read(d / "status") != "Discharging":
+            continue
+        for en_k, pw_k in (("energy_now", "power_now"), ("charge_now", "current_now")):
+            en, pw = read(d / en_k), read(d / pw_k)
+            if en and pw and en.isdigit() and pw.isdigit():
+                e, p = e + int(en), p + int(pw)
+                break
+    return 60.0 * e / p if p > 0 else None
+
+
+def pick_battery(spec):
+    """spec: auto | total | lowest | <name>  ->  (percent or None, label, battery name or None for "all").
+    auto: two or more batteries -> BAT1 (a ThinkPad's slice/external battery); one battery -> that battery."""
+    spec = (spec or "total").strip() or "total"
+    names = battery_names()
+    if spec == "auto":
+        spec = "BAT1" if len(names) >= 2 and "BAT1" in names else (names[0] if len(names) == 1 else "total")
+    if spec == "lowest":
+        vals = [(p, n) for n in names for p in [battery_pct_of(n)] if p is not None]
+        if vals:
+            p, n = min(vals)
+            return p, "lowest battery", n
+        return None, "lowest battery", None
+    if spec != "total":
+        p = battery_pct_of(spec)
+        if p is not None:
+            return p, spec, spec
+    return battery_pct(), "battery", None
 
 
 def batteries():
