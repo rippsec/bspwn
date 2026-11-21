@@ -350,6 +350,15 @@ install_system_files() {
   install_local_bins
   install_skippy_xd
 
+  # Battery switch (power tools): let the admin group choose the discharging battery; reset to firmware order on AC
+  if [[ -f "$project_root/system/etc/udev/rules.d/90-bspwn-battery.rules" ]]; then
+    sudo install -m 755 "$project_root/system/usr/local/sbin/bspwn-battery-auto" /usr/local/sbin/bspwn-battery-auto
+    sudo install -m 644 "$project_root/system/etc/udev/rules.d/90-bspwn-battery.rules" /etc/udev/rules.d/90-bspwn-battery.rules
+    sudo udevadm control --reload-rules 2>/dev/null || true
+    sudo udevadm trigger --subsystem-match=power_supply --action=change 2>/dev/null || true
+    log "Installed battery switch udev rule"
+  fi
+
   # Make brightnessctl's udev rule apply to the already-present backlight device
   if [[ -f /usr/lib/udev/rules.d/90-brightnessctl.rules || -f /lib/udev/rules.d/90-brightnessctl.rules ]]; then
     sudo udevadm control --reload-rules 2>/dev/null || true
