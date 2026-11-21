@@ -16,7 +16,7 @@ uptime=$(uptime -p | sed -e 's/up //g')
 
 # one entry per button: big Nerd Font glyph over a label ('|' separates entries)
 g() { printf "<span font_family='Symbols Nerd Font Mono' size='34pt'>%s</span>\n%s" "$1" "$2"; }
-options="$(g $'\U000f033e' Lock)|$(g $'\U000f04b2' Sleep)|$(g $'\U000f0343' Logout)|$(g $'\U000f0709' Restart)|$(g $'\U000f0425' Shutdown)"
+options="$(g $'\U000f033e' Lock)|$(g $'\U000f04b2' Sleep)|$(g $'\U000f0717' Hibernate)|$(g $'\U000f0343' Logout)|$(g $'\U000f0709' Restart)|$(g $'\U000f0425' Shutdown)"
 
 # -format i -> index of the chosen button (empty when cancelled)
 chosen=$(printf '%s' "$options" | rofi -dmenu -sep '|' -markup-rows -eh 4 -format i \
@@ -25,7 +25,8 @@ chosen=$(printf '%s' "$options" | rofi -dmenu -sep '|' -markup-rows -eh 4 -forma
 case "$chosen" in
   0) command -v xlock >/dev/null && xlock ;;
   1) mpc -q pause 2>/dev/null; amixer set Master mute >/dev/null 2>&1; systemctl suspend ;;
-  2) bspc quit ;;
-  3) shutdown -r now ;;
-  4) shutdown -h now ;;
+  2) mpc -q pause 2>/dev/null; amixer set Master mute >/dev/null 2>&1; systemctl hibernate ;;  # to disk: no battery drain
+  3) bspc quit ;;
+  4) shutdown -r now ;;
+  5) shutdown -h now ;;
 esac

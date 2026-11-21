@@ -44,3 +44,8 @@ This repo has only been run on the ThinkPad above. A Dell (or any other laptop) 
 - `dot/.zsh/plugins/fzf.zsh`: Ctrl+F file finder, exact + case-insensitive; quote a term (`'word'`) for whole-word matching.
 - `dot/.zsh/config/completion.zsh`: needs the `zsh-autocomplete` package (`/usr/share/zsh-autocomplete`); Left/Right move the cursor, Tab/Shift-Tab cycle the menu.
   `config/keybindings.zsh` loads after it, so never rebind `^[[Z` there.
+
+## Hibernate button (power menu)
+
+`polybar/scripts/pwmenu.sh` has a Hibernate button (`systemctl hibernate`). It only works if you have a swap area at least as big as your RAM **and** resume is configured
+(`cat /sys/power/resume` is not `0:0`, `busctl call org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager CanHibernate` says `yes`; on Debian add `resume=` / `RESUME=` and run `update-initramfs -u`). Otherwise remove the button.
