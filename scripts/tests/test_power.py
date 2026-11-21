@@ -155,22 +155,55 @@ class PowerTest(unittest.TestCase):
         self.assertTrue(self.inh.held and info["effective"])
         self.assertFalse(self.rec.has("xset"))
 
-    def test_lid_close_locks_and_blanks_then_reopen_wakes(self):
+    def test_lid_close_blanks_only_after_the_lock_is_painted(self):
+        """Regression (2026-11-20): blanking in the same instant the lock mapped left picom showing the old,
+        unlocked desktop on wake. Now: lock first, blank only once the lock has been up for 2 s."""
+        running = [False]
+        sm.i3lock_running = lambda: running[0]
         sm.STATE.write_text("on"); self.d.tick()
-        w(TMP / "lid", "closed")
-        t = [100.0]
-        sm.time.monotonic = lambda: t[0]
+        w(TMP / "lid", "closed"); t = [100.0]; sm.time.monotonic = lambda: t[0]
+        self.d.tick()                                                          # t=100: no lock yet
+        self.assertFalse(self.rec.has("xset dpms force off"))                  # never blank before the lock exists
+        self.assertFalse(self.rec.has("spawn xlock"))                          # give acpid's lid.sh 2 s to lock first
+        t[0] = 102.5; self.d.tick()                                            # still no lock: fallback locker
+        self.assertTrue(self.rec.has("spawn xlock")); self.assertFalse(self.rec.has("xset dpms force off"))
+        running[0] = True
+        t[0] = 103.0; self.d.tick()                                            # lock seen now
+        self.assertFalse(self.rec.has("xset dpms force off"))                  # ... but not painted long enough
+        t[0] = 105.1; self.d.tick()
+        self.assertTrue(self.rec.has("xset dpms force off"))                   # 2 s after the lock appeared: dark
+        self.assertEqual(sum(c == "spawn xlock" for c in self.rec.calls), 1)   # fallback tried once per close
+        self.assertTrue(self.inh.held); self.assertFalse(self.rec.has("suspend"))
+
+    def test_lid_open_wakes_and_forces_a_full_repaint_twice(self):
+        sm.i3lock_running = lambda: True
+        sm.STATE.write_text("on"); self.d.tick()
+        w(TMP / "lid", "closed"); t = [0.0]; sm.time.monotonic = lambda: t[0]
+        self.d.tick(); t[0] = 3; self.d.tick()
+        self.rec.calls.clear()
+        w(TMP / "lid", "open"); t[0] = 2000; self.d.tick()
+        self.assertEqual(self.rec.calls[:3], ["xset s reset", "xset dpms force on", "xrefresh"])
+        self.rec.calls.clear()
+        t[0] = 2000.5; self.d.tick(); self.assertFalse(self.rec.has("xrefresh"))   # not yet
+        t[0] = 2001.6; self.d.tick(); self.assertEqual(self.rec.calls.count("xrefresh"), 1)
+        t[0] = 2010; self.d.tick(); self.assertEqual(self.rec.calls.count("xrefresh"), 1)  # only one extra repaint
+
+    def test_no_locker_still_blanks_after_ten_seconds(self):
+        sm.i3lock_running = lambda: False
+        sm.shutil.which = lambda n: None                                       # no xlock installed
+        sm.STATE.write_text("on"); self.d.tick()
+        w(TMP / "lid", "closed"); t = [0.0]; sm.time.monotonic = lambda: t[0]
+        self.d.tick(); t[0] = 9; self.d.tick()
+        self.assertFalse(self.rec.has("xset dpms force off"))
+        t[0] = 10.1; self.d.tick()
+        self.assertTrue(self.rec.has("xset dpms force off"))                   # better dark than showing the desktop
+
+    def test_lock_disabled_blanks_immediately(self):
+        w(TMP / "power.conf", "SERVER_LOCK=0\n")
+        sm.STATE.write_text("on"); self.d.tick()
+        w(TMP / "lid", "closed"); t = [0.0]; sm.time.monotonic = lambda: t[0]
         self.d.tick()
-        self.assertTrue(self.rec.has("xset dpms force off"))
-        self.assertFalse(self.rec.has("spawn xlock"))                          # not before 2 s (acpid usually locks first)
-        t[0] = 103.0
-        self.d.tick()
-        self.assertTrue(self.rec.has("spawn xlock"))
-        self.assertEqual(sum(c == "spawn xlock" for c in self.rec.calls), 1)   # only tried once per close
-        self.assertTrue(self.inh.held)                                         # never suspended
-        self.assertFalse(self.rec.has("suspend"))
-        w(TMP / "lid", "open"); self.d.tick()
-        self.assertTrue(self.rec.has("xset dpms force on"))
+        self.assertTrue(self.rec.has("xset dpms force off")); self.assertFalse(self.rec.has("xlock"))
 
     def test_existing_lock_is_not_doubled(self):
         sm.i3lock_running = lambda: True
@@ -245,6 +278,44 @@ class PowerTest(unittest.TestCase):
         w(TMP / "lid", "closed"); t = [0.0]; sm.time.monotonic = lambda: t[0]
         self.d.tick(); t[0] = 9; self.d.tick()
         self.assertFalse(self.rec.has("xset")); self.assertFalse(self.rec.has("xlock"))
+
+    def test_watch_one_battery_by_name(self):
+        w(TMP / "power.conf", "SERVER_BATTERY=BAT1\n")
+        supply("AC", "Mains", online=0)
+        supply("BAT0", "Battery", energy_now=15000000, energy_full=15670000, status="Discharging")   # internal ~96%
+        supply("BAT1", "Battery", energy_now=500000, energy_full=2190000, status="Discharging")      # slice ~23%
+        sm.STATE.write_text("on")
+        info = self.d.tick()
+        self.assertTrue(info["effective"]); self.assertEqual(info["battery"], "BAT1"); self.assertAlmostEqual(info["pct"], 22.8, places=1)
+        supply("BAT1", "Battery", energy_now=400000, energy_full=2190000, status="Discharging")      # slice ~18% < 20
+        info = self.d.tick()
+        self.assertFalse(info["effective"]); self.assertEqual(info["reason"], "low-battery")       # ends although the total is ~86%
+        self.assertTrue(any("BAT1 at 18%" in c for c in self.rec.calls))
+
+    def test_missing_battery_name_falls_back_to_total(self):
+        w(TMP / "power.conf", "SERVER_BATTERY=BAT7\n")
+        pct, label = sm.watched_battery(pl.conf())
+        self.assertEqual(label, "battery"); self.assertAlmostEqual(pct, pl.battery_pct())
+
+    def test_lowest_battery(self):
+        w(TMP / "power.conf", "SERVER_BATTERY=lowest\n")
+        pct, label = sm.watched_battery(pl.conf())
+        self.assertAlmostEqual(pct, 100 * 1820000 / 2190000, places=3); self.assertEqual(label, "lowest battery")
+
+    def test_auto_picks_slice_on_thinkpad_and_the_only_battery_elsewhere(self):
+        w(TMP / "power.conf", "SERVER_BATTERY=auto\n")
+        pct, label = sm.watched_battery(pl.conf())
+        self.assertEqual(label, "BAT1")                                        # two batteries: the slice
+        remove_battery("BAT1")
+        pct, label = sm.watched_battery(pl.conf())
+        self.assertEqual(label, "BAT0")                                        # one battery (Dell-like): that one
+        remove_battery("BAT0"); supply("BAT1", "Battery", energy_now=30, energy_full=60, status="Discharging")
+        pct, label = sm.watched_battery(pl.conf())
+        self.assertEqual(label, "BAT1"); self.assertAlmostEqual(pct, 50.0)    # single battery named BAT1 (some Dells)
+
+    def test_default_is_total(self):
+        pct, label = sm.watched_battery(pl.conf())
+        self.assertAlmostEqual(pct, pl.battery_pct()); self.assertEqual(label, "battery")
 
     def test_bar_text(self):
         self.assertIn(sm.DIM, sm.bar_text({"on": False, "ac": True, "pct": 90}))

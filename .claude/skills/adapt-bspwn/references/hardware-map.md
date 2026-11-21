@@ -25,6 +25,8 @@ Everything below is a place where that shows. **Find your value first, then chan
 
 ## Power tools on another laptop
 - `power.conf` is per machine. `SERVER_BATTERY_MIN=auto` is 20 for two batteries and 55 for one; set a number if you prefer.
+- `SERVER_BATTERY` picks the charge server mode watches: `total`, `lowest` or a battery name. The shipped `auto` watches `BAT1` (the slice) when there are two
+  batteries and the only battery otherwise. Check battery health first (`energy_full` vs `energy_full_design` in `/sys/class/power_supply/BAT*`): watching a worn-out battery ends server mode early.
 - Keyboard LED level 1 is "minimal" on the ThinkPad (max 2). Check `cat /sys/class/leds/<kbd led>/max_brightness`; some laptops have 3 levels or an ambient-light mode.
 - The lid is ignored by a logind inhibitor, which needs systemd-logind and a polkit rule allowing the active session to inhibit (default on Debian/Ubuntu/Fedora/Arch desktops).
 - Run `python3 scripts/tests/test_power.py` after any change to the power scripts.

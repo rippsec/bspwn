@@ -31,6 +31,7 @@ DEFAULTS = {
     "KBD_LEVEL": "1",             # level used when a key lights it (1 = minimal; 0 = the level it had before)
     "KBD_WAKE_POINTER": "0",      # 1 = touchpad/mouse input also lights it (default: keyboard only)
     "SERVER_BATTERY_MIN": "auto",  # server mode ends below this % on battery; auto = 20 (2+ batteries) or 55
+    "SERVER_BATTERY": "total",     # which charge to watch: auto | total | lowest | a battery name (BAT0, BAT1, ...)
     "SERVER_TEMP_MAX": "0",       # >0: server mode ends (and the laptop suspends) at this temperature, degrees C; 0 = off
     "SERVER_LOCK": "1",           # lock the screen when the lid closes in server mode
     "SERVER_SCREEN_OFF": "1",     # turn the display off while the lid is closed in server mode
@@ -83,6 +84,36 @@ def conf():
 # ---------------------------------------------------------------- power supply / lid / thermal
 def _supplies(kind):
     return [d for d in sorted(PS_DIR.glob("*")) if read(d / "type") == kind]
+
+
+def _battery_reading(d):
+    """(now, full) for one battery dir, or None."""
+    for now, full in (("energy_now", "energy_full"), ("charge_now", "charge_full")):
+        n, f = read(d / now), read(d / full)
+        if n and f and n.isdigit() and f.isdigit() and int(f) > 0:
+            return int(n), int(f)
+    cap = read(d / "capacity")
+    if cap and cap.isdigit():
+        return int(cap), 100
+    return None
+
+
+def battery_names():
+    return [d.name for d in _supplies("Battery")]
+
+
+def battery_pct_of(name):
+    """Charge of ONE battery (e.g. "BAT1"), 0-100, or None if there is no such battery."""
+    d = PS_DIR / name
+    if read(d / "type") != "Battery":
+        return None
+    r = _battery_reading(d)
+    return None if r is None else 100.0 * r[0] / r[1]
+
+
+def battery_pct_lowest():
+    vals = [p for p in (battery_pct_of(n) for n in battery_names()) if p is not None]
+    return min(vals) if vals else None
 
 
 def batteries():
