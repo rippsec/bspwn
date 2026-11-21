@@ -142,6 +142,7 @@ The screen locks and goes dark and the keyboard light turns off, but the system 
   (it suspends if the lid is closed). Which charge is watched is `SERVER_BATTERY` (shipped `auto`: the slice battery on a two-battery ThinkPad, the internal battery on a one-battery laptop).
 - It is **off after every reboot/logout** on purpose (state lives in `$XDG_RUNTIME_DIR`).
 - **Safe by design**: the lid is ignored only while the daemon holds an inhibitor lock, which the kernel releases the moment the daemon exits or crashes.
+- When server mode ends on a low battery with the lid closed it normally suspends; if the [battery guard](#battery-guard) is keeping the laptop awake it stays up and shuts down cleanly instead.
 
 | Setting | Shipped | Meaning |
 | --- | --- | --- |
@@ -154,6 +155,30 @@ The screen locks and goes dark and the keyboard light turns off, but the system 
 Troubleshooting: `servermode.py status`, `systemd-inhibit --list | grep bspwn` (the lock is held while it is on), `journalctl -t bspwn-power` (daemon log).
 Wi-Fi power saving should be off for remote access to stay snappy (`iw dev wlan0 get power_save`).
 The logic is covered by tests on a fake sysfs: `python3 scripts/tests/test_power.py`.
+
+#### Battery guard
+
+Never lets the battery run out with the laptop on (or asleep). On battery it watches the battery that powers the laptop and:
+
+1. **warns** at 15% or when about 8 minutes are left at the current draw;
+2. at 7% or about 4 minutes left shows a **30 s countdown, then shuts down cleanly**. Plugging in power cancels it;
+3. below 30% **does not suspend** (lid, idle timeout or the power menu): a laptop that runs out of battery *while asleep* just loses power. With the lid closed it locks and blanks the screen
+   like server mode and stays awake until it is safe to shut down.
+
+It uses minutes as well as % because a small or worn battery's percentage is unreliable. It was built for this ThinkPad, whose internal battery can no longer power it: when the external
+battery runs out the laptop cuts off instead of switching batteries, so Linux's own low-battery action (which averages both batteries) never fires.
+
+| Setting | Shipped | Meaning |
+| --- | --- | --- |
+| `GUARD_ENABLED` | `1` | `0` turns the guard off |
+| `GUARD_BATTERY` | `auto` | battery to watch; same values as `SERVER_BATTERY` (`auto` = external/slice on a two-battery ThinkPad, the only battery elsewhere) |
+| `GUARD_WARN_PCT` / `GUARD_WARN_MIN` | `15` / `8` | warn at this % or with this many minutes left |
+| `GUARD_ACT_PCT` / `GUARD_ACT_MIN` | `7` / `4` | start the countdown at this % or minutes left |
+| `GUARD_ACTION` | `poweroff` | `poweroff`, `hibernate` (only if resuming from hibernation is set up on your system) or `none` (notifications only) |
+| `GUARD_GRACE` | `30` | seconds of countdown |
+| `GUARD_NO_SUSPEND_BELOW` | `30` | on battery below this %, the laptop does not suspend |
+
+`servermode.py status` shows the guard's state (`ac`, `armed`, `warned`, `countdown`); `journalctl -t bspwn-power` logs what it did.
 
 ### Themes
 

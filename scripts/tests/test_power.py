@@ -105,8 +105,8 @@ class PowerTest(unittest.TestCase):
         sm.STATE.unlink(missing_ok=True)
         self.rec = Recorder()
         self.inh = FakeInhibitor()
-        self.d = sm.Daemon(self.inh)
-        self.d.inh = self.inh
+        self.ginh = FakeInhibitor()                       # battery guard lock: never take a real logind lock in tests
+        self.d = sm.Daemon(self.inh, self.ginh)
         sm.i3lock_running = lambda: False
         self._which = sm.shutil.which
         sm.shutil.which = lambda n: "/usr/local/bin/xlock"
@@ -223,9 +223,16 @@ class PowerTest(unittest.TestCase):
         set_total_pct(19)
         info = self.d.tick()
         self.assertFalse(info["on"] or info["effective"])
-        self.assertFalse(self.inh.held)                                        # lid works normally again
+        self.assertFalse(self.inh.held)                                        # server mode released its lock
         self.assertFalse(sm.STATE.exists())                                    # server mode switched itself off
-        self.assertTrue(self.rec.has("suspend"))                               # lid is shut -> normal behaviour = sleep
+        self.assertTrue(self.ginh.held)                                        # ... but the battery guard keeps it awake
+        self.assertFalse(self.rec.has("systemctl suspend"))                    # no sleep on a low battery (power-cut risk)
+
+    def test_without_guard_server_mode_end_suspends(self):
+        w(TMP / "power.conf", "GUARD_ENABLED=0\n")
+        sm.STATE.write_text("on"); self.d.tick()
+        w(TMP / "lid", "closed"); thinkpad(ac=False); set_total_pct(19)
+        self.d.tick()
         self.assertEqual(sum("systemctl suspend" in c for c in self.rec.calls), 1)
 
     def test_low_battery_with_lid_open_does_not_suspend(self):
@@ -316,6 +323,85 @@ class PowerTest(unittest.TestCase):
     def test_default_is_total(self):
         pct, label = sm.watched_battery(pl.conf())
         self.assertAlmostEqual(pct, pl.battery_pct()); self.assertEqual(label, "battery")
+
+    # --- battery guard (watches BAT1 on the fake two-battery ThinkPad)
+    def slice_at(self, pct, power_uw=8000000, status="Discharging"):
+        full = 2190000
+        supply("BAT1", "Battery", energy_now=int(full * pct / 100), energy_full=full, power_now=power_uw, status=status)
+
+    def guard_tick(self, t):
+        sm.time.monotonic = lambda: t
+        return self.d.tick()
+
+    def test_guard_idle_on_ac_and_healthy_battery(self):
+        self.slice_at(5); self.guard_tick(0)                                   # AC (default): nothing at all
+        self.assertFalse(self.ginh.held); self.assertFalse(self.rec.has("Battery"))
+        thinkpad(ac=False); self.slice_at(80, power_uw=1000000)                # 80%, ~105 min: armed, silent
+        self.assertEqual(self.guard_tick(1)["guard"], "armed")
+        self.assertFalse(self.ginh.held); self.assertFalse(self.rec.has("Battery"))
+
+    def test_guard_blocks_suspend_below_threshold(self):
+        thinkpad(ac=False); self.slice_at(29, power_uw=500000)
+        self.guard_tick(0)
+        self.assertTrue(self.ginh.held)
+
+    def test_guard_warns_once(self):
+        thinkpad(ac=False); self.slice_at(14, power_uw=500000)                 # 14% but plenty of minutes
+        self.assertEqual(self.guard_tick(0)["guard"], "warned"); self.guard_tick(2)
+        self.assertEqual(sum("Battery low" in c for c in self.rec.calls), 1)
+
+    def test_guard_countdown_then_poweroff(self):
+        thinkpad(ac=False); self.slice_at(6, power_uw=500000)
+        self.assertEqual(self.guard_tick(100)["guard"], "countdown")
+        self.assertTrue(self.rec.has("Shutting down in 30 s"))
+        self.guard_tick(120); self.assertFalse(self.rec.has("systemctl poweroff"))
+        self.guard_tick(130.5); self.assertEqual(self.rec.calls.count("systemctl poweroff"), 1)
+        self.guard_tick(140); self.assertEqual(self.rec.calls.count("systemctl poweroff"), 1)   # only once
+
+    def test_guard_ac_cancels_countdown(self):
+        thinkpad(ac=False); self.slice_at(6, power_uw=500000); self.guard_tick(100)
+        supply("AC", "Mains", online=1)
+        self.guard_tick(110)
+        self.assertTrue(self.rec.has("shutdown cancelled")); self.assertFalse(self.ginh.held)
+        self.guard_tick(200); self.assertFalse(self.rec.has("systemctl poweroff"))
+
+    def test_guard_acts_on_minutes_left_for_a_small_worn_battery(self):
+        thinkpad(ac=False); self.slice_at(40, power_uw=15000000)               # 40% of 2.19 Wh at 15 W = ~3.5 min
+        info = self.guard_tick(0)
+        self.assertEqual(info["guard"], "countdown"); self.assertLess(info["guard_min"], 4)
+
+    def test_guard_hibernate_releases_its_sleep_block_first(self):
+        w(TMP / "power.conf", "GUARD_ACTION=hibernate\nGUARD_GRACE=0\n")
+        thinkpad(ac=False); self.slice_at(5, power_uw=500000)
+        self.guard_tick(0); self.guard_tick(1)
+        self.assertTrue(self.rec.has("systemctl hibernate")); self.assertFalse(self.ginh.held)
+
+    def test_guard_notify_only(self):
+        w(TMP / "power.conf", "GUARD_ACTION=none\n")
+        thinkpad(ac=False); self.slice_at(5, power_uw=500000)
+        self.guard_tick(0); self.guard_tick(100)
+        self.assertTrue(self.rec.has("Plug in power now")); self.assertFalse(self.rec.has("systemctl"))
+
+    def test_guard_disabled(self):
+        w(TMP / "power.conf", "GUARD_ENABLED=0\n")
+        thinkpad(ac=False); self.slice_at(3, power_uw=500000)
+        self.assertEqual(self.guard_tick(0)["guard"], "off")
+        self.assertFalse(self.ginh.held); self.assertFalse(self.rec.has("Battery"))
+
+    def test_guard_handles_the_lid_like_server_mode(self):
+        sm.i3lock_running = lambda: True
+        thinkpad(ac=False); self.slice_at(20, power_uw=500000)                 # guard awake, server mode OFF
+        w(TMP / "lid", "closed")
+        self.guard_tick(0); self.guard_tick(2.5)
+        self.assertTrue(self.rec.has("xset dpms force off")); self.assertFalse(self.rec.has("systemctl suspend"))
+        w(TMP / "lid", "open"); self.guard_tick(10)
+        self.assertTrue(self.rec.has("xrefresh"))
+
+    def test_guard_uses_the_only_battery_on_a_single_battery_laptop(self):
+        remove_battery("BAT1"); supply("AC", "Mains", online=0)
+        supply("BAT0", "Battery", energy_now=int(50000000 * 0.05), energy_full=50000000, power_now=9000000, status="Discharging")
+        info = self.guard_tick(0)
+        self.assertEqual(info["guard_battery"], "BAT0"); self.assertEqual(info["guard"], "countdown")
 
     def test_bar_text(self):
         self.assertIn(sm.DIM, sm.bar_text({"on": False, "ac": True, "pct": 90}))
