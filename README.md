@@ -221,6 +221,13 @@ python3 scripts/palette_check.py         # contrast + colour-difference report; 
 It checks text contrast, that every pair of hues is far enough apart (CIEDE2000 ≥ 20, ≥ 14 with the colours washed out to 60%) and that bright variants differ from normal ones.
 Edit both files together, re-run the checker, and look at it in a real terminal. `lsd` (the `ls` alias) is mapped onto the palette in `dot/.config/lsd/`.
 
+## Shell: fzf and completion
+
+- **`Ctrl+F`** fuzzy-finds any file on the system and pastes it (`dot/.zsh/plugins/fzf.zsh`). Matching is exact and case-insensitive, so `claude` is a plain substring.
+  For a whole word, quote it: `'claude'` matches `claude-code` and `/x/claude/y` but not `claudette`. Also `!word` (exclude), `^word`, `word$`, and space = AND.
+- **Completion menu** (`zsh-autocomplete`): Up/Down and Tab / Shift-Tab move through the menu; **Left/Right still move the text cursor** (they close the menu) so you can edit a recalled command
+  (`dot/.zsh/config/completion.zsh`).
+
 ## Other pieces
 
 - **Wallpapers**: generated with Pillow by `scripts/wallpaper/gen_*.py` into `assets/wallpaper/`; the active one is set in `modes/cockpit.conf` and `bspwm/start`.
