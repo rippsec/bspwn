@@ -1,8 +1,0 @@
-# bspwn power tools (dot/.config/bspwm/scripts/servermode.py, "battery switch"):
-# 1) let members of the admin group choose which battery a ThinkPad discharges, without sudo:
-#    /sys/class/power_supply/BAT*/charge_behaviour = auto | inhibit-charge | force-discharge
-#    (the group is "sudo" on Debian/Ubuntu/Kali; use "wheel" on Arch/Fedora)
-SUBSYSTEM=="power_supply", KERNEL=="BAT*", TEST=="charge_behaviour", RUN+="/bin/chgrp sudo /sys%p/charge_behaviour", RUN+="/bin/chmod g+w /sys%p/charge_behaviour"
-# 2) safety net: whenever AC power is connected, give the batteries back to the firmware (auto), so a forced
-#    discharge can never keep draining a battery while plugged in, even if the power daemon is not running.
-SUBSYSTEM=="power_supply", KERNEL=="AC*", ATTR{online}=="1", RUN+="/usr/local/sbin/bspwn-battery-auto"

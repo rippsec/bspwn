@@ -1,7 +1,0 @@
-#!/bin/sh
-# Give every battery back to the firmware's own discharge order (run by udev when AC is connected;
-# see /etc/udev/rules.d/90-bspwn-battery.rules). Safe to run any time.
-for f in /sys/class/power_supply/BAT*/charge_behaviour; do
-  [ -e "$f" ] && echo auto > "$f"
-done
-exit 0

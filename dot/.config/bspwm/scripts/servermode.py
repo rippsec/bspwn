@@ -155,7 +155,6 @@ class Daemon:
         self.warned = False
         self.acted = False
         self.min_ema = None
-        self.switch_warned = False     # told the user once that the battery switch cannot write (no udev rule)
         self.lid_prev = False
         self.ac_prev = None
         self.closed_at = None
@@ -163,41 +162,19 @@ class Daemon:
         self.lock_seen_at = None       # when a running locker was first seen after the lid closed
         self.refresh_at = None         # second repaint after the lid reopened
 
-    def switch(self, c, ac):
-        """Battery switch (two-battery laptops). The firmware drains SWITCH_FROM (a ThinkPad's external battery) first; when
-        it runs DRY the hand-over to the internal one can fail and cut the power. So switch early, while it still has charge,
-        by forcing the firmware to discharge SWITCH_TO. On AC everything goes back to the firmware's own order (auto)."""
-        names = pl.battery_names()
-        if c.get("SWITCH_ENABLED", "1") != "1":
-            return {"switch": "off"}
-        frm = c.get("SWITCH_FROM", "auto"); frm = "BAT1" if frm == "auto" else frm
-        to = c.get("SWITCH_TO", "auto"); to = "BAT0" if to == "auto" else to
-        if len(names) < 2 or frm not in names or to not in names or "force-discharge" not in pl.charge_options(to):
-            return {"switch": "n/a"}
-        forced = [n for n in names if pl.charge_mode(n) == "force-discharge"]
-        if ac:
-            if forced:
-                for n in forced:
-                    pl.set_charge_behaviour(n, "auto")
-                pl.log("battery switch: AC connected, batteries back to the firmware's order")
-            return {"switch": "ac"}
-        if to in forced:
-            return {"switch": f"on {to}"}
-        pf, pt = pl.battery_pct_of(frm), pl.battery_pct_of(to)
-        mins = pl.battery_minutes_left(frm)
-        low = pf is not None and (pf <= num(c, "SWITCH_AT_PCT", 15) or (mins is not None and mins <= num(c, "SWITCH_AT_MIN", 10)))
-        if low and pt is not None and pt > num(c, "SWITCH_TO_MIN", 10):
-            if pl.set_charge_behaviour(to, "force-discharge"):
-                left = "" if mins is None else f", ~{mins:.0f} min left"
-                pl.log(f"battery switch: {frm} at {pf:.0f}%{left}, switched to {to} ({pt:.0f}%) before it runs dry")
-                pl.notify("Battery switch", f"{frm} at {pf:.0f}%: now running on {to} ({pt:.0f}%) so the hand-over "
-                          "happens while it still has charge.", "normal")
-                return {"switch": f"on {to}"}
-            if not self.switch_warned:
-                self.switch_warned = True
-                pl.log(f"battery switch: cannot write {to}/charge_behaviour (install system/etc/udev/rules.d/90-bspwn-battery.rules)")
-                pl.notify("Battery switch unavailable", "Cannot choose the battery: the udev rule 90-bspwn-battery.rules is not installed.", "critical")
-        return {"switch": f"watching {frm}"}
+    def swap_hint(self, c, active):
+        """Two-battery ThinkPads: the firmware cannot be told to switch batteries while on battery (it rejects
+        force-discharge), but pulling the drained battery out IS a clean switch. Suggest it when the other battery
+        still has charge."""
+        if c.get("GUARD_SWAP_HINT", "1") != "1" or not active:
+            return ""
+        others = [(pl.battery_pct_of(n), n) for n in pl.battery_names() if n != active]
+        others = [(p, n) for p, n in others if p is not None and p > 10]
+        if not others:
+            return ""
+        p, n = max(others)
+        return (f" Or remove the {active} battery now: the laptop moves to {n} ({p:.0f}%) safely. "
+                f"Do not let {active} run dry while inserted.")
 
     def _guard_reset(self):
         if self.ginh.held:
@@ -235,6 +212,7 @@ class Daemon:
 
         state = "armed"
         left = "" if mins is None else f", about {mins:.0f} min left"
+        hint = self.swap_hint(c, name)
         if low("GUARD_ACT_PCT", "GUARD_ACT_MIN"):
             state = "countdown"
             action = c.get("GUARD_ACTION", "poweroff")
@@ -244,7 +222,7 @@ class Daemon:
                 verb = {"poweroff": "Shutting down", "hibernate": "Hibernating"}.get(action)
                 pl.log(f"battery guard: {label} at {pct:.0f}%{left}; action {action} in {grace:.0f} s")
                 pl.notify("Battery critical", f"{label} at {pct:.0f}%{left}. "
-                          + (f"{verb} in {grace:.0f} s. Plug in power to cancel." if verb else "Plug in power now."), "critical")
+                          + (f"{verb} in {grace:.0f} s. Plug in power to cancel." if verb else "Plug in power now.") + hint, "critical")
             elif not self.acted and now >= self.countdown_at and action in ("poweroff", "hibernate"):
                 self.acted = True
                 pl.log(f"battery guard: {action} now ({label} at {pct:.0f}%{left})")
@@ -261,7 +239,7 @@ class Daemon:
                     self.warned = True
                     pl.log(f"battery guard: low, {label} at {pct:.0f}%{left}")
                     pl.notify("Battery low", f"{label} at {pct:.0f}%{left}. Plug in power; the laptop shuts down "
-                              f"cleanly at {num(c, 'GUARD_ACT_PCT'):.0f}%.", "critical")
+                              f"cleanly at {num(c, 'GUARD_ACT_PCT'):.0f}%." + hint, "critical")
         return {"guard": state, "guard_battery": label, "guard_pct": round(pct, 1),
                 "guard_min": None if mins is None else round(mins, 1)}
 
@@ -273,7 +251,6 @@ class Daemon:
         min_pct = battery_min(c)
         temp_max = temp_limit(c)
         eff, why = evaluate(on, ac, pct, min_pct, temp, temp_max)
-        sinfo = self.switch(c, ac)                                # before the guard: it follows the active battery
         ginfo = self.guard(c, ac, time.monotonic())
         guarding = self.ginh.held                                 # the guard is keeping the laptop awake
 
@@ -337,7 +314,7 @@ class Daemon:
         self.lid_prev = lid
 
         info = {"on": on, "effective": want, "reason": why, "ac": ac, "pct": None if pct is None else round(pct, 1), "battery": bat_label,
-                "min": min_pct, "lid": lid, "temp": temp, **sinfo, **ginfo}
+                "min": min_pct, "lid": lid, "temp": temp, **ginfo}
         try:
             tmp = INFO.with_suffix(".tmp")
             tmp.write_text(json.dumps(info))
@@ -365,10 +342,6 @@ def run_daemon():
     finally:
         d.inh.release()
         d.ginh.release()
-        if pl.ac_online():                                        # never leave a forced discharge behind on AC
-            for n in pl.battery_names():
-                if pl.charge_mode(n) == "force-discharge":
-                    pl.set_charge_behaviour(n, "auto")
         INFO.unlink(missing_ok=True)
         PIDF.unlink(missing_ok=True)
 
@@ -437,8 +410,6 @@ def status():
     print(f"server mode: {'ON' if i['on'] else 'OFF'}   power: {'AC' if i['ac'] else 'battery'}   "
           f"{i.get('battery', 'battery')}: {i['pct']}% (ends below {i['min']}% on battery)   lid: {'closed' if i['lid'] else 'open'}   "
           f"temp: {i['temp']}")
-    if i.get("switch"):
-        print(f"battery switch: {i['switch']}")
     g = i.get("guard")
     if g:
         extra = ""

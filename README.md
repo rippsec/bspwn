@@ -156,21 +156,6 @@ Troubleshooting: `servermode.py status`, `systemd-inhibit --list | grep bspwn` (
 Wi-Fi power saving should be off for remote access to stay snappy (`iw dev wlan0 get power_save`).
 The logic is covered by tests on a fake sysfs: `python3 scripts/tests/test_power.py`.
 
-#### Battery switch (two-battery ThinkPads)
-
-A T450 has an internal battery and an external one; the firmware drains the external first. When the external runs **dry**, the switch to the internal one can fail and cut the power
-(pulling the external out while running is fine, the firmware handles that). So the power daemon switches **early**: when the external reaches 15% (or about 10 minutes left) it tells the
-firmware to run on the internal battery while the external still has charge. Plugging in AC hands control back to the firmware. Linux exposes this as
-`/sys/class/power_supply/BAT*/charge_behaviour` (`force-discharge`); a small udev rule (`system/etc/udev/rules.d/90-bspwn-battery.rules`, installed by `./install.sh -system`)
-lets your account set it without sudo and resets it to `auto` whenever AC is connected, even if the daemon is not running.
-
-| Setting | Shipped | Meaning |
-| --- | --- | --- |
-| `SWITCH_ENABLED` | `1` | `0` = leave the battery order to the firmware |
-| `SWITCH_FROM` / `SWITCH_TO` | `auto` / `auto` | battery drained first / battery to switch to (`auto` = `BAT1` / `BAT0`) |
-| `SWITCH_AT_PCT` / `SWITCH_AT_MIN` | `15` / `10` | switch when the external is at this % or has this many minutes left |
-| `SWITCH_TO_MIN` | `10` | only switch if the internal battery has more than this % |
-
 #### Battery guard
 
 Never lets the battery run out with the laptop on (or asleep). On battery it watches the battery that powers the laptop and:
@@ -179,6 +164,10 @@ Never lets the battery run out with the laptop on (or asleep). On battery it wat
 2. at 7% or about 4 minutes left shows a **30 s countdown, then shuts down cleanly**. Plugging in power cancels it;
 3. below 30% **does not suspend** (lid, idle timeout or the power menu): a laptop that runs out of battery *while asleep* just loses power. With the lid closed it locks and blanks the screen
    like server mode and stays awake until it is safe to shut down.
+
+**Two batteries (ThinkPad T450 with an external battery):** the firmware drains the external first, and when it runs *dry* the switch to the internal battery can fail and cut the power,
+while pulling the external out with the laptop running is a clean switch. The firmware only lets Linux choose the battery while on AC (`charge_behaviour` = `force-discharge` is rejected on
+battery), so the switch cannot be automated. Instead the warnings tell you to **pull the external battery out** (the laptop carries on with the internal one) or plug in.
 
 It uses minutes as well as % because a small or worn battery's percentage is unreliable. It was built for this ThinkPad: when its external battery *runs out*, the laptop has sometimes
 cut off instead of switching to the internal one (which works fine on its own, tested), and Linux's own low-battery action never fires because it averages both batteries.
@@ -190,10 +179,11 @@ cut off instead of switching to the internal one (which works fine on its own, t
 | `GUARD_WARN_PCT` / `GUARD_WARN_MIN` | `15` / `8` | warn at this % or with this many minutes left |
 | `GUARD_ACT_PCT` / `GUARD_ACT_MIN` | `7` / `4` | start the countdown at this % or minutes left |
 | `GUARD_ACTION` | `poweroff` | `poweroff`, `hibernate` (only if resuming from hibernation is set up on your system) or `none` (notifications only) |
+| `GUARD_SWAP_HINT` | `1` | with two batteries, the warnings suggest pulling the low one out while the other still has charge |
 | `GUARD_GRACE` | `30` | seconds of countdown |
 | `GUARD_NO_SUSPEND_BELOW` | `30` | on battery below this %, the laptop does not suspend |
 
-`servermode.py status` shows the switch and guard state (`ac`, `watching BAT1`, `on BAT0`, `armed`, `warned`, `countdown`); `journalctl -t bspwn-power` logs what they did.
+`servermode.py status` shows the guard's state (`ac`, `armed`, `warned`, `countdown`); `journalctl -t bspwn-power` logs what it did.
 
 ### Themes
 

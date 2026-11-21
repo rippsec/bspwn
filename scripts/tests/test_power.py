@@ -403,69 +403,43 @@ class PowerTest(unittest.TestCase):
         info = self.guard_tick(0)
         self.assertEqual(info["guard_battery"], "BAT0"); self.assertEqual(info["guard"], "countdown")
 
-    # --- battery switch (fake ThinkPad with charge_behaviour on both batteries)
-    def with_switch(self, ac=False, ext=(50, 8000000), internal=95):
-        thinkpad(ac=ac)
-        full1, full0 = 2190000, 15670000
-        supply("BAT1", "Battery", energy_now=int(full1 * ext[0] / 100), energy_full=full1, power_now=ext[1],
-               status="Discharging" if not ac else "Not charging", charge_behaviour="[auto] inhibit-charge force-discharge")
-        supply("BAT0", "Battery", energy_now=int(full0 * internal / 100), energy_full=full0, power_now=0,
-               status="Not charging", charge_behaviour="[auto] inhibit-charge force-discharge")
+    # --- two batteries: the guard suggests pulling the low external out (the firmware cannot switch on battery)
+    def two_batteries(self, ext_pct, int_pct=95, power_uw=500000):
+        thinkpad(ac=False)
+        supply("BAT1", "Battery", energy_now=int(2190000 * ext_pct / 100), energy_full=2190000, power_now=power_uw, status="Discharging")
+        supply("BAT0", "Battery", energy_now=int(15670000 * int_pct / 100), energy_full=15670000, power_now=0, status="Not charging")
 
-    def test_switch_waits_while_external_has_charge(self):
-        self.with_switch(ext=(50, 1000000))                                    # 50%, ~66 min
-        self.assertEqual(self.d.tick()["switch"], "watching BAT1")
-        self.assertEqual(pl.charge_mode("BAT0"), "auto")
-
-    def test_switch_to_internal_before_external_runs_dry(self):
-        self.with_switch(ext=(14, 1000000))
+    def test_low_external_warning_suggests_pulling_it_out(self):
+        self.two_batteries(14)
         info = self.d.tick()
-        self.assertEqual(info["switch"], "on BAT0"); self.assertEqual(pl.charge_mode("BAT0"), "force-discharge")
-        self.assertTrue(self.rec.has("now running on BAT0"))
-        self.assertEqual(info["guard_battery"], "BAT0")                        # the guard follows the battery in use
-        self.assertEqual(info["guard"], "armed"); self.assertFalse(self.ginh.held)   # internal at 95%: all fine
-        self.d.tick(); self.assertEqual(sum("now running on BAT0" in c for c in self.rec.calls), 1)   # once
+        self.assertEqual(info["guard_battery"], "BAT1"); self.assertEqual(info["guard"], "warned")
+        self.assertTrue(self.rec.has("remove the BAT1 battery now: the laptop moves to BAT0 (95%) safely"))
 
-    def test_switch_on_minutes_left(self):
-        self.with_switch(ext=(30, 4000000))                                    # 30% of 2.19 Wh at 4 W = ~10 min
-        self.assertEqual(self.d.tick()["switch"], "on BAT0")
+    def test_countdown_also_suggests_it(self):
+        self.two_batteries(6)
+        self.d.tick()
+        self.assertTrue(self.rec.has("Shutting down in 30 s")); self.assertTrue(self.rec.has("remove the BAT1 battery now"))
 
-    def test_no_switch_when_internal_is_low_too(self):
-        self.with_switch(ext=(12, 1000000), internal=8)
-        self.assertEqual(self.d.tick()["switch"], "watching BAT1"); self.assertEqual(pl.charge_mode("BAT0"), "auto")
+    def test_no_swap_hint_when_the_other_battery_is_empty_or_disabled(self):
+        self.two_batteries(14, int_pct=5)
+        self.d.tick(); self.assertFalse(self.rec.has("remove the"))
+        self.rec.calls.clear(); self.d._guard_reset()
+        w(TMP / "power.conf", "GUARD_SWAP_HINT=0\n"); self.two_batteries(14)
+        self.d.tick(); self.assertTrue(self.rec.has("Battery low")); self.assertFalse(self.rec.has("remove the"))
 
-    def test_ac_gives_batteries_back_to_the_firmware(self):
-        self.with_switch(ext=(14, 1000000)); self.d.tick()
-        self.assertEqual(pl.charge_mode("BAT0"), "force-discharge")
-        supply("AC", "Mains", online=1)
-        self.assertEqual(self.d.tick()["switch"], "ac"); self.assertEqual(pl.charge_mode("BAT0"), "auto")
-
-    def test_switch_cannot_write_warns_once(self):
-        self.with_switch(ext=(14, 1000000))
-        orig = pl.set_charge_behaviour
-        pl.set_charge_behaviour = lambda n, v: False
-        try:
-            self.d.tick(); self.d.tick()
-        finally:
-            pl.set_charge_behaviour = orig
-        self.assertEqual(sum("Battery switch unavailable" in c for c in self.rec.calls), 1)
-
-    def test_switch_disabled_and_single_battery(self):
-        w(TMP / "power.conf", "SWITCH_ENABLED=0\n")
-        self.with_switch(ext=(5, 1000000)); self.assertEqual(self.d.tick()["switch"], "off")
-        w(TMP / "power.conf", "")
-        remove_battery("BAT1"); self.assertEqual(self.d.tick()["switch"], "n/a")
-
-    def test_already_forced_stays(self):
-        self.with_switch(ext=(60, 1000000))
-        pl.set_charge_behaviour("BAT0", "force-discharge")
-        self.assertEqual(self.d.tick()["switch"], "on BAT0"); self.assertEqual(pl.charge_mode("BAT0"), "force-discharge")
+    def test_after_pulling_the_external_the_guard_follows_the_internal(self):
+        self.two_batteries(12)
+        self.d.tick(); self.assertEqual(self.d.tick()["guard_battery"], "BAT1")
+        remove_battery("BAT1")                                                 # owner pulls it out
+        supply("BAT0", "Battery", energy_now=int(15670000 * 0.95), energy_full=15670000, power_now=4800000, status="Discharging")
+        info = self.d.tick()
+        self.assertEqual(info["guard_battery"], "BAT0"); self.assertEqual(info["guard"], "armed")
 
     def test_active_battery_pick(self):
-        self.with_switch(ext=(60, 1000000))
+        self.two_batteries(60)
         self.assertEqual(pl.pick_battery("active")[1], "BAT1")                 # the discharging one
-        pl.set_charge_behaviour("BAT0", "force-discharge")
-        self.assertEqual(pl.pick_battery("active")[1], "BAT0")                 # the forced one wins
+        w(TMP / "ps/BAT0/charge_behaviour", "auto inhibit-charge [force-discharge]")
+        self.assertEqual(pl.pick_battery("active")[1], "BAT0")                 # a forced one wins
 
     def test_bar_text(self):
         self.assertIn(sm.DIM, sm.bar_text({"on": False, "ac": True, "pct": 90}))
