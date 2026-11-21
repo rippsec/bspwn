@@ -156,6 +156,21 @@ Troubleshooting: `servermode.py status`, `systemd-inhibit --list | grep bspwn` (
 Wi-Fi power saving should be off for remote access to stay snappy (`iw dev wlan0 get power_save`).
 The logic is covered by tests on a fake sysfs: `python3 scripts/tests/test_power.py`.
 
+#### Battery switch (two-battery ThinkPads)
+
+A T450 has an internal battery and an external one; the firmware drains the external first. When the external runs **dry**, the switch to the internal one can fail and cut the power
+(pulling the external out while running is fine, the firmware handles that). So the power daemon switches **early**: when the external reaches 15% (or about 10 minutes left) it tells the
+firmware to run on the internal battery while the external still has charge. Plugging in AC hands control back to the firmware. Linux exposes this as
+`/sys/class/power_supply/BAT*/charge_behaviour` (`force-discharge`); a small udev rule (`system/etc/udev/rules.d/90-bspwn-battery.rules`, installed by `./install.sh -system`)
+lets your account set it without sudo and resets it to `auto` whenever AC is connected, even if the daemon is not running.
+
+| Setting | Shipped | Meaning |
+| --- | --- | --- |
+| `SWITCH_ENABLED` | `1` | `0` = leave the battery order to the firmware |
+| `SWITCH_FROM` / `SWITCH_TO` | `auto` / `auto` | battery drained first / battery to switch to (`auto` = `BAT1` / `BAT0`) |
+| `SWITCH_AT_PCT` / `SWITCH_AT_MIN` | `15` / `10` | switch when the external is at this % or has this many minutes left |
+| `SWITCH_TO_MIN` | `10` | only switch if the internal battery has more than this % |
+
 #### Battery guard
 
 Never lets the battery run out with the laptop on (or asleep). On battery it watches the battery that powers the laptop and:
@@ -171,14 +186,14 @@ cut off instead of switching to the internal one (which works fine on its own, t
 | Setting | Shipped | Meaning |
 | --- | --- | --- |
 | `GUARD_ENABLED` | `1` | `0` turns the guard off |
-| `GUARD_BATTERY` | `auto` | battery to watch; same values as `SERVER_BATTERY` (`auto` = external/slice on a two-battery ThinkPad, the only battery elsewhere) |
+| `GUARD_BATTERY` | `active` | battery to watch: `active` = whichever battery is powering the laptop (follows the battery switch); or the `SERVER_BATTERY` values |
 | `GUARD_WARN_PCT` / `GUARD_WARN_MIN` | `15` / `8` | warn at this % or with this many minutes left |
 | `GUARD_ACT_PCT` / `GUARD_ACT_MIN` | `7` / `4` | start the countdown at this % or minutes left |
 | `GUARD_ACTION` | `poweroff` | `poweroff`, `hibernate` (only if resuming from hibernation is set up on your system) or `none` (notifications only) |
 | `GUARD_GRACE` | `30` | seconds of countdown |
 | `GUARD_NO_SUSPEND_BELOW` | `30` | on battery below this %, the laptop does not suspend |
 
-`servermode.py status` shows the guard's state (`ac`, `armed`, `warned`, `countdown`); `journalctl -t bspwn-power` logs what it did.
+`servermode.py status` shows the switch and guard state (`ac`, `watching BAT1`, `on BAT0`, `armed`, `warned`, `countdown`); `journalctl -t bspwn-power` logs what they did.
 
 ### Themes
 
