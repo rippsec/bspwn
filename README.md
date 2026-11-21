@@ -193,6 +193,9 @@ themer --gtk Adwaita-dark --icons Papirus   # headless
 themer --list      # installed themes        themer --current   # what is live
 ```
 
+A standalone, window-manager-agnostic version (no bspwm specifics, a hooks directory for your own targets) lives at
+[rippsec/themer](https://github.com/rippsec/themer).
+
 The default theme here is `Flat-Remix-GTK-Slate-Darkest`, a custom variant generated with the upstream
 [flat-remix-gtk](https://github.com/daniruiz/flat-remix-gtk) script and bundled in `dot/theme/themes` (icons: Flat-Remix-Black-Dark in `dot/theme/icons`).
 To make your own: `./generate-color-theme.sh Name '#HIGHLIGHT' '#HIGHLIGHT_TEXT'` (needs `make inkscape sassc optipng`), then copy the result to `dot/theme/themes/` and `~/.themes/`.
