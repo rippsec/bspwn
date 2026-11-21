@@ -69,7 +69,7 @@ The bar is three floating islands. Numbers match the picture. *(In the screensho
 | 18 | battery | **Battery, all batteries combined** into one icon (a bolt when charging on AC) | click: notification with each battery and the AC state |
 | 19 | microphone | **Mic.** Dim crossed-out mic = muted; **red** lit mic = live (unmuted) | click: mute/unmute |
 | 20 | tray icons | **System tray**: network applet (Wi-Fi), clipboard manager (paperclip) and any app that puts an icon there | per app |
-| 21 | power symbol | **Power menu** | click: full-screen menu with Lock, Sleep, **Hibernate** (suspend to disk: no battery drain while off), Logout, Restart, Shutdown; Esc or a second click closes it |
+| 21 | power symbol | **Power menu** | click: full-screen menu with Lock, Sleep, **Hibernate** (suspend to disk: no battery drain while off; it powers off and on resume the machine boots, asks the disk passphrase, then restores your session, so it looks like a reboot but nothing is lost), Logout, Restart, Shutdown; Esc or a second click closes it |
 
 ### The HUD column (right side)
 
