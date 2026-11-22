@@ -1,5 +1,5 @@
 #!/bin/bash
-# Screen locker (i3lock-color): troll blue-screen parody by default, or a
+# Screen locker (i3lock-color): a fake blue screen (one scene) by default, or a
 # monochrome clock + ring with XLOCK_STYLE=classic.
 # Used by sxhkd (super+x), polybar power menu and /etc/acpi/lid.sh.
 
@@ -11,7 +11,17 @@ if [[ $EUID -eq 0 ]]; then
 fi
 
 # Single instance: a second i3lock stacked on top means you unlock one and
-# are still stuck behind the other.
+# are still stuck behind the other. On lid close acpid (lid.sh) and xss-lock
+# (suspend) both call xlock in the same second, before either i3lock exists,
+# so the pgrep check below can miss; a lock file per display, held for the
+# whole time the screen is locked, makes the second caller exit at once.
+rundir=/run/user/$EUID; [[ -d $rundir && -w $rundir ]] || rundir=/tmp
+lockfile="$rundir/xlock-${DISPLAY//[^0-9A-Za-z]/_}.lock"
+exec {xlock_fd}>>"$lockfile" || exit 1
+if ! flock -n "$xlock_fd"; then
+  logger -t xlock "already locking (DISPLAY=$DISPLAY), not starting a second lock"
+  exit 0
+fi
 # Only i3locks on THIS display count (a stale one on another X display, e.g. a
 # test Xvfb, must not stop the real screen from locking).
 for p in $(pgrep -u "$EUID" -x i3lock); do
@@ -31,7 +41,7 @@ playerctl --all-players pause 2>/dev/null
 dunstctl set-paused true 2>/dev/null
 trap 'dunstctl set-paused false 2>/dev/null' EXIT
 
-# Style: "bsod" (default) = troll blue-screen parody with live error clock and
+# Style: "bsod" (default) = fake blue screen with live error clock and
 # a 'recovery code' progress bar; "classic" = monochrome clock + ring.
 # Override with XLOCK_STYLE=classic.
 style=${XLOCK_STYLE:-bsod}
@@ -58,7 +68,7 @@ lock_classic() {
 }
 
 # ---------------------------------------------------------------- bsod style
-# Starts i3lock on one scene image (xlock-bsod renders it + prints positions).
+# Starts i3lock on the bsod image (xlock-bsod renders it + prints positions).
 # Sets $pid to the new i3lock.
 start_scene() {   # start_scene SCENE FAILS
   local scene=$1 fails=$2 img="$dir/$1-$2.png" vars
@@ -66,12 +76,7 @@ start_scene() {   # start_scene SCENE FAILS
   local BAR_X BAR_Y BAR_W BAR_H TEXT_X TIME_Y DATE_Y TINY STATUS_X STATUS_Y STATUS_SIZE CLOCK
   eval "$vars"
   local font="Noto Sans" white=ffffffff
-  local track keyhl status_c verif wrong
-  case $scene in
-    bsod)  track=4da0e6ff keyhl=$white status_c=$white verif="checking recovery code..." wrong="invalid recovery code" ;;
-    alert) track=ff3b3bff keyhl=$white status_c=$white verif="VERIFYING IDENTITY..." wrong="ACCESS DENIED" ;;
-    final) track=1a1a1aff keyhl=7a0000ff status_c=5a0000ff verif="..." wrong="no." ;;
-  esac
+  local track=4da0e6ff keyhl=$white status_c=$white verif="checking recovery code..." wrong="invalid recovery code"
   local args=(
     --nofork --image="$img" --color=000000
     --bar-indicator --bar-orientation=horizontal
@@ -101,15 +106,13 @@ start_scene() {   # start_scene SCENE FAILS
   esac
   i3lock "${args[@]}" &
   pid=$!
+  logger -t xlock "i3lock started: scene=$scene fails=$fails pid=$pid"
 }
 
-# Troll lock: blue screen; every wrong password swaps to a random red glitch /
-# Emergency-Alert scene; from the 3rd wrong password on, a black ":):" screen
-# with a zalgo "i know what you did". The real password works in every scene.
-#
-# Swapping scenes never leaves the screen unlocked: the NEW i3lock is started
-# first (it maps on top and keeps retrying the keyboard/pointer grab), and only
-# then the old one is stopped, so the grab passes straight from one to the other.
+# Troll lock: one fake blue screen. A wrong password just shows "invalid recovery
+# code" (i3lock's own text); there are no scene swaps, so one i3lock holds the
+# keyboard grab from lock to unlock. If i3lock dies without the right password it
+# is started again (5 times), then the classic lock takes over.
 lock_bsod() {
   dir="${XDG_RUNTIME_DIR:-/tmp}/xlock"
   mkdir -p "$dir" && chmod 700 "$dir"
@@ -118,39 +121,25 @@ lock_bsod() {
   w=${geo%x*}; h=${geo#*x}
   [[ -n $w && -n $h ]] || { w=1600; h=900; }
 
+  logger -t xlock "lock requested (DISPLAY=$DISPLAY)"
   start_scene bsod 0 || return 1
-  local fails=0 line rc old scene=bsod retries=0
-
-  # wrong passwords show up in the journal as PAM auth failures of i3lock
-  exec {jfd}< <(journalctl -f -n 0 -o cat SYSLOG_IDENTIFIER=i3lock 2>/dev/null)
-  local jpid=$!
-
+  local rc retries=0
   while :; do
-    if ! kill -0 "$pid" 2>/dev/null; then
-      wait "$pid"; rc=$?
-      (( rc == 0 )) && break                       # correct password: unlocked
-      # i3lock died without a correct password (e.g. lost the grab during a
-      # swap): lock again right away, give up to the caller after 5 tries
-      (( ++retries > 5 )) && break
-      start_scene "$scene" "$fails" || break
-      continue
-    fi
-    if read -r -t 0.3 -u "$jfd" line && [[ $line == *"authentication failure"* ]]; then
-      fails=$((fails + 1))
-      old=$pid
-      if (( fails >= 3 )); then scene=final; else scene=alert; fi
-      start_scene "$scene" "$fails" || { pid=$old; continue; }
-      sleep 0.3                       # new lock window is mapped and waiting for the grab
-      kill "$old" 2>/dev/null; wait "$old" 2>/dev/null
-    fi
+    wait "$pid"; rc=$?
+    logger -t xlock "i3lock pid=$pid exited rc=$rc (retries=$retries)"
+    (( rc == 0 )) && break                         # correct password: unlocked
+    (( ++retries > 5 )) && { logger -t xlock "giving up after $retries restarts, falling back to classic lock"; break; }
+    logger -t xlock "restarting i3lock (retry $retries/5)"
+    start_scene bsod 0 || break
   done
 
-  kill "$jpid" 2>/dev/null; exec {jfd}<&-
+  logger -t xlock "unlocked (rc=$rc)"
   rm -f "$dir"/*.png
   return $rc
 }
 
 if [[ $style == classic ]]; then
+  logger -t xlock "classic lock"
   lock_classic
 else
   lock_bsod || lock_classic        # never leave the screen unlocked
