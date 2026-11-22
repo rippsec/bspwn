@@ -68,7 +68,7 @@ process_list=(
   "sxhkd"
   #"lxde-settings-daemon"
   "xsettingsd"
-  "xss-lock -- xlock"  # locks on idle (xset s) and before suspend; xlock is single-instance
+  "xss-lock --transfer-sleep-lock -- xlock"  # locks on idle and before suspend; -l: suspend waits until the lock is on screen
   "conky -q -c $HOME/.config/conky/hud.conf"
   "xfce4-notes"
   "picom -b --config $HOME/.config/picom/picom.conf"

@@ -160,10 +160,10 @@ The logic is covered by tests on a fake sysfs: `python3 scripts/tests/test_power
 
 Never lets the battery run out with the laptop on (or asleep). On battery it watches the battery that powers the laptop and:
 
-1. **warns** at 15%, when about 8 minutes are left at the current draw, or when the battery's **voltage** falls to 11.2 V;
-2. at 7%, about 4 minutes left or 11.0 V shows a **countdown (30 s, or 5 s when the voltage triggered it), then hibernates**: the session is saved to disk and comes back on the
+1. **warns** at 15%, when about 8 minutes are left at the current draw, or when the battery's **voltage** falls to 11.0 V;
+2. at 7%, about 4 minutes left or 10.85 V shows a **countdown (30 s, or 5 s when the voltage triggered it), then hibernates**: the session is saved to disk and comes back on the
    next power-on. Plugging in power cancels it;
-3. below 30% or 11.2 V **does not suspend** (lid, idle timeout or the power menu): a laptop that runs out of battery *while asleep* just loses power. With the lid closed it locks and
+3. below 30% or 11.0 V **does not suspend** (lid, idle timeout or the power menu): a laptop that runs out of battery *while asleep* just loses power. With the lid closed it locks and
    blanks the screen like server mode and stays awake until it is safe to act.
 
 Why the voltage: a worn battery's percentage can lie. This ThinkPad's external battery read 59% and was empty 15 seconds later (seen during a `tlp recalibrate`), while its voltage
@@ -185,7 +185,7 @@ cut off instead of switching to the internal one (which works fine on its own, t
 | `GUARD_BATTERY` | `active` | battery to watch: `active` = whichever battery is powering the laptop (follows the battery switch); or the `SERVER_BATTERY` values |
 | `GUARD_WARN_PCT` / `GUARD_WARN_MIN` | `15` / `8` | warn at this % or with this many minutes left |
 | `GUARD_ACT_PCT` / `GUARD_ACT_MIN` | `7` / `4` | start the countdown at this % or minutes left |
-| `GUARD_WARN_MV` / `GUARD_ACT_MV` | `11200` / `11000` | warn / start the countdown at this battery voltage in millivolts (`0` = off, the code default). Set them for your pack: about 3.73 / 3.67 V per cell |
+| `GUARD_WARN_MV` / `GUARD_ACT_MV` | `11000` / `10850` | warn / start the countdown at this battery voltage in millivolts (`0` = off, the code default). Set them for your pack: about 3.67 / 3.62 V per cell, below the flat middle of the discharge (this external sits at 11.1-11.26 V from 58% to 31% at ~5 W) |
 | `GUARD_MV_HOLD` | `6` | the voltage must stay at or below the setting this many seconds before it counts (a load spike sags a worn pack by ~0.4 V for a moment) |
 | `GUARD_GRACE_MV` | `5` | countdown in seconds when the voltage triggered it (a worn pack collapses within seconds) |
 | `GUARD_ACTION` | `hibernate` | `hibernate` (only if resuming from hibernation is set up on your system; it is here), `poweroff` or `none` (notifications only) |
