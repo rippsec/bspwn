@@ -32,6 +32,9 @@ Everything below is a place where that shows. **Find your value first, then chan
 - The **battery guard** (`GUARD_*` in `power.conf`) exists because on the original ThinkPad the hand-over from a drained external battery to the internal one
   has cut the power (the internal battery itself works). On a laptop with one healthy battery, Linux's own
   low-battery action already works; keep the guard (it is harmless) or set `GUARD_ENABLED=0`. `GUARD_ACTION=hibernate` only if hibernation with resume is configured.
+  `GUARD_WARN_MV` / `GUARD_ACT_MV` (voltage trigger, for packs whose % gauge lies) are set for a **3-cell** pack (11200 / 11000 mV, about 3.73 / 3.67 V per cell):
+  scale them to the user's cell count (`voltage_min_design` / 3.7 V), or set them to 0. Restart the daemon with `servermode.py restart`, never a plain kill
+  (with the lid closed in server mode a kill suspends at once).
 - Two-battery ThinkPads: `thinkpad_acpi` exposes `charge_behaviour` = `force-discharge`, but on the original T450 the firmware **rejects it while on battery** (EIO), so the
   discharge order cannot be changed off AC. Test before relying on it: `echo force-discharge > /sys/class/power_supply/BAT0/charge_behaviour` (as root, on battery), then `auto`.
 - Run `python3 scripts/tests/test_power.py` after any change to the power scripts.
