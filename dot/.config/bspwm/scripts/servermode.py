@@ -16,6 +16,8 @@ ever dies the kernel closes it and the lid works normally again, so a crash can 
   servermode.py status                human readable state
   servermode.py bar [--follow]        polybar output (--follow prints on every change, for `tail = true`)
   servermode.py daemon                the watcher (started from bspwm/start; single instance)
+  servermode.py restart               reload the daemon (after a code change) WITHOUT a gap in its locks:
+                                      killing it with the lid closed in server mode would suspend at once
 """
 import json
 import os
@@ -155,6 +157,9 @@ class Daemon:
         self.warned = False
         self.acted = False
         self.min_ema = None
+        self.mv_ema = None
+        self.mv_low_since = {}         # setting key -> when the voltage first fell to it
+        self.g_name = None             # battery the guard watched last tick (pulling one out switches it)
         self.lid_prev = False
         self.ac_prev = None
         self.closed_at = None
@@ -180,7 +185,8 @@ class Daemon:
         if self.ginh.held:
             self.ginh.release()
             pl.log("battery guard: released")
-        self.countdown_at, self.warned, self.acted, self.min_ema = None, False, False, None
+        self.countdown_at, self.warned, self.acted, self.min_ema, self.mv_ema = None, False, False, None, None
+        self.mv_low_since = {}
 
     def guard(self, c, ac, now):
         """Battery guard: warn when the watched battery is low, then shut down cleanly (after a countdown that
@@ -196,28 +202,54 @@ class Daemon:
                 pl.log("battery guard: AC connected, countdown cancelled")
             self._guard_reset()
             return {"guard": "ac" if ac else "no battery"}
+        if name != self.g_name:                                  # another battery took over (one was pulled out):
+            self.g_name, self.min_ema, self.mv_ema = name, None, None   # its readings start fresh
+            self.mv_low_since = {}
+            if self.countdown_at is not None and not self.acted:
+                self.countdown_at = None
+                pl.log(f"battery guard: now on {label}, countdown cancelled")
+            self.warned = False
         m = pl.battery_minutes_left(name)
         if m is not None:
             self.min_ema = m if self.min_ema is None else 0.7 * self.min_ema + 0.3 * m
         mins = self.min_ema
+        v = pl.battery_mv(name)                                  # smoothed, so a short load spike does not trigger
+        if v is not None:
+            self.mv_ema = v if self.mv_ema is None else 0.5 * self.mv_ema + 0.5 * v
+        mv = self.mv_ema
 
-        if pct < num(c, "GUARD_NO_SUSPEND_BELOW", 30):
+        hold = num(c, "GUARD_MV_HOLD", 6)
+
+        def volt_low(key):
+            """True once the smoothed voltage has stayed at/below the setting for GUARD_MV_HOLD seconds
+            (a load spike sags a worn pack by ~0.4 V for a moment; a real drain stays down)."""
+            if mv is None or num(c, key) <= 0 or mv > num(c, key):
+                self.mv_low_since.pop(key, None)
+                return False
+            since = self.mv_low_since.setdefault(key, now)
+            return now - since >= hold
+
+        if pct < num(c, "GUARD_NO_SUSPEND_BELOW", 30) or volt_low("GUARD_WARN_MV"):
             if not self.ginh.held and self.ginh.acquire():
                 pl.log(f"battery guard: {label} at {pct:.0f}%, suspend blocked until AC")
         elif self.ginh.held:
             self.ginh.release()
 
-        def low(pct_key, min_key):
-            return pct <= num(c, pct_key) or (mins is not None and mins <= num(c, min_key))
+        def low(pct_key, min_key, mv_key):
+            return pct <= num(c, pct_key) or (mins is not None and mins <= num(c, min_key)) or volt_low(mv_key)
 
         state = "armed"
         left = "" if mins is None else f", about {mins:.0f} min left"
+        if mv is not None and (num(c, "GUARD_WARN_MV") > 0 or num(c, "GUARD_ACT_MV") > 0):
+            left += f", {mv / 1000:.2f} V"
         hint = self.swap_hint(c, name)
-        if low("GUARD_ACT_PCT", "GUARD_ACT_MIN"):
+        if low("GUARD_ACT_PCT", "GUARD_ACT_MIN", "GUARD_ACT_MV"):
             state = "countdown"
             action = c.get("GUARD_ACTION", "poweroff")
             if self.countdown_at is None:
                 grace = num(c, "GUARD_GRACE", 30)
+                if volt_low("GUARD_ACT_MV"):                     # the voltage is about to collapse: little time
+                    grace = min(grace, num(c, "GUARD_GRACE_MV", 5))
                 self.countdown_at = now + grace
                 verb = {"poweroff": "Shutting down", "hibernate": "Hibernating"}.get(action)
                 pl.log(f"battery guard: {label} at {pct:.0f}%{left}; action {action} in {grace:.0f} s")
@@ -233,15 +265,21 @@ class Daemon:
             if self.countdown_at is not None and not self.acted:   # reading recovered: stand down
                 self.countdown_at = None
                 pl.log("battery guard: level recovered, countdown cancelled")
-            if low("GUARD_WARN_PCT", "GUARD_WARN_MIN"):
+            if low("GUARD_WARN_PCT", "GUARD_WARN_MIN", "GUARD_WARN_MV"):
                 state = "warned"
                 if not self.warned:
                     self.warned = True
                     pl.log(f"battery guard: low, {label} at {pct:.0f}%{left}")
-                    pl.notify("Battery low", f"{label} at {pct:.0f}%{left}. Plug in power; the laptop shuts down "
-                              f"cleanly at {num(c, 'GUARD_ACT_PCT'):.0f}%." + hint, "critical")
+                    what = {"hibernate": "hibernates (session saved)", "none": "only warns again"}.get(
+                        c.get("GUARD_ACTION", "poweroff"), "shuts down cleanly")
+                    at = f"{num(c, 'GUARD_ACT_PCT'):.0f}%"
+                    if num(c, "GUARD_ACT_MV") > 0:
+                        at += f" or {num(c, 'GUARD_ACT_MV') / 1000:.2f} V"
+                    pl.notify("Battery low", f"{label} at {pct:.0f}%{left}. Plug in power; the laptop {what} "
+                              f"at {at}." + hint, "critical")
         return {"guard": state, "guard_battery": label, "guard_pct": round(pct, 1),
-                "guard_min": None if mins is None else round(mins, 1)}
+                "guard_min": None if mins is None else round(mins, 1),
+                "guard_mv": None if mv is None else round(mv)}
 
     def tick(self):
         c = pl.conf()
@@ -382,6 +420,41 @@ def set_state(on):
             pl.notify("Server mode OFF", "Closing the lid suspends again.", "low")
 
 
+def restart_daemon(timeout=15):
+    """Swap the daemon for a fresh one while a bridge lock keeps the lid from suspending in between."""
+    bridge = Inhibitor("handle-lid-switch:sleep:idle", "bspwn-servermode-restart", "Server mode daemon restarting")
+    if not bridge.acquire():
+        print("could not take the bridge lock; not restarting (the lid could suspend during the swap)", file=sys.stderr)
+        return 1
+    try:
+        try:
+            old = int(PIDF.read_text())
+            os.kill(old, signal.SIGTERM)
+        except (OSError, ValueError):
+            old = None
+        end = time.monotonic() + timeout
+        while daemon_running() and time.monotonic() < end:
+            time.sleep(0.2)
+        if daemon_running():
+            print("the old daemon did not stop", file=sys.stderr)
+            return 1
+        start = time.time()
+        spawn([sys.executable, str(Path(__file__).resolve()), "daemon"])
+        while time.monotonic() < end:                    # wait until the new one has done a tick (holds its locks)
+            try:
+                if INFO.stat().st_mtime >= start:
+                    print(f"daemon restarted (old pid {old}, new pid {PIDF.read_text().strip()})")
+                    return 0
+            except OSError:
+                pass
+            time.sleep(0.2)
+        print("the new daemon did not report in time", file=sys.stderr)
+        return 1
+    finally:
+        time.sleep(0.5)
+        bridge.release()
+
+
 def load_info(max_age=20):
     """The daemon's last status, or None if it is missing/stale (daemon not running)."""
     try:
@@ -414,7 +487,8 @@ def status():
     if g:
         extra = ""
         if i.get("guard_pct") is not None:
-            extra = f" ({i['guard_battery']} {i['guard_pct']}%" + (f", ~{i['guard_min']:.0f} min" if i.get("guard_min") else "") + ")"
+            extra = (f" ({i['guard_battery']} {i['guard_pct']}%" + (f", ~{i['guard_min']:.0f} min" if i.get("guard_min") else "")
+                     + (f", {i['guard_mv'] / 1000:.2f} V" if i.get("guard_mv") else "") + ")")
         print(f"battery guard: {g}{extra}")
 
 
@@ -428,6 +502,8 @@ def main(argv):
         set_state(not STATE.exists())
     elif cmd == "status":
         status()
+    elif cmd == "restart":
+        return restart_daemon()
     elif cmd == "bar":
         if "--follow" in argv:
             last = None

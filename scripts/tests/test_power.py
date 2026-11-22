@@ -435,6 +435,55 @@ class PowerTest(unittest.TestCase):
         info = self.d.tick()
         self.assertEqual(info["guard_battery"], "BAT0"); self.assertEqual(info["guard"], "armed")
 
+    # --- voltage trigger: a worn external's % gauge lies (59% -> 4% in seconds), its voltage does not
+    VOLT = "GUARD_WARN_MV=11200\nGUARD_ACT_MV=11000\nGUARD_ACTION=hibernate\n"
+
+    def ext_volts(self, mv, ext_pct=59):
+        self.two_batteries(ext_pct)
+        w(TMP / "ps/BAT1/voltage_now", int(mv * 1000))
+        w(TMP / "ps/BAT0/voltage_now", 11990000)
+
+    def test_voltage_warns_although_the_gauge_says_59(self):
+        w(TMP / "power.conf", self.VOLT); self.ext_volts(11150)
+        self.assertEqual(self.guard_tick(0)["guard"], "armed")                 # not yet: must stay low 6 s
+        info = self.guard_tick(6)
+        self.assertEqual(info["guard"], "warned"); self.assertEqual(info["guard_mv"], 11150)
+        self.assertTrue(self.rec.has("11.15 V")); self.assertTrue(self.rec.has("hibernates (session saved) at 7% or 11.00 V"))
+        self.assertTrue(self.ginh.held)                                        # and suspend is blocked despite "59%"
+
+    def test_voltage_act_uses_the_short_grace_then_hibernates(self):
+        w(TMP / "power.conf", self.VOLT); self.ext_volts(10950)
+        self.guard_tick(100)
+        self.assertEqual(self.guard_tick(106)["guard"], "countdown")
+        self.assertTrue(self.rec.has("Hibernating in 5 s"))
+        self.guard_tick(110); self.assertFalse(self.rec.has("systemctl hibernate"))
+        self.guard_tick(111.5); self.assertTrue(self.rec.has("systemctl hibernate"))
+
+    def test_load_spikes_do_not_trigger(self):
+        w(TMP / "power.conf", self.VOLT); self.ext_volts(11040)               # daemon starts during a spike
+        self.guard_tick(0)
+        self.ext_volts(11420); self.guard_tick(2); self.guard_tick(4)          # back to normal
+        self.ext_volts(10700); self.guard_tick(6)                              # another short sag
+        self.ext_volts(11420); info = self.guard_tick(8); self.guard_tick(14)
+        self.assertEqual(info["guard"], "armed")
+        self.assertFalse(self.rec.has("Battery low")); self.assertFalse(self.rec.has("Hibernating"))
+
+    def test_voltage_trigger_is_off_by_default(self):
+        self.ext_volts(10500)
+        self.assertEqual(self.guard_tick(0)["guard"], "armed")                 # 59%, no MV settings: nothing
+
+    def test_pulling_the_external_cancels_a_voltage_countdown(self):
+        w(TMP / "power.conf", self.VOLT.replace("GUARD_ACTION=hibernate", "GUARD_GRACE_MV=20"))
+        self.ext_volts(10900); self.guard_tick(0)
+        self.assertEqual(self.guard_tick(6)["guard"], "countdown")
+        remove_battery("BAT1")
+        supply("BAT0", "Battery", energy_now=int(15670000 * 0.95), energy_full=15670000, power_now=4800000,
+               voltage_now=11990000, status="Discharging")
+        info = self.guard_tick(8)
+        self.assertEqual(info["guard_battery"], "BAT0"); self.assertEqual(info["guard"], "armed")
+        self.guard_tick(30); self.assertFalse(self.rec.has("systemctl poweroff"))
+        self.assertFalse(self.ginh.held)
+
     def test_active_battery_pick(self):
         self.two_batteries(60)
         self.assertEqual(pl.pick_battery("active")[1], "BAT1")                 # the discharging one

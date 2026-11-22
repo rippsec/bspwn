@@ -39,6 +39,10 @@ DEFAULTS = {
     "GUARD_WARN_MIN": "8",         # ... or when this many minutes are left at the current draw
     "GUARD_ACT_PCT": "7",          # act at or below this %
     "GUARD_ACT_MIN": "4",          # ... or with this many minutes left
+    "GUARD_WARN_MV": "0",          # ... or when the battery's voltage falls to this many millivolts (0 = off). Voltage is
+    "GUARD_ACT_MV": "0",           # honest when a worn pack's % gauge is not; set both for your pack (3-cell ~11200/11000)
+    "GUARD_MV_HOLD": "6",          # the voltage must stay that low this many seconds (load spikes sag it briefly)
+    "GUARD_GRACE_MV": "5",        # countdown (s) when the VOLTAGE triggered: a worn pack collapses within seconds
     "GUARD_ACTION": "poweroff",    # poweroff | hibernate | none (notify only)
     "GUARD_SWAP_HINT": "1",        # two batteries: suggest pulling the low one out (a clean switch) in the warnings
     "GUARD_GRACE": "30",           # seconds of countdown before acting; plugging in AC cancels
@@ -119,6 +123,12 @@ def battery_pct_of(name):
         return None
     r = _battery_reading(d)
     return None if r is None else 100.0 * r[0] / r[1]
+
+
+def battery_mv(name):
+    """Voltage of one battery in millivolts, or None if unknown."""
+    v = read(PS_DIR / name / "voltage_now") if name else None
+    return int(v) / 1000.0 if v and v.isdigit() and int(v) > 0 else None
 
 
 def battery_pct_lowest():

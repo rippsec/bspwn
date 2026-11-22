@@ -160,14 +160,21 @@ The logic is covered by tests on a fake sysfs: `python3 scripts/tests/test_power
 
 Never lets the battery run out with the laptop on (or asleep). On battery it watches the battery that powers the laptop and:
 
-1. **warns** at 15% or when about 8 minutes are left at the current draw;
-2. at 7% or about 4 minutes left shows a **30 s countdown, then shuts down cleanly**. Plugging in power cancels it;
-3. below 30% **does not suspend** (lid, idle timeout or the power menu): a laptop that runs out of battery *while asleep* just loses power. With the lid closed it locks and blanks the screen
-   like server mode and stays awake until it is safe to shut down.
+1. **warns** at 15%, when about 8 minutes are left at the current draw, or when the battery's **voltage** falls to 11.2 V;
+2. at 7%, about 4 minutes left or 11.0 V shows a **countdown (30 s, or 5 s when the voltage triggered it), then hibernates**: the session is saved to disk and comes back on the
+   next power-on. Plugging in power cancels it;
+3. below 30% or 11.2 V **does not suspend** (lid, idle timeout or the power menu): a laptop that runs out of battery *while asleep* just loses power. With the lid closed it locks and
+   blanks the screen like server mode and stays awake until it is safe to act.
+
+Why the voltage: a worn battery's percentage can lie. This ThinkPad's external battery read 59% and was empty 15 seconds later (seen during a `tlp recalibrate`), while its voltage
+was already down at 10.76 V. The voltage falls steadily before the collapse, so it gives a warning the percentage does not. The values suit 3-cell packs (11.1 V nominal);
+the readings are smoothed so a short load spike does not trigger it.
 
 **Two batteries (ThinkPad T450 with an external battery):** the firmware drains the external first, and when it runs *dry* the switch to the internal battery can fail and cut the power,
 while pulling the external out with the laptop running is a clean switch. The firmware only lets Linux choose the battery while on AC (`charge_behaviour` = `force-discharge` is rejected on
 battery), so the switch cannot be automated. Instead the warnings tell you to **pull the external battery out** (the laptop carries on with the internal one) or plug in.
+If the power does cut out, the internal battery can stay locked out afterwards (it boots on AC and dies when AC is unplugged, even with the external removed). For that reason the
+internal battery's TLP charge range is 95-100% (`system/etc/tlp.d/01-rip.conf`) instead of a storage range, so it is topped up whenever AC is plugged in.
 
 It uses minutes as well as % because a small or worn battery's percentage is unreliable. It was built for this ThinkPad: when its external battery *runs out*, the laptop has sometimes
 cut off instead of switching to the internal one (which works fine on its own, tested), and Linux's own low-battery action never fires because it averages both batteries.
@@ -178,10 +185,13 @@ cut off instead of switching to the internal one (which works fine on its own, t
 | `GUARD_BATTERY` | `active` | battery to watch: `active` = whichever battery is powering the laptop (follows the battery switch); or the `SERVER_BATTERY` values |
 | `GUARD_WARN_PCT` / `GUARD_WARN_MIN` | `15` / `8` | warn at this % or with this many minutes left |
 | `GUARD_ACT_PCT` / `GUARD_ACT_MIN` | `7` / `4` | start the countdown at this % or minutes left |
-| `GUARD_ACTION` | `poweroff` | `poweroff`, `hibernate` (only if resuming from hibernation is set up on your system) or `none` (notifications only) |
+| `GUARD_WARN_MV` / `GUARD_ACT_MV` | `11200` / `11000` | warn / start the countdown at this battery voltage in millivolts (`0` = off, the code default). Set them for your pack: about 3.73 / 3.67 V per cell |
+| `GUARD_MV_HOLD` | `6` | the voltage must stay at or below the setting this many seconds before it counts (a load spike sags a worn pack by ~0.4 V for a moment) |
+| `GUARD_GRACE_MV` | `5` | countdown in seconds when the voltage triggered it (a worn pack collapses within seconds) |
+| `GUARD_ACTION` | `hibernate` | `hibernate` (only if resuming from hibernation is set up on your system; it is here), `poweroff` or `none` (notifications only) |
 | `GUARD_SWAP_HINT` | `1` | with two batteries, the warnings suggest pulling the low one out while the other still has charge |
 | `GUARD_GRACE` | `30` | seconds of countdown |
-| `GUARD_NO_SUSPEND_BELOW` | `30` | on battery below this %, the laptop does not suspend |
+| `GUARD_NO_SUSPEND_BELOW` | `30` | on battery below this % (or below `GUARD_WARN_MV`), the laptop does not suspend |
 
 `servermode.py status` shows the guard's state (`ac`, `armed`, `warned`, `countdown`); `journalctl -t bspwn-power` logs what it did.
 
