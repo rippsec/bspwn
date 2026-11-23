@@ -1,0 +1,12 @@
+#!/bin/sh
+# OnlyOffice on the Intel GPU only. OnlyOffice is Chromium (CEF): at start its GPU
+# process probes every GL/EGL/Vulkan driver, NVIDIA's included. When the NVIDIA
+# driver is wedged (seen on the Dell: nv_shutdown_adapter deadlock) that probe
+# hangs in the kernel and the window stays blank white. Hiding NVIDIA from it
+# avoids that and keeps the dGPU asleep (battery). Wraps the packaged launcher;
+# /usr/local/bin comes first in PATH and the menu entry is overridden to call this.
+icd=/usr/share/vulkan/icd.d/intel_icd.json
+[ -f "$icd" ] && export VK_DRIVER_FILES="$icd" VK_ICD_FILENAMES="$icd"
+export __EGL_VENDOR_LIBRARY_FILENAMES=/usr/share/glvnd/egl_vendor.d/50_mesa.json
+export __GLX_VENDOR_LIBRARY_NAME=mesa
+exec /usr/bin/onlyoffice-desktopeditors "$@"

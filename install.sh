@@ -98,6 +98,17 @@ install_local_bins() {
   for f in "$project_root"/system/bin/*; do
     [[ -f "$f" ]] && sudo install -Dm755 "$f" "/usr/local/bin/$(basename "$f")"
   done
+  # OnlyOffice: system/bin/onlyoffice-desktopeditors keeps it off the NVIDIA driver. The
+  # packaged menu entry calls /usr/bin/... by full path, so generate a per-user override
+  # from it (regenerated on every run, so it follows OnlyOffice updates).
+  local oo=/usr/share/applications/onlyoffice-desktopeditors.desktop
+  if [[ -f $oo && -x /usr/local/bin/onlyoffice-desktopeditors ]]; then
+    sudo ln -sfn onlyoffice-desktopeditors /usr/local/bin/desktopeditors
+    mkdir -p "$HOME/.local/share/applications"
+    sed 's#/usr/bin/onlyoffice-desktopeditors#/usr/local/bin/onlyoffice-desktopeditors#g' "$oo" \
+      > "$HOME/.local/share/applications/onlyoffice-desktopeditors.desktop"
+    log "OnlyOffice menu entry -> Intel-only wrapper"
+  fi
 }
 
 # skippy-xd (window overview, bound in sxhkdrc) is not packaged — build from source

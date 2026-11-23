@@ -311,6 +311,9 @@ I2C-HID touchpad, Dell keyboard backlight). What differs from the ThinkPad on `m
   deadlocked the NVIDIA 550 driver (`nv_shutdown_adapter` waiting on an ACPI notify handler): the stuck process
   blocked every suspend, and with the lid closed logind retried 108 times in 38 minutes, running hot. Only a reboot
   clears that state. JARVIS does not use Ollama.
+- **OnlyOffice runs on the Intel GPU only** (`system/bin/onlyoffice-desktopeditors`, plus a per-user menu entry
+  that calls it). Its Chromium GPU process probes every GL/Vulkan driver at start; with the NVIDIA driver wedged
+  that probe hung and the window stayed blank white (from rofi and from the terminal).
 - **Suspend failsafe**: if suspend fails 3 times within 5 minutes with the lid still closed, the laptop powers off
   cleanly (forced after 4 minutes if a stuck process blocks the shutdown). `systemd-suspend.service` runs
   `/usr/local/sbin/bspwn-suspend-failsafe` on failure; its log is `journalctl -t bspwn-power`.
