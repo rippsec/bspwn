@@ -100,12 +100,17 @@ Each mode is a profile in `dot/.config/bspwm/modes/*.conf` (theme names, wallpap
 | `super+Tab`, `alt+Tab` | window overview / switcher (skippy-xd) |
 | `super+ctrl+u` | toggle cockpit / undercover mode |
 | `super+ctrl+s` | **toggle server mode** |
-| `super+x` | lock the screen |
+| `super+x` | lock the screen (it also locks by itself the moment the screen goes dark after 5 min idle, and before suspend) |
 | `super+Left/Right`, `super+alt+Left/Right` | previous/next desktop, move window there |
 | `super+p` | toggle focus-follows-pointer |
 | `super+e` | toggle touchpad |
 | `Print`, `super+shift+s` | screenshot (flameshot) |
 | `super+Escape`, `alt+shift+Escape` | restart bspwm, reload sxhkd |
+
+**Idle lock.** `bspwm/start` sets `xset s 300` (the screen blanks after 5 min) and `xset dpms 310` (backlight off 10 s later) and starts
+`scripts/idle-lock.sh`. That script keeps `xss-lock` running, and xss-lock runs `xlock` on the same blank event, so the lock is up as soon as the
+screen goes dark. If xss-lock exits, the script restarts it (log: `journalctl -t idle-lock`). xss-lock has to run inside the login session.
+Started from a tmux shell it aborts after each lock ("NoSessionForPID"), so restart it with `super+Escape`, not by hand.
 
 ## Settings you can tweak
 

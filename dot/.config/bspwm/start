@@ -68,7 +68,7 @@ process_list=(
   "sxhkd"
   #"lxde-settings-daemon"
   "xsettingsd"
-  "xss-lock --transfer-sleep-lock -- xlock"  # locks on idle and before suspend; -l: suspend waits until the lock is on screen
+  # xss-lock (lock when the screen blanks and before suspend): started below by scripts/idle-lock.sh, which restarts it if it dies
   "conky -q -c $HOME/.config/conky/hud.conf"
   "xfce4-notes"
   # picom: started by scripts/power-mode.sh (via mode.sh apply): AC only, and not at all with PICOM=0 in power.conf
@@ -92,6 +92,8 @@ done
 # Desktop mode (cockpit | undercover): theme, panel, geometry, wallpaper, picom/conky + power profile
 "$HOME/.config/bspwm/scripts/mode.sh" apply &
 setsid "$HOME/.config/bspwm/scripts/power-watch.sh" >/dev/null 2>&1 &
+# Idle lock: the screen locks the moment it blanks (xset s 300 above), and before suspend
+setsid "$HOME/.config/bspwm/scripts/idle-lock.sh" >/dev/null 2>&1 &
 # Keyboard backlight idle-off and server-mode watcher (single-instance daemons; settings in bspwm/power.conf)
 setsid "$HOME/.config/bspwm/scripts/kbd-backlight.py" >/dev/null 2>&1 &
 setsid "$HOME/.config/bspwm/scripts/servermode.py" daemon >/dev/null 2>&1 &
