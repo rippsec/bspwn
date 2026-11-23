@@ -132,7 +132,7 @@ Without picom, window transparency (e.g. alacritty's `opacity`) and shadows are 
 
 #### Keyboard backlight
 
-Any **keypress** lights the keyboard backlight at the minimal level, and it turns off a few seconds after the **last keypress**. Typing keeps it on, and so does **holding a key** (auto-repeat counts): `jjjjj` in vim, WASD, the arrows or Shift+arrows never let it time out while held.
+Any **keypress** lights the keyboard backlight at the minimal level, and it turns off 9 seconds (`KBD_IDLE_AC`/`KBD_IDLE_BAT`) after the **last keypress**. Typing keeps it on, and so does **holding a key** (auto-repeat counts): `jjjjj` in vim, WASD, the arrows or Shift+arrows never let it time out while held.
 It stays off while the lid is closed. If you change the level yourself (e.g. Fn+Space) it respects that until the timeout, then turns off.
 Keys are read from XInput raw events (keyboard only, instant, also seen while the lock screen is up). It works with any `/sys/class/leds/*kbd_backlight*`
 (ThinkPad `tpacpi::kbd_backlight`, Dell `dell::kbd_backlight`, ...) and does nothing on a laptop without one.
@@ -140,8 +140,8 @@ Keys are read from XInput raw events (keyboard only, instant, also seen while th
 | Setting | Shipped | Meaning |
 | --- | --- | --- |
 | `KBD_AUTO` | `1` | `0` = never touch the keyboard backlight |
-| `KBD_IDLE_AC` | `3` | seconds after the last keypress before it turns off, on AC. Use `1` for a quick off, `10` for a longer glow, `0` = never turn off |
-| `KBD_IDLE_BAT` | `3` | the same, on battery |
+| `KBD_IDLE_AC` | `9` | seconds after the last keypress before it turns off, on AC. Use `1` for a quick off, `10` for a longer glow, `0` = never turn off |
+| `KBD_IDLE_BAT` | `9` | the same, on battery |
 | `KBD_LEVEL` | `1` | level a keypress lights it to (`1` = minimal; `0` = the level it had before) |
 | `KBD_WAKE_POINTER` | `0` | `1` = touchpad/mouse input also lights it |
 
