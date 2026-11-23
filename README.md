@@ -45,7 +45,7 @@ The desktop has three parts: the **bar** along the top, the **HUD** column on th
 
 ![polybar](docs/screenshots/polybar.png)
 
-The bar is three floating islands. Numbers match the picture. *(In the screenshot the address next to 12 is hidden on purpose.)*
+The bar is three floating islands plus a small fourth one at the far right that holds only the power button, so a crowded systray can never push it off screen. Numbers match the picture. *(In the screenshot the address next to 12 is hidden on purpose.)*
 
 | # | Symbol | What it shows | Click / scroll |
 | --- | --- | --- | --- |
