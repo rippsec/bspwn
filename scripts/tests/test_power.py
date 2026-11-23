@@ -572,6 +572,7 @@ class KbdTest(unittest.TestCase):
     def test_only_keyboard_events_count_by_default(self):
         key = "EVENT type 13 (RawKeyPress)\n    device: 12"
         self.assertTrue(kb.is_activity(key))
+        self.assertTrue(kb.is_activity("EVENT type 2 (KeyPress)\n    detail: 45\n    flags: repeat"))   # held key (auto-repeat)
         self.assertFalse(kb.is_activity("EVENT type 14 (RawKeyRelease)\nEVENT type 17 (RawMotion)\nEVENT type 15 (RawButtonPress)"))
         self.assertTrue(kb.is_activity("EVENT type 17 (RawMotion)", pointer=True))
         self.assertFalse(kb.is_activity("EVENT type 17 (RawMotion)", pointer=False))

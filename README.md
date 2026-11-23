@@ -132,7 +132,7 @@ Without picom, window transparency (e.g. alacritty's `opacity`) and shadows are 
 
 #### Keyboard backlight
 
-Any **keypress** lights the keyboard backlight at the minimal level, and it turns off a few seconds after the **last keypress**. Typing keeps it on.
+Any **keypress** lights the keyboard backlight at the minimal level, and it turns off a few seconds after the **last keypress**. Typing keeps it on, and so does **holding a key** (auto-repeat counts): `jjjjj` in vim, WASD, the arrows or Shift+arrows never let it time out while held.
 It stays off while the lid is closed. If you change the level yourself (e.g. Fn+Space) it respects that until the timeout, then turns off.
 Keys are read from XInput raw events (keyboard only, instant, also seen while the lock screen is up). It works with any `/sys/class/leds/*kbd_backlight*`
 (ThinkPad `tpacpi::kbd_backlight`, Dell `dell::kbd_backlight`, ...) and does nothing on a laptop without one.

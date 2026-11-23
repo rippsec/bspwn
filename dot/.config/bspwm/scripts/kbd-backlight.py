@@ -28,8 +28,10 @@ FALLBACK_IDLE_MS = 700       # without xinput: input newer than this counts as t
 
 
 def is_activity(chunk, pointer=False):
-    """True if an xinput output chunk contains a key press (or, optionally, pointer input)."""
-    if "(RawKeyPress)" in chunk:
+    """True if an xinput output chunk contains a key press (or, optionally, pointer input).
+    A held key produces ONE RawKeyPress and then only plain `KeyPress` events flagged `repeat` (X auto-repeat), so those
+    count too: holding k/j/w/a/s/d, an arrow or shift keeps the light on for as long as it is held."""
+    if "(RawKeyPress)" in chunk or "(KeyPress)" in chunk:
         return True
     return pointer and ("(RawButtonPress)" in chunk or "(RawMotion)" in chunk)
 
