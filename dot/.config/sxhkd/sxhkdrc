@@ -21,8 +21,8 @@ super + F
   firefox-esr --no-remote
 
 # brave
-# super + B
-#  flatpak run com.brave.Browser
+super + B
+  brave-browser
 
 # caido
 super + C

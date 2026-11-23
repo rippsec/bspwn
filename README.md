@@ -52,7 +52,7 @@ The bar is three floating islands. Numbers match the picture. *(In the screensho
 | 1 | Kali logo | **App launcher** | click: full-screen launcher (rofi); click again to close |
 | 2 | ten dots | **Desktops** 1-9 and 0. Filled white dot = the desktop you are on, ring with a dot = has windows, faint ring = empty | click a dot to go there |
 | 3 | terminal | **Terminal** | left: terminal attached to the `tmux` session (created if missing, same as `super+Return`); right: plain terminal |
-| 4 | shield | **Browser** (Brave) | left: open it |
+| 4 | globe | **Browser** (Brave) | left: open it |
 | 5 | folder | **File manager** (Thunar) | left: your home folder; right: Downloads |
 | 6 | chip + block | **CPU load** | none. The small block grows with load: dim grey, grey, white, and *inverted* when it is in alarm |
 | 7 | memory + block | **RAM in use** | none. Same block as above |
