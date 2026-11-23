@@ -29,6 +29,8 @@ Everything below is a place where that shows. **Find your value first, then chan
   batteries and the only battery otherwise. Check battery health first (`energy_full` vs `energy_full_design` in `/sys/class/power_supply/BAT*`): watching a worn-out battery ends server mode early.
 - Keyboard LED level 1 is "minimal" on the ThinkPad (max 2). Check `cat /sys/class/leds/<kbd led>/max_brightness`; some laptops have 3 levels or an ambient-light mode.
 - The lid is ignored by a logind inhibitor, which needs systemd-logind and a polkit rule allowing the active session to inhibit (default on Debian/Ubuntu/Fedora/Arch desktops).
+- **Compositor**: `PICOM=0` in `power.conf` keeps picom off on AC and battery (the original ThinkPad runs without it). On a machine with a GPU that handles it
+  well, set `PICOM=1` (picom on AC only) and run `scripts/power-mode.sh auto --force`.
 - The **battery guard** (`GUARD_*` in `power.conf`) exists because on the original ThinkPad the hand-over from a drained external battery to the internal one
   has cut the power (the internal battery itself works). On a laptop with one healthy battery, Linux's own
   low-battery action already works; keep the guard (it is harmless) or set `GUARD_ENABLED=0`. `GUARD_ACTION=hibernate` only if hibernation with resume is configured.

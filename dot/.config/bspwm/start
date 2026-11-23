@@ -71,7 +71,7 @@ process_list=(
   "xss-lock --transfer-sleep-lock -- xlock"  # locks on idle and before suspend; -l: suspend waits until the lock is on screen
   "conky -q -c $HOME/.config/conky/hud.conf"
   "xfce4-notes"
-  "picom -b --config $HOME/.config/picom/picom.conf"
+  # picom: started by scripts/power-mode.sh (via mode.sh apply): AC only, and not at all with PICOM=0 in power.conf
   "xbindkeys"
 )
 

@@ -73,7 +73,7 @@ The bar is three floating islands. Numbers match the picture. *(In the screensho
 
 ### The HUD column (right side)
 
-A [conky](https://github.com/brndnmtthws/conky) widget, `dot/.config/conky/hud.conf`. It is a desktop widget, so windows cover it; it is turned off while on battery (the power profile stops conky and picom to save power).
+A [conky](https://github.com/brndnmtthws/conky) widget, `dot/.config/conky/hud.conf`. It is a desktop widget, so windows cover it; it is turned off while on battery (the power profile stops conky, and picom if it runs, to save power).
 
 | Block | What it shows |
 | --- | --- |
@@ -114,6 +114,15 @@ Each mode is a profile in `dot/.config/bspwm/modes/*.conf` (theme names, wallpap
 All power settings live in **`~/.config/bspwm/power.conf`** (a symlink to `dot/.config/bspwm/power.conf`). It is plain `KEY=VALUE`, read live: save the file and the change applies
 within a few seconds, no restart. The scripts are in `dot/.config/bspwm/scripts/` (`kbd-backlight.py`, `servermode.py`, shared `powerlib.py`) and start from `bspwm/start`.
 No root is needed: the keyboard LED is set through logind and the lid is handled with a logind inhibitor lock.
+
+#### Compositor (picom)
+
+| Setting | Shipped | Meaning |
+| --- | --- | --- |
+| `PICOM` | `0` | `1` = run [picom](https://github.com/yshui/picom) (shadows, fades, transparency) on AC; it is always stopped on battery. `0` = never run it (this ThinkPad). |
+
+`scripts/power-mode.sh` reads it whenever the power source changes or a mode is applied; to apply it at once run `~/.config/bspwm/scripts/power-mode.sh auto --force`.
+Without picom, window transparency (e.g. alacritty's `opacity`) and shadows are off.
 
 #### Keyboard backlight
 

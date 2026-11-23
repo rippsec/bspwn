@@ -11,6 +11,9 @@ DESK=$(cat "$HOME/.cache/bspwn-mode" 2>/dev/null)
 [[ -f $HOME/.config/bspwm/modes/$DESK.conf ]] && source "$HOME/.config/bspwm/modes/$DESK.conf"
 PICOM_CONF=${PICOM_CONF:-$HOME/.config/picom/picom.conf}
 CONKY=${CONKY:-1}
+# power.conf PICOM=0 turns the compositor off on this machine (AC and battery); default 1 = picom on AC only
+PICOM=$(sed -n 's/^PICOM=\([01]\).*/\1/p' "$HOME/.config/bspwm/power.conf" 2>/dev/null | tail -1)
+PICOM=${PICOM:-1}
 
 mode=${1:-auto}
 if [[ $mode == auto ]]; then
@@ -35,7 +38,11 @@ if [[ $mode == battery ]]; then
 else
   prev=$(sed -n 's/^brightness=//p' "$STATE" 2>/dev/null)
   [[ -n $prev ]] && brightnessctl -q set "${prev}%"
-  pgrep -x picom >/dev/null || picom -b --config "$PICOM_CONF"
+  if [[ $PICOM == 1 ]]; then
+    pgrep -x picom >/dev/null || picom -b --config "$PICOM_CONF"
+  else
+    pkill -x picom
+  fi
   [[ $CONKY == 1 ]] && { pgrep -x conky >/dev/null || setsid conky -q -c "$HOME/.config/conky/hud.conf" >/dev/null 2>&1 & }
   pgrep -x kdeconnectd >/dev/null || { setsid kdeconnectd >/dev/null 2>&1 & }
   [[ -f ~/.config/jarvis/config.toml ]] && systemctl --user start jarvis 2>/dev/null
