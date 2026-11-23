@@ -107,7 +107,7 @@ def draw_bsod(bg, face=":(", headline=None, glitchy=False):
     soft = tuple(min(255, c + 200) for c in bg)
     d.text((X - int(6 * s), int(40 * s)), face, font=font(F_LIGHT, 150), fill=WHITE)
     y = int(255 * s)
-    for line in headline or ("Widnows ran into a problem and your PC needs to reboot.",
+    for line in headline or ("Windows ran into a problem and your PC needs to reboot.",
                              "Enter the recovery code to restart the machine."):
         d.text((X, y), corrupt(line) if glitchy else line, font=font(F_LIGHT, 27), fill=WHITE)
         y += int(42 * s)
@@ -207,7 +207,7 @@ elif scene == "alert":
         draw_eas()
     else:
         draw_bsod((170, 0, 0), face=":(", glitchy=True,
-                  headline=("Widnows detected an UNAUTHORIZED user at this machine.",
+                  headline=("Windows detected an UNAUTHORIZED user at this machine.",
                             "Incident reported. Enter the recovery code or stay very still."))
 elif scene == "final":
     draw_final()

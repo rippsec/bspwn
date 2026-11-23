@@ -54,7 +54,7 @@ The bar is three floating islands. Numbers match the picture. *(In the screensho
 | 3 | terminal | **Terminal** | left: terminal attached to the `tmux` session (created if missing, same as `super+Return`); right: plain terminal |
 | 4 | globe | **Browser** (Brave) | left: open it |
 | 5 | folder | **File manager** (Thunar) | left: your home folder; right: Downloads |
-| 6 | chip + block | **CPU load** | none. The small block grows with load: dim grey, grey, white, and *inverted* when it is in alarm |
+| 6 | chip + block | **CPU load** | none. The small block grows with load: dim grey, grey, white, and turns into an *inverted* `!` when it is in alarm (same width, so nothing in the bar shifts) |
 | 7 | memory + block | **RAM in use** | none. Same block as above |
 | 8 | disk + block | **Root disk fullness** (more blocks = less space left) | none |
 | 9 | thermometer + block | **CPU temperature** | none |
