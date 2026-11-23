@@ -1,0 +1,4 @@
+# Only the colour theme is set here; everything else keeps lsd's defaults
+# (the `ls` alias passes the rest as flags). colors.yaml maps lsd onto the terminal palette.
+color:
+  theme: custom

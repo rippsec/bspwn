@@ -35,3 +35,17 @@ zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
 # cache expensive completers (apt, dpkg, man pages, ...)
 zstyle ':completion:*' use-cache on
 zstyle ':completion:*' cache-path ${XDG_CACHE_HOME:-$HOME/.cache}/zsh-compcache
+
+# Left/Right keep moving the cursor even when the autocomplete menu is open
+# (the menu used to hijack them to change the selected item). Up/Down/Tab/Shift-Tab
+# still navigate the menu.
+if [[ -r /usr/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh ]]; then
+    _ac_cursor_left()  { zle send-break; zle .backward-char }
+    _ac_cursor_right() { zle send-break; zle .forward-char }
+    zle -N _ac_cursor_left; zle -N _ac_cursor_right
+    bindkey -M menuselect '^[[D' _ac_cursor_left  '^[OD' _ac_cursor_left
+    bindkey -M menuselect '^[[C' _ac_cursor_right '^[OC' _ac_cursor_right
+    bindkey -M menuselect '^I' menu-complete '^[[Z' reverse-menu-complete
+    # Shift-Tab in the normal prompt: open menu backwards instead of undo
+    bindkey '^[[Z' reverse-menu-complete
+fi

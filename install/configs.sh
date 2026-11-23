@@ -54,6 +54,7 @@ link_config_dirs() {
     "ranger"
     "zathura"
     "alacritty"
+    "lsd"
     "fastfetch"
     "gtk-3.0"
     "gtk-4.0"

@@ -76,7 +76,7 @@ process_list=(
   "xss-lock -- xlock"  # locks on idle (xset s) and before suspend; xlock is single-instance
   "conky -q -c $HOME/.config/conky/hud.conf"
   "xfce4-notes"
-  "picom -b --config $HOME/.config/picom/picom.conf"
+  "picom -b --config $HOME/.config/picom/picom.conf"  # power-mode.sh stops it on battery (PICOM=1 in power.conf)
   "xbindkeys"
 )
 
@@ -97,6 +97,9 @@ done
 # Desktop mode (cockpit | undercover): theme, panel, geometry, wallpaper, picom/conky + power profile
 "$HOME/.config/bspwm/scripts/mode.sh" apply &
 setsid "$HOME/.config/bspwm/scripts/power-watch.sh" >/dev/null 2>&1 &
+# Keyboard backlight idle-off and server-mode watcher (single-instance daemons; settings in bspwm/power.conf)
+setsid "$HOME/.config/bspwm/scripts/kbd-backlight.py" >/dev/null 2>&1 &
+setsid "$HOME/.config/bspwm/scripts/servermode.py" daemon >/dev/null 2>&1 &
 # Notes widget: started after the loop because restart_process kills every "conky" by name
 #conky -q -c "$HOME/.config/conky/notes.conf" &
 # click the widget to edit, wheel over it to scroll (kill any old watcher first)
