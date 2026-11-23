@@ -41,19 +41,26 @@ class Kbd:
 
     def __init__(self, now):
         self.last_key = now          # startup grace: the first timeout counts from the daemon start
+        self.keyed = False           # no keypress seen yet: do not light an unlit keyboard just because the daemon started
+        self.manual_off = False      # the user switched it off by hand (Fn+Space): stay off until the next keypress
         self.last_set = None         # level we last asked for (to notice changes made behind our back)
         self.prev = 0                # last non-zero level seen
 
     def key(self, now):
         self.last_key = now
+        self.keyed = True
+        self.manual_off = False
 
     def step(self, now, cur, timeout, lid_closed, level):
         if self.last_set is not None and cur != self.last_set:
             self.last_key = now      # changed by someone else (Fn+Space): treat as activity, do not fight it
+            self.manual_off = cur == 0   # ... and if they turned it OFF, keep it off (until a keypress)
         if cur > 0:
             self.prev = cur
-        if lid_closed:
+        if lid_closed or self.manual_off:
             want = 0
+        elif cur == 0 and not self.keyed and timeout > 0:
+            want = 0                 # daemon just (re)started with the light off: leave it off until a key is pressed
         elif timeout <= 0 or now - self.last_key < timeout:
             want = cur if cur > 0 else (level or self.prev or 1)   # typing: light it, keep a level the user chose
         else:
