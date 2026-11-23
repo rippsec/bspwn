@@ -386,6 +386,19 @@ Exec=bspwm
 Type=Application
 EOF'
 
+  # needrestart's notify-send hook never exports the session bus address, so after apt
+  # D-Bus autolaunched a private bus with a second dunst that drew over the lock screen.
+  # Replace it with the fixed copy; dpkg-divert keeps package upgrades from restoring it.
+  local nr=/etc/needrestart/notify.d/400-notify-send
+  if [[ -d /etc/needrestart/notify.d && -f "$project_root/system$nr" ]]; then
+    log "Installing fixed needrestart notify-send hook (diverted)..."
+    sudo mkdir -p /usr/local/share/bspwn
+    dpkg-divert --list "$nr" | grep -q bspwn \
+      || sudo dpkg-divert --package bspwn --rename \
+           --divert /usr/local/share/bspwn/needrestart-400-notify-send.distrib --add "$nr"
+    sudo install -m755 "$project_root/system$nr" "$nr"
+  fi
+
   # sysctl performance tuning (vm, inotify, network, perf_event)
   if [[ -f "$project_root/system/etc/sysctl.d/99-rip.conf" ]]; then
     log "Installing sysctl tuning (99-rip.conf)..."

@@ -302,6 +302,11 @@ I2C-HID touchpad, Dell keyboard backlight). What differs from the ThinkPad on `m
 - **Charge thresholds** (`system/etc/tlp.d/01-rip.conf`): 85/90 on the single Dell battery.
 - **Touchpad**: `touchpad.sh` also finds the Dell pad and resets it by rebinding `i2c_hid_acpi`.
 - **Conky HUD**: GPU section, CPU/NVMe/RAM temperatures and both Dell fans (`dell_smm`), one battery.
+- **Notifications never show over the lock screen**: `xlock` pauses every running dunst on the bus it actually
+  listens on, and stops stray dunsts on autolaunched buses. Those came from needrestart (after `apt`), whose
+  notify-send hook did not export the session bus address; `install.sh -system` replaces that hook with a fixed
+  copy via `dpkg-divert` (`system/etc/needrestart/notify.d/400-notify-send`). Undo:
+  `sudo rm /etc/needrestart/notify.d/400-notify-send && sudo dpkg-divert --package bspwn --rename --remove /etc/needrestart/notify.d/400-notify-send`.
 
 ### Antialiasing de fuentes
 

@@ -28,8 +28,24 @@ playerctl --all-players pause 2>/dev/null
 
 # Notifications would be drawn ON TOP of the lock screen (message previews,
 # chat contents...). Hold them while locked; they show up after unlocking.
-dunstctl set-paused true 2>/dev/null
-trap 'dunstctl set-paused false 2>/dev/null' EXIT
+# A notifier that lacks the session bus address (needrestart after apt, cron,
+# acpi scripts) makes D-Bus autolaunch a private bus with a SECOND dunst on it,
+# which a plain `dunstctl` never reaches: stop those strays, and pause every
+# remaining dunst on the bus it actually listens on.
+session_bus="unix:path=${XDG_RUNTIME_DIR:-/run/user/$EUID}/bus"
+dunst_pause() {   # dunst_pause true|false
+  local p bus
+  for p in $(pgrep -u "$EUID" -x dunst); do
+    bus=$(tr '\0' '\n' < "/proc/$p/environ" 2>/dev/null | sed -n 's/^DBUS_SESSION_BUS_ADDRESS=//p')
+    if [[ $1 == true && -n $bus && $bus != "$session_bus"* ]]; then
+      kill "$p" 2>/dev/null        # stray dunst on an autolaunched bus
+      continue
+    fi
+    DBUS_SESSION_BUS_ADDRESS=${bus:-$session_bus} dunstctl set-paused "$1" 2>/dev/null
+  done
+}
+dunst_pause true
+trap 'dunst_pause false' EXIT
 
 # Style: "bsod" (default) = troll blue-screen parody with live error clock and
 # a 'recovery code' progress bar; "classic" = monochrome clock + ring.
