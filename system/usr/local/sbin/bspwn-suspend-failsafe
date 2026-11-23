@@ -1,0 +1,43 @@
+#!/bin/sh
+# Suspend failsafe (run by systemd as OnFailure= of systemd-suspend.service).
+#
+# When a process is stuck in the kernel (state D, e.g. the NVIDIA driver deadlock
+# seen on the Dell), every suspend fails with "Freezing user space processes
+# failed" and logind retries as long as the lid stays closed: the laptop runs
+# flat out inside a closed lid / bag and gets very hot. After FAILS failed
+# suspends within WINDOW seconds with the lid still closed, power off cleanly
+# instead. If the stuck process also blocks the clean shutdown, force it after
+# FORCE_AFTER seconds (filesystems synced first).
+#
+# Overridable for tests: BSPWN_FAILSAFE_DIR, BSPWN_LID_GLOB, BSPWN_FAILSAFE_DRYRUN=1
+FAILS=3
+WINDOW=300
+FORCE_AFTER=240
+dir=${BSPWN_FAILSAFE_DIR:-/run/bspwn}
+lid_glob=${BSPWN_LID_GLOB:-/proc/acpi/button/lid/*/state}
+log() { logger -t bspwn-power "suspend-failsafe: $*" 2>/dev/null; echo "$*"; }
+
+mkdir -p "$dir"
+now=$(date +%s)
+echo "$now" >> "$dir/suspend-fails"
+# keep only the failures inside the window
+awk -v t=$((now - WINDOW)) '$1 >= t' "$dir/suspend-fails" > "$dir/suspend-fails.new"
+mv "$dir/suspend-fails.new" "$dir/suspend-fails"
+n=$(wc -l < "$dir/suspend-fails")
+
+lid=open
+for f in $lid_glob; do
+  [ -r "$f" ] && grep -q closed "$f" && lid=closed
+done
+
+log "suspend failed ($n in the last ${WINDOW}s, lid $lid)"
+[ "$lid" = closed ] && [ "$n" -ge "$FAILS" ] || exit 0
+
+stuck=$(ps -eo stat=,comm= 2>/dev/null | awk '$1 ~ /^D/ {print $2}' | sort | uniq -c | sort -rn | head -5 | tr -s ' \n' ' ')
+log "lid closed and suspend keeps failing (stuck in kernel: ${stuck:-none}): powering off to avoid overheating"
+rm -f "$dir/suspend-fails"
+[ "${BSPWN_FAILSAFE_DRYRUN:-0}" = 1 ] && { echo "DRYRUN: would power off"; exit 0; }
+
+# fallback first (detached), then the clean shutdown
+setsid sh -c "sleep $FORCE_AFTER; sync; logger -t bspwn-power 'suspend-failsafe: clean shutdown hung, forcing power off'; systemctl poweroff -ff" >/dev/null 2>&1 &
+systemctl poweroff --no-block

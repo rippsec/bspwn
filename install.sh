@@ -399,6 +399,18 @@ EOF'
     sudo install -m755 "$project_root/system$nr" "$nr"
   fi
 
+  # Suspend failsafe: power off after 3 failed suspends in 5 min with the lid closed
+  # (a process stuck in the kernel makes logind retry forever and the laptop overheats)
+  if [[ -f "$project_root/system/usr/local/sbin/bspwn-suspend-failsafe" ]]; then
+    log "Installing suspend failsafe..."
+    sudo install -Dm755 "$project_root/system/usr/local/sbin/bspwn-suspend-failsafe" /usr/local/sbin/bspwn-suspend-failsafe
+    sudo install -Dm644 "$project_root/system/etc/systemd/system/bspwn-suspend-failsafe.service" \
+      /etc/systemd/system/bspwn-suspend-failsafe.service
+    sudo install -Dm644 "$project_root/system/etc/systemd/system/systemd-suspend.service.d/bspwn-failsafe.conf" \
+      /etc/systemd/system/systemd-suspend.service.d/bspwn-failsafe.conf
+    sudo systemctl daemon-reload
+  fi
+
   # sysctl performance tuning (vm, inotify, network, perf_event)
   if [[ -f "$project_root/system/etc/sysctl.d/99-rip.conf" ]]; then
     log "Installing sysctl tuning (99-rip.conf)..."

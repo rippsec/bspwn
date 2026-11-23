@@ -1,0 +1,8 @@
+[Unit]
+Description=bspwn: power off if suspend keeps failing with the lid closed
+Documentation=file:///usr/local/sbin/bspwn-suspend-failsafe
+DefaultDependencies=no
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/bspwn-suspend-failsafe
