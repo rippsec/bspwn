@@ -30,10 +30,12 @@ xset r rate 350 25
 
 # Enable DPMS (timeouts in seconds)
 # this setting doesn't suspend or shutdowns the system only the display
-# After 5 min idle: lock (xss-lock -> xlock), then turn the display off ~10s later.
-# Only the display sleeps; the machine keeps running.
-xset s 300 0
-xset dpms 310 310 310
+# After 5 min idle: lock first, then turn the display off (done by scripts/idle-lock.sh, which watches the idle time).
+# X's own screensaver/DPMS timers are off so they cannot blank the screen before the lock is up. Only the display
+# sleeps; the machine keeps running. IDLE_LOCK (seconds) can be set in the environment of idle-lock.sh.
+xset s off
+xset +dpms
+xset dpms 0 0 0
 
 ### Process Management
 
