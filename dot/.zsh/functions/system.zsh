@@ -15,12 +15,6 @@ function apt() {
   sudo /usr/bin/apt -y "$@"
 }
 
-function clear_all(){
-    for i in "lhost" "lport" "rhost" "rport" "ssl" "proto"; do
-        unsetg "$i";
-    done
-}
-
 
 center() {
     local text="$1"

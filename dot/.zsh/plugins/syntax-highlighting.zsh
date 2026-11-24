@@ -1,7 +1,10 @@
-# Syntax-highlighting
-if [ -f /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
-    . /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+# SPDX-License-Identifier: GPL-2.0-only
+# Copyright (c) 2025-2026 rippsec and contributors. See LICENSE and NOTICE.md.
+# zsh-syntax-highlighting: sourced ONCE, with the palette-friendly styles below.
+if [[ -r /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
+    ZSH_HIGHLIGHT_MAXLENGTH=300              # skip highlighting very long buffers
     ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets pattern line regexp)
+    source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
     ZSH_HIGHLIGHT_STYLES[default]=none
     ZSH_HIGHLIGHT_STYLES[line]=bold
     ZSH_HIGHLIGHT_STYLES[unknown-token]=fg=red
