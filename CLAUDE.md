@@ -25,7 +25,7 @@ For porting to other hardware use the skill `.claude/skills/adapt-bspwn/` and it
 | `dot/.config/bspwm/` | `bspwmrc` (env, rules, colours), `start` (autostart `process_list`), `power.conf`, `modes/*.conf`, `scripts/` |
 | `dot/.config/sxhkd/sxhkdrc` | **every desktop shortcut** |
 | `dot/.config/polybar/config.ini` | the bar (`launch.sh` restarts it; `scripts/` has helper scripts) |
-| `dot/.tmux.conf`, `dot/.zsh/` | tmux and the shell (`~/.tmux.conf`, `~/.zsh` link here) |
+| `dot/.tmux.conf`, `dot/.zsh/` | tmux and the shell. `~/.zshrc` is tiny and sources `dot/.zsh/init.zsh`, which loads `config/ prompt/ plugins/ aliases/ functions/ pentest/` in that order (then `exports.zsh`, `theme.zsh`, `~/.zshrc.local`); add a plugin/function/alias as a new `*.zsh` file in the right folder. Machine-specific shell bits go in `~/.zshrc.local` (not in git). The polybar LHOST/RHOST widgets rewrite the `lhost`/`rhost` lines of `~/.zshrc`: keep them there |
 | `dot/theme/` | bundled GTK theme and icons |
 | `scripts/` | `themer/` (theme GUI), `palette_check.py`, `wallpaper/gen_*.py`, `tests/test_power.py`, `docs/` (documentation builder) |
 | `system/` | root-level files (acpi, ly, X11, tlp, `bin/xlock*`), installed only by `install.sh -system` |
@@ -60,6 +60,7 @@ Keys: **sxhkd** reads `sxhkdrc` and runs `bspc ...` (window actions), scripts, o
 - **polybar:** icons are **real glyph characters** in the file. Polybar does not understand `\u{f059f}`; write them with Python: `python3 -c "print(chr(0xf059f))"`. Icon font: *Symbols Nerd Font Mono*. The bar is several processes (`left center right power`) started by `launch.sh`.
 - **tmux:** `bind-key -n M-x` = Alt+x without the prefix; `bind x` = prefix (`Ctrl+b`) then x. The prompt line is styled by `message-style` and `message-format`.
 - **Shell:** `ls` = lsd, `cat` = batcat, `rm` is verbose: use `command cat`; in scripts use absolute paths. The Bash tool resets cwd each call.
+- **zsh change check:** snapshot `alias`, `functions`, `bindkey`, `env` of `zsh -i` before and after, and diff them (that is how the refactor was verified).
 - Never blanket-delete `__pycache__`: one `.pyc` under `dot/.config/ranger/plugins/` is tracked.
 - `/home/<user>` must not be hard-coded in new files: use `$HOME` / `~`.
 

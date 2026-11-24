@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-2.0-only
-# Copyright (c) 2025-2026 rip (rippsec) and contributors. See LICENSE and NOTICE.md.
+# Copyright (c) 2025-2026 rippsec and contributors. See LICENSE and NOTICE.md.
 """Tests for the power tools (kbd-backlight.py, servermode.py, powerlib.py) against a fake sysfs.
 
     python3 scripts/tests/test_power.py

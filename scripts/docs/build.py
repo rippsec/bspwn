@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-2.0-only
-# Copyright (c) 2025-2026 rip (rippsec) and contributors. See LICENSE and NOTICE.md.
+# Copyright (c) 2025-2026 rippsec and contributors. See LICENSE and NOTICE.md.
 """Build the bspwn documentation: manual (md + pdf), cheatsheet (md + pdf), keyboard map and diagrams, interactive page.
 
     python3 scripts/docs/build.py            # everything
@@ -23,7 +23,12 @@ import keys as K
 # ------------------------------------------------------------------ check
 def check():
     ok = True
-    real = {k.lower() for k in K.parse_sxhkd(ROOT / "dot/.config/sxhkd/sxhkdrc")}
+    allk = [k.lower() for k in K.parse_sxhkd(ROOT / "dot/.config/sxhkd/sxhkdrc")]
+    dups = sorted({k for k in allk if allk.count(k) > 1})
+    if dups:
+        ok = False
+        print("sxhkd: the same combination is bound more than once:"); [print("   ", x) for x in dups]
+    real = set(allk)
     doc = {k.lower() for k in K.doc_sxhkd_keys() if "drag" not in k}
     for label, a, b in (("bound in sxhkdrc but missing from scripts/docs/keys.py", real - doc, None),
                         ("documented in keys.py but not bound in sxhkdrc", doc - real, None)):
@@ -70,7 +75,7 @@ SHORT = {  # super+key and super+shift+key, a few letters each
  "y": ("pull leaf", ""), "u": ("", ""), "i": ("newer", ""), "o": ("older", "float all"), "p": ("focus fol.", ""),
  "a": ("", ""), "s": ("float", "screenshot"), "d": ("menu", ""), "f": ("fullscr", "firefox"), "g": ("swap big", "chromium"),
  "h": ("focus ◀", "move ◀"), "j": ("focus ▼", "move ▼"), "k": ("focus ▲", "move ▲"), "l": ("focus ▶", "move ▶"),
- "z": ("", ""), "x": ("lock", ""), "c": ("next win", "caido*"), "v": ("", ""), "b": ("sibling", "brave"), "n": ("notes", "add todo"),
+ "z": ("", ""), "x": ("lock", ""), "c": ("next win", "caido"), "v": ("", ""), "b": ("sibling", "brave"), "n": ("notes", "add todo"),
  "m": ("monocle", ""),
  "Return": ("terminal", "plain term"), "Tab": ("overview", ""), "Esc": ("restart wm", "dbus+wm"),
 }
@@ -98,7 +103,7 @@ def keymap_svg():
     key(10, yb, "Esc", 100); key(10 + 106, yb, "Tab", 100); key(10 + 212, yb, "Return", 130)
     W = 10 + 10 * (w + gap) + 20
     H = yb + h + 40
-    parts.append(f'<text x="10" y="{H-14}" font-size="11" fill="#33353b">Hold Super (the Windows key) and press the key. Black = Super+key, orange ⇧ = Super+Shift+key. * caido shares its keys with "previous window".</text>')
+    parts.append(f'<text x="10" y="{H-14}" font-size="11" fill="#33353b">Hold Super (the Windows key) and press the key. Black = Super+key, orange ⇧ = Super+Shift+key.</text>')
     svg = (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" '
            f'font-family="DejaVu Sans, sans-serif">{"".join(parts)}</svg>')
     (DOCS / "diagrams/keymap.svg").write_text(svg)
@@ -168,10 +173,12 @@ def make_toc(md, maxlevel=2):
 
 # ------------------------------------------------------------------ manual
 CSS = r"""
-@page { size: A4; margin: 18mm 16mm 20mm 16mm;
-  @bottom-center { content: counter(page); font: 9pt 'DejaVu Sans'; color: #666; }
+@page { size: A4; margin: 18mm 16mm 22mm 16mm;
+  @bottom-left { content: "bspwn manual · © 2025-2026 rippsec and contributors"; font: 7.8pt 'DejaVu Sans'; color: #777; width: 52%; white-space: nowrap; }
+  @bottom-center { content: "GPL-2.0-only · docs CC BY-SA 4.0"; font: 7.8pt 'DejaVu Sans'; color: #777; width: 40%; white-space: nowrap; text-align: right; }
+  @bottom-right { content: counter(page); font: 9pt 'DejaVu Sans'; color: #555; width: 8%; text-align: right; }
   @top-right { content: string(chapter); font: 8.5pt 'DejaVu Sans'; color: #888; } }
-@page :first { margin: 0; @bottom-center { content: none } @top-right { content: none } }
+@page :first { margin: 0; @bottom-left { content: none } @bottom-center { content: none } @bottom-right { content: none } @top-right { content: none } }
 html { font: 10pt/1.5 'DejaVu Sans', sans-serif; color: #1b1c20; }
 h1 { string-set: chapter content(); font-size: 21pt; margin: 0 0 6mm; padding-bottom: 2mm; border-bottom: 2px solid #3a3c42; page-break-before: always; }
 h1.first { page-break-before: avoid; }
@@ -193,6 +200,7 @@ blockquote { margin: 3mm 0; padding: 2mm 4mm; border-left: 3px solid #8e9099; ba
 .cover h1 { color: #f2efe9; border: 0; font-size: 44pt; page-break-before: avoid; string-set: none; margin: 0; }
 .cover p { font-size: 13pt; color: #bdbab3; max-width: 130mm; }
 .cover .small { font-size: 9.5pt; color: #8e9099; margin-top: 70mm; }
+.cover .foot { position: absolute; left: 22mm; right: 22mm; bottom: 12mm; font-size: 7.8pt; color: #777; display: flex; justify-content: space-between; }
 .toc { page-break-after: always; }
 .toc h1 { page-break-before: avoid; }
 .toc ul { list-style: none; padding-left: 0; margin: 0; }
@@ -236,14 +244,17 @@ def build_manual(pdf=True):
     body = body.replace('<h1 id=', '<h1 id=', 1)
     cover = (f'<div class="cover"><h1>bspwn</h1><p>User manual for the bspwm desktop: using it, changing it, and making it yours.</p>'
              f'<p>bspwm · sxhkd · polybar · tmux · zsh · themes · lock screen · power tools</p>'
-             f'<p class="small">Built {datetime.date.today().isoformat()} from the repository (rippsec/bspwn). Licensed GPL-2.0; documentation CC BY-SA 4.0. See the LICENSE and NOTICE files.</p></div>')
+             f'<p class="small">Built {datetime.date.today().isoformat()} from the repository (rippsec/bspwn). Code GPL-2.0-only; documentation CC BY-SA 4.0. See the LICENSE and NOTICE.md files.</p>'
+             f'<div class="foot"><span>bspwn user manual · © 2025-2026 rippsec and contributors</span><span>GPL-2.0-only · docs CC BY-SA 4.0 · github.com/rippsec/bspwn</span></div></div>')
     doc = f"<html><head><meta charset='utf-8'><title>bspwn user manual</title><style>{CSS}</style></head><body>{cover}{toc_html}{body}</body></html>"
     HTML(string=doc, base_url=str(DOCS) + "/").write_pdf(str(DOCS / "BSPWN-manual.pdf"))
     print("manual.pdf: ok")
 
 # ------------------------------------------------------------------ cheatsheet
 CS_CSS = r"""
-@page { size: A4 landscape; margin: 8mm; }
+@page { size: A4 landscape; margin: 8mm 8mm 12mm 8mm;
+  @bottom-left { content: "bspwn cheatsheet · © 2025-2026 rippsec and contributors"; font: 6.6pt 'DejaVu Sans'; color: #777; }
+  @bottom-right { content: "GPL-2.0-only · docs CC BY-SA 4.0 · github.com/rippsec/bspwn · page " counter(page); font: 6.6pt 'DejaVu Sans'; color: #777; } }
 html { font: 7.6pt/1.28 'DejaVu Sans', sans-serif; color: #1b1c20; }
 h1 { font-size: 14pt; margin: 0 0 1.5mm; } .sub { color: #555860; margin: 0 0 2.5mm; font-size: 7.6pt; }
 .cols { column-count: 3; column-gap: 5mm; }
@@ -273,7 +284,7 @@ def build_cheatsheet(pdf=True):
     md = ["# bspwn cheatsheet", "", "*Super = the Windows key. A capital letter in sxhkdrc means Shift. tmux prefix is `Ctrl+b`; the Alt keys need no prefix.*", ""]
     for t, rows in secs:
         md += [f"## {t}", "", md_table(rows), ""]
-    md += ["![Super key map](diagrams/keymap.svg)", "", "Generated by `scripts/docs/build.py` from `scripts/docs/keys.py`."]
+    md += ["![Super key map](diagrams/keymap.svg)", "", "Generated by `scripts/docs/build.py` from `scripts/docs/keys.py`.", "", "© 2025-2026 rippsec and contributors · GPL-2.0-only code, docs CC BY-SA 4.0 · <https://github.com/rippsec/bspwn>"]
     (DOCS / "BSPWN-cheatsheet.md").write_text("\n".join(md))
     print("cheatsheet.md: ok")
     if not pdf:

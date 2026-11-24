@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-2.0-only
-# Copyright (c) 2025-2026 rip (rippsec) and contributors. See LICENSE and NOTICE.md.
+# Copyright (c) 2025-2026 rippsec and contributors. See LICENSE and NOTICE.md.
 """Single source of truth for the shortcuts shown in the manual, the cheatsheet and the interactive page.
 
 `python3 scripts/docs/build.py --check` parses dot/.config/sxhkd/sxhkdrc and dot/.tmux.conf and reports every
@@ -17,7 +17,7 @@ SXHKD = [
   ("super+shift+g", "Chromium"),
   ("super+shift+f", "Firefox"),
   ("super+shift+b", "Brave browser"),
-  ("super+shift+c", "Caido (note: shares its keys with 'focus previous window', see Known quirks)"),
+  ("super+shift+c", "Caido"),
   ("super+n", "Desktop notes: edit"),
   ("super+shift+n", "Desktop notes: quick-add a todo"),
   ("super+ctrl+n", "Desktop notes: tick a task"),
@@ -33,7 +33,7 @@ SXHKD = [
   ("alt+shift+Escape", "Reload sxhkd (this file)"),
   ("super+alt+Escape", "Quit bspwm (log out)"),
   ("super+shift+Escape", "Restart the D-Bus daemon and bspwm (last resort)"),
-  ("super+p", "Toggle focus-follows-pointer (also bound to 'focus parent', see Known quirks)"),
+  ("super+p", "Toggle focus-follows-pointer"),
   ("super+e", "Toggle touchpad"),
   ("super+shift+e", "Un-freeze a stuck touchpad"),
   ("Print", "Screenshot, region (flameshot)"),
@@ -68,7 +68,6 @@ SXHKD = [
   ("super+b", "Focus the sibling (brother) node"),
   ("super+comma", "Focus the first child"), ("super+period", "Focus the second child"),
   ("super+c", "Focus next window on this desktop"),
-  ("super+shift+c", "Focus previous window on this desktop"),
   ("super+o", "Focus the older window in the focus history"),
   ("super+i", "Focus the newer window in the focus history"),
  ]),

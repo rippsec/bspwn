@@ -76,8 +76,9 @@ for(const s of S){const a=document.createElement('a');a.href='#'+s.id;a.textCont
 const tb=document.createElement('button');tb.textContent='Light / dark';tb.onclick=()=>{const l=document.documentElement.dataset.theme==='light';document.documentElement.dataset.theme=l?'dark':'light';store.set('theme',l?'dark':'light')};nav.append(tb);
 if(store.get('theme','dark')==='light')document.documentElement.dataset.theme='light';
 let cleanup=null;
-function go(){const id=(location.hash||'#start').slice(1);const s=S.find(x=>x.id===id)||S[0];$$('nav a').forEach(a=>a.classList.toggle('on',a.dataset.id===s.id));if(cleanup){cleanup();cleanup=null}const m=$('#main');m.innerHTML='';const r=s.r(m);if(typeof r==='function')cleanup=r;scrollTo(0,0)}
+function go(){const id=(location.hash||'#start').slice(1);const s=S.find(x=>x.id===id)||S[0];$$('nav a').forEach(a=>a.classList.toggle('on',a.dataset.id===s.id));if(cleanup){cleanup();cleanup=null}const m=$('#main');m.innerHTML='';const r=s.r(m);m.append(foot);if(typeof r==='function')cleanup=r;scrollTo(0,0)}
 addEventListener('hashchange',go);
+const foot=document.createElement('p');foot.style.cssText='color:var(--dim);font-size:13px;margin:32px 0 0';foot.innerHTML='bspwn interactive manual · © 2025-2026 rippsec and contributors · GPL-2.0-only code, docs CC BY-SA 4.0 · <a href="https://github.com/rippsec/bspwn">github.com/rippsec/bspwn</a>';
 const H=(h)=>{const d=document.createElement('div');d.innerHTML=h;return d};
 // ---- 1 start
 function rStart(m){m.innerHTML=`<h2>bspwn, interactively</h2><p class="lead">A tiling desktop you drive with the keyboard. Use the menu on the left to learn it by doing.</p>

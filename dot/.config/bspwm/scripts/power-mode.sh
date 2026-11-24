@@ -1,6 +1,6 @@
 #!/bin/bash
 # SPDX-License-Identifier: GPL-2.0-only
-# Copyright (c) 2025-2026 rip (rippsec) and contributors. See LICENSE and NOTICE.md.
+# Copyright (c) 2025-2026 rippsec and contributors. See LICENSE and NOTICE.md.
 # Apply the userspace half of the power profile (TLP handles CPU/disk/wifi/PCIe).
 #   battery: stop picom, conky HUD, kdeconnect, cap brightness  -> least drain
 #   AC:      start them again, restore brightness               -> full eye candy

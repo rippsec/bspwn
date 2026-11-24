@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-2.0-only
-# Copyright (c) 2025-2026 rip (rippsec) and contributors. See LICENSE and NOTICE.md.
+# Copyright (c) 2025-2026 rippsec and contributors. See LICENSE and NOTICE.md.
 """Shared helpers for the bspwn power tools (kbd-backlight.py, servermode.py).
 
 Everything that touches the machine goes through small functions here so it can be faked in tests:

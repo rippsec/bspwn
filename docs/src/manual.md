@@ -186,14 +186,12 @@ Keys are read by **sxhkd** from `dot/.config/sxhkd/sxhkdrc`. **Super** is the Wi
 
 <!--KEYS:sxhkd-->
 
-## Known quirks
+## Notes on the key list
 
-- **`Super+p`** is bound twice in `sxhkdrc` (focus-follows-pointer toggle and "focus parent"); only one of them fires.
-- **`Super+Shift+c`** is bound twice (Caido and "focus previous window"); same story. If you rely on either, remove the duplicate.
-- The browser shortcuts use capital letters, so they really are `Super+Shift+g/f/b`.
+- The browser shortcuts use capital letters in `sxhkdrc`, so they really are `Super+Shift+g/f/b`, and Caido is `Super+Shift+c`.
+- Every combination is bound exactly once; `python3 scripts/docs/build.py --check` also reports a shortcut that is documented here but not bound, or the reverse.
 - `Super+Shift+Escape` restarts the D-Bus daemon: it is a last resort, and can close apps that depend on the session bus.
-
-To find a duplicate yourself, search the file for the combination: `grep -n "super + p" ~/.config/sxhkd/sxhkdrc`. The shortcut list in this manual is checked against `sxhkdrc` by `python3 scripts/docs/build.py --check`.
+- Before adding a shortcut, search the file for the combination (`grep -n "super + p" ~/.config/sxhkd/sxhkdrc`); if two lines use the same combination, only one of them will fire.
 
 # 6. tmux
 
@@ -217,9 +215,21 @@ tmux keeps terminals alive: windows and panes live inside a *server* that keeps 
 
 # 7. The shell (zsh)
 
-`dot/.zsh/` is split into small files: `aliases/` (shortcuts like `ls` = `lsd`, `cat` = `batcat`), `config/` (history, keybindings, completion),
-`functions/` (helpers), `plugins/` (fzf), `prompt/` and `pentest/` (lab helpers such as the `rhost` and `lhost` variables shown in the bar).
-`~/.zshrc` loads them in order. Add your own aliases to `dot/.zsh/aliases/aliases.zsh`.
+`~/.zshrc` is deliberately tiny: it sources **`~/.zsh/init.zsh`**, which loads the modules in a fixed order (the order matters, so it is spelled out in that file):
+
+| Folder / file | What is in it |
+| --- | --- |
+| `config/` | shell options (`main.zsh`), history, completion (zsh-autocomplete must run before `compinit`), key bindings, the X display fix |
+| `prompt/` | the prompt, IP detection (`get_ipaddr`), cursor style |
+| `plugins/` | fzf (`Ctrl+F`), autosuggestions, syntax highlighting (sourced once, with palette-friendly styles) |
+| `aliases/` | aliases such as `ls` = `lsd`, `cat` = `batcat` |
+| `functions/` | helpers: the `setg` / `unsetg` lab variables, apt wrappers, small tools |
+| `pentest/` | optional lab helpers; a failure here never stops the shell |
+| `exports.zsh`, `theme.zsh` | `PATH` (every entry once) and environment; ls/less colours |
+| `~/.zshrc.local` | **your machine-specific extras, not in git** (loaded last, optional) |
+
+Add your own aliases to `dot/.zsh/aliases/aliases.zsh`, a new function to a file in `functions/`, a new plugin as `plugins/<name>.zsh` (it is picked up automatically).
+Machine-specific things (a language manager's PATH line, a GPU variable) belong in `~/.zshrc.local`. The polybar LHOST/RHOST widgets rewrite the `lhost` / `rhost` lines of `~/.zshrc`, so leave those lines in that file.
 
 <!--KEYS:zsh-->
 
@@ -442,13 +452,13 @@ For adapting the setup to a different laptop there is also a dedicated skill, `.
 
 # 15. Licence, credits and reuse
 
-The code and configuration are released under the **GNU General Public License, version 2** (see `LICENSE`). Copyright (c) 2025-2026 **rip (rippsec) and contributors**; the
+The code and configuration are released under the **GNU General Public License, version 2** (see `LICENSE`). Copyright (c) 2025-2026 **rippsec and contributors**; the
 `NOTICE` file lists the people and the third-party components (themes, icons, fonts) that keep their own licences.
 This manual and its diagrams are licensed **CC BY-SA 4.0**: you may share and adapt them if you credit the project and keep the same licence.
 
 In plain words: you are free to use, change and redistribute this setup, including your own variations, **as long as you keep the copyright notice and the licence
 and publish your changes under the same licence**. You may not remove the authorship, relicense it as closed source, or present the project as your own work.
-The public git history (commit dates and authors) is the proof of who made it first.
+The public git history (commit dates and authors) is the record of who made what. The author's only official channels are the GitHub profile [github.com/rippsec](https://github.com/rippsec) and the links in its README; anyone else claiming to be the author or to speak for the project is not official.
 
 # Appendix A. File map
 

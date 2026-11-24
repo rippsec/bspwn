@@ -1,6 +1,6 @@
 #!/bin/bash
 # SPDX-License-Identifier: GPL-2.0-only
-# Copyright (c) 2025-2026 rip (rippsec) and contributors. See LICENSE and NOTICE.md.
+# Copyright (c) 2025-2026 rippsec and contributors. See LICENSE and NOTICE.md.
 # Desktop mode switcher: cockpit (monochrome rice) <-> undercover (Windows 10 look).
 #   mode.sh cockpit | undercover | toggle | apply
 # Everything is applied LIVE (no logout): GTK via xsettingsd + gsettings, geometry via

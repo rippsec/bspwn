@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-2.0-only
-# Copyright (c) 2025-2026 rip (rippsec) and contributors. See LICENSE and NOTICE.md.
+# Copyright (c) 2025-2026 rippsec and contributors. See LICENSE and NOTICE.md.
 """Keyboard backlight that follows your typing: any keypress lights it (minimal level), and it turns off
 KBD_IDLE seconds after the last keypress (default 9). Stays off while the lid is closed.
 

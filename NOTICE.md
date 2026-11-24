@@ -2,9 +2,13 @@
 
 ## Who made this
 
-**bspwn** (the bspwm desktop in this repository) is the work of **rip (GitHub: [rippsec](https://github.com/rippsec)) and contributors**,
-copyright (c) 2025-2026. The project's history, with every author and date, is the public git log of <https://github.com/rippsec/bspwn>
-(first commit 2025-09-28). That log is the authoritative record of who wrote what and when.
+**bspwn** (the bspwm desktop in this repository) is the work of **rippsec** (GitHub: [rippsec](https://github.com/rippsec)) **and contributors**, copyright (c) 2025-2026.
+The project's history, with every author and date, is the public git log of <https://github.com/rippsec/bspwn>; that log is the record of who wrote what and when.
+
+## Official channels
+
+The author works under the handle **rippsec** only. The official places are the GitHub profile <https://github.com/rippsec> and whatever channels that profile's README lists
+(currently LinkedIn and Hack The Box). Any other account, site or message that claims to be the author or to speak for this project, including accounts with similar names, is **not** official.
 
 ## Licence of the code and configuration
 
@@ -23,7 +27,7 @@ What the licence means for you, in short:
 
 The manual, the cheatsheet, the interactive page, the diagrams and the screenshots under `docs/` (and `docs/src/`) are licensed
 **Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)**, <https://creativecommons.org/licenses/by-sa/4.0/>.
-Credit: "bspwn by rip (rippsec) and contributors, https://github.com/rippsec/bspwn". Share-alike: derivatives stay CC BY-SA.
+Credit: "bspwn by rippsec and contributors, https://github.com/rippsec/bspwn". Share-alike: derivatives stay CC BY-SA.
 
 ## Third-party components (keep their own licences)
 

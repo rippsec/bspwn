@@ -251,6 +251,9 @@ Edit both files together, re-run the checker, and look at it in a real terminal.
 
 ## Shell: fzf and completion
 
+`~/.zshrc` is tiny: it sources `dot/.zsh/init.zsh`, which loads `config/`, `prompt/`, `plugins/`, `aliases/`, `functions/`, `pentest/`, then `exports.zsh` and `theme.zsh` in that fixed order
+(documented in the file). Put machine-specific extras in `~/.zshrc.local` (not in git); a new plugin, alias file or function file is picked up by dropping a `*.zsh` into its folder.
+
 - **`Ctrl+F`** fuzzy-finds any file on the system and pastes it (`dot/.zsh/plugins/fzf.zsh`). Matching is exact and case-insensitive, so `claude` is a plain substring.
   For a whole word, quote it: `'claude'` matches `claude-code` and `/x/claude/y` but not `claudette`. Also `!word` (exclude), `^word`, `word$`, and space = AND.
 - **Completion menu** (`zsh-autocomplete`): Up/Down and Tab / Shift-Tab cycle through the options (Tab next, Shift-Tab previous, nothing is deleted; Shift-Tab used to be `undo`); **Left/Right still move the text cursor** (they close the menu) so you can edit a recalled command
@@ -292,6 +295,6 @@ CLAUDE.md, NOTICE.md    instructions for Claude Code; authorship and third-party
 
 ## License
 
-Code and configuration: **GPL-2.0-only**, see [LICENSE](LICENSE). Copyright (c) 2025-2026 **rip ([rippsec](https://github.com/rippsec)) and contributors**.
+Code and configuration: **GPL-2.0-only**, see [LICENSE](LICENSE). Copyright (c) 2025-2026 **rippsec ([github.com/rippsec](https://github.com/rippsec)) and contributors**.
 Documentation (`docs/`): **CC BY-SA 4.0**. You are free to use, change and share this, but you must keep the copyright and licence notices, publish your changes under the same licence and not present
 it as your own work. [NOTICE.md](NOTICE.md) has the details, the authorship record and the licences of the bundled third-party themes, icons and fonts. The public git history is the proof of who made what and when.
