@@ -7,8 +7,13 @@ The project's history, with every author and date, is the public git log of <htt
 
 ## Official channels
 
-The author works under the handle **rippsec** only. The official places are the GitHub profile <https://github.com/rippsec> and whatever channels that profile's README lists
-(currently LinkedIn and Hack The Box). Any other account, site or message that claims to be the author or to speak for this project, including accounts with similar names, is **not** official.
+The author works under the handle **rippsec** only. The official places are:
+
+- GitHub: <https://github.com/rippsec>
+- LinkedIn: <https://www.linkedin.com/in/rippsec>
+- Hack The Box: <https://profile.hackthebox.com/profile/019c8c0d-954d-73ef-a0ea-f6291b8da8a4>
+
+Any other account, site or message that claims to be the author or to speak for this project, including accounts with similar names, is **not** official.
 
 ## Licence of the code and configuration
 

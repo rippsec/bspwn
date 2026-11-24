@@ -706,7 +706,7 @@ This manual and its diagrams are licensed **CC BY-SA 4.0**: you may share and ad
 
 In plain words: you are free to use, change and redistribute this setup, including your own variations, **as long as you keep the copyright notice and the licence
 and publish your changes under the same licence**. You may not remove the authorship, relicense it as closed source, or present the project as your own work.
-The public git history (commit dates and authors) is the record of who made what. The author's only official channels are the GitHub profile [github.com/rippsec](https://github.com/rippsec) and the links in its README; anyone else claiming to be the author or to speak for the project is not official.
+The public git history (commit dates and authors) is the record of who made what. The author's only official channels are [GitHub](https://github.com/rippsec), [LinkedIn](https://www.linkedin.com/in/rippsec) and [Hack The Box](https://profile.hackthebox.com/profile/019c8c0d-954d-73ef-a0ea-f6291b8da8a4); anyone else claiming to be the author or to speak for the project is not official.
 
 # Appendix A. File map
 

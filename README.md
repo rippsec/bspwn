@@ -297,4 +297,4 @@ CLAUDE.md, NOTICE.md    instructions for Claude Code; authorship and third-party
 
 Code and configuration: **GPL-2.0-only**, see [LICENSE](LICENSE). Copyright (c) 2025-2026 **rippsec ([github.com/rippsec](https://github.com/rippsec)) and contributors**.
 Documentation (`docs/`): **CC BY-SA 4.0**. You are free to use, change and share this, but you must keep the copyright and licence notices, publish your changes under the same licence and not present
-it as your own work. [NOTICE.md](NOTICE.md) has the details, the authorship record and the licences of the bundled third-party themes, icons and fonts. The public git history is the proof of who made what and when.
+it as your own work. [NOTICE.md](NOTICE.md) has the details, the authorship record and the licences of the bundled third-party themes, icons and fonts. The public git history is the proof of who made what and when. Official channels of the author: [GitHub](https://github.com/rippsec), [LinkedIn](https://www.linkedin.com/in/rippsec), [Hack The Box](https://profile.hackthebox.com/profile/019c8c0d-954d-73ef-a0ea-f6291b8da8a4); nothing else is official.
