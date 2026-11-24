@@ -8,7 +8,7 @@
 Reports, with these targets:
   * text contrast vs background (WCAG ratio; hue colours >= 6:1, main text >= ~11:1)
   * pairwise CIEDE2000 difference between all hue colours + foreground (>= 20 is easy to tell apart)
-  * same, with chroma cut to 60% (a washed-out panel): should stay >= ~14
+  * same, with chroma cut to 60% (low saturation): should stay >= ~14
   * normal vs bright twin difference (>= 10 so bold/bright output stands out)
 Exit status is 1 if any target is missed. Pure python, no dependencies.
 """
@@ -125,7 +125,7 @@ def load(path):
         if m: cfg[m[1]] = m[2].lower()
     return cfg
 
-def washed(h, k=0.6):
+def lowchroma(h, k=0.6):
     L, C, hh = lab2lch(hex2lab(h)); lab = lch2lab(L, C * k, hh)
     return lab2hex(lab) if lab_in_gamut(lab) else h
 
@@ -143,7 +143,7 @@ def main():
     for i, n in HUES.items():
         check(contrast(c[f"color{i}"], bg) >= 6.0, f"{n:8s} {c[f'color{i}']}  {contrast(c[f'color{i}'], bg):.1f}:1")
     check(contrast(c["color8"], bg) >= 4.5, f"bright black (dim text) {contrast(c['color8'], bg):.1f}:1")
-    for label, fn, floor in (("pairwise dE2000", lambda h: h, 20.0), ("pairwise dE2000, washed panel (chroma x0.6)", washed, 14.0)):
+    for label, fn, floor in (("pairwise dE2000", lambda h: h, 20.0), ("pairwise dE2000, low chroma (x0.6)", lowchroma, 14.0)):
         items = {n: fn(c[f"color{i}"]) for i, n in HUES.items()}; items["foreground"] = fn(fg)
         pairs = sorted((de_hex(items[a], items[b]), a, b) for a, b in itertools.combinations(items, 2))
         print(f"\n{label}: worst 4 -> " + "; ".join(f"{a}-{b} {d:.1f}" for d, a, b in pairs[:4]))

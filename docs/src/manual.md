@@ -272,7 +272,7 @@ Headless: `themer --gtk NAME --icons NAME`, `themer --list`, `themer --current`.
 ![Terminal colours](screenshots/terminals.png)
 
 The palette lives in two files that must be edited together: `dot/.config/kitty/cockpit.conf` and the `[colors]` block of `dot/.config/alacritty/alacritty.toml`
-(alacritty reloads by itself; kitty needs `Ctrl+Shift+F5`). Every pair of hues is far apart in lightness
+(alacritty reloads by itself; kitty needs `Ctrl+Shift+F5`). Every pair of hues differs in lightness
 as well as hue. After changing a colour run:
 
 ```sh
@@ -295,7 +295,7 @@ python3 scripts/palette_check.py     # exit code 1 means a target was missed
 Wallpapers are generated with Pillow by `scripts/wallpaper/gen_*.py` into `assets/wallpaper/*.jpg`. The active one is `WALLPAPER=` in the mode profile
 (and the `feh` line in `bspwm/start`). Keep the art clear of the HUD column on the right (the screen is 1600x900).
 
-**Personal wallpaper:** `./install.sh -wallpaper` (also run by `-full`) runs `gen_bspwn.py --user`, which draws the same layout with your user name (`whoami`, in capitals) instead of BSPWN and saves it to `~/.local/share/bspwn/wallpaper.jpg`. The cockpit profile and `bspwm/start` use that file when it exists, otherwise the bundled `assets/wallpaper/bspwn.jpg`. Delete the file to go back to the BSPWN wordmark; `gen_bspwn.py --text WORD` makes one with any other word. Long names shrink to fit.
+**Personal wallpaper:** `./install.sh -wallpaper` (also in `-full`) runs `gen_bspwn.py --user` and saves your user name in capitals to `~/.local/share/bspwn/wallpaper.jpg`, used when it exists (else `assets/wallpaper/bspwn.jpg`). Delete it to go back to BSPWN; `--text WORD` makes any other word.
 
 # 10. Lock screen and idle
 

@@ -1,7 +1,6 @@
 /**
  * Cockpit palette (same as polybar / kitty / conky): monochrome,
- * white selection (no pure black/white,
- * no saturated blue).
+ * white selection (no pure black/white, no saturated blue).
  **/
 * {
     background:     #111214F2;
