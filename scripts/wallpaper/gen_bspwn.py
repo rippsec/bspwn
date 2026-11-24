@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Minimal dark wallpaper: the word BSPWN centred, framed by sharp-edged
-tech patterns (corner brackets, broken crosshair, ticks, hatch).
+tech patterns (corner brackets, ticks, hatch).
 Flat design: only black and dark greys, no shadows, highlights or gradients. Pillow + numpy only; drawn at 2x and downsampled.
 
 usage: gen_bspwn.py [out.jpg] [font.ttf]
@@ -55,14 +55,6 @@ def tri(cx, cy, r, deg, fill):
     poly([(cx + r * math.cos(math.radians(deg + 120 * k)), cy + r * math.sin(math.radians(deg + 120 * k)))
           for k in range(3)], fill=fill)
 
-
-# ---- broken crosshair along the axes (gap around the glyph)
-for sx in (-1, 1):
-    ln(CX + sx * 235, CY, CX + sx * 560, CY, MID, 1.2)
-    ln(CX + sx * 580, CY, CX + sx * 640, CY, DIM, 1.2)
-for sy in (-1, 1):
-    ln(CX, CY + sy * 215, CX, CY + sy * 400, MID, 1.2)
-    ln(CX, CY + sy * 415, CX, CY + sy * 440, DIM, 1.2)
 
 # ---- corner brackets
 for sx, sy, x0, y0 in ((1, 1, 90, 90), (-1, 1, 1510, 90), (1, -1, 90, 810), (-1, -1, 1510, 810)):
