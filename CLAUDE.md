@@ -83,4 +83,4 @@ Keys: **sxhkd** reads `sxhkdrc` and runs `bspc ...` (window actions), scripts, o
 
 ## Things to leave alone unless asked
 
-The lock screen (`system/bin/xlock*`, PAM), the login manager setup, `libvibrant/`, wallpaper art, and any `*.bak` files. The voice assistant that used to live in `jarvis/` was removed from this repository and is a separate project.
+The lock screen (`system/bin/xlock*`, PAM), the login manager setup, `libvibrant/` (vendored upstream source, unmodified), wallpaper art, and any `*.bak` files. The voice assistant that used to live in `jarvis/` was removed from this repository and is a separate project.

@@ -42,6 +42,7 @@ These files are *bundled for convenience* (mere aggregation: they are separate w
 | --- | --- | --- | --- |
 | Flat-Remix GTK theme (custom Slate-Darkest variant generated with its script) | `dot/theme/themes/` | Daniel Ruiz de Alegría, <https://github.com/daniruiz/flat-remix-gtk> | GPL-3.0 |
 | Flat-Remix icon theme (Black-Dark variant) | `dot/theme/icons/` | Daniel Ruiz de Alegría, <https://github.com/daniruiz/flat-remix> | GPL-3.0 |
+| libvibrant 1.1.1 (unmodified upstream source, commit `bc0d93f`) | `libvibrant/` | Sefa Eyeoglu, <https://github.com/libvibrant/libvibrant> | GPL-3.0-or-later (its own `LICENSE` and `NOTICE`) |
 | Atkinson Hyperlegible Mono font | `assets/fonts/AtkinsonHyperlegibleMono/` | Braille Institute of America, Inc. and contributors | SIL Open Font License 1.1 (`OFL.txt` there) |
 | `hackthebox.vim` colour scheme | `dot/.vim/colors/` | audibleblink, based on silofy/hackthebox and joshdick/onedark.vim | MIT |
 | `iceberg.vim` colour scheme | `dot/.vim/colors/` | cocopon | MIT |
