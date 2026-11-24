@@ -110,7 +110,7 @@ TMUX = [
   ("alt+z", "Zoom / unzoom the pane"), ("alt+o", "Zoom / unzoom the pane"),
   ("alt+x", "Kill the pane (asks first)"), ("alt+w", "Kill the pane (asks first)"), ("alt+shift+w", "Kill the pane, no question"),
   ("alt+space", "Next pane layout"), ("alt+v", "Scroll / copy mode"),
-  ("alt+m", "Mouse mode on/off"), ("alt+r", "Reload ~/.tmux.conf"),
+  ("alt+m", "Mouse mode on/off (on by default)"), ("alt+r", "Reload ~/.tmux.conf"),
  ]),
  ("After the prefix (Ctrl+b, then the key)", [
   ("prefix+t", "New window"), ("prefix+w", "Pick a window from a tree (and kill with the confirm prompt)"),

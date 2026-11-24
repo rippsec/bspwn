@@ -380,7 +380,7 @@ tmux keeps terminals alive: windows and panes live inside a *server* that keeps 
 
 - **Two ways to press keys.** Most useful commands work with just **Alt** (no prefix). The classic way is the **prefix `Ctrl+b`**, release, then a key. Both are listed below.
 - The status bar is at the **top**. Windows are numbered from 1. The right side shows the session name, pane size and the time.
-- Copy mode uses **vim keys**; selecting with the mouse copies to the system clipboard (`xclip`) when you release.
+- Copy mode uses **vim keys**; selecting with the mouse copies to the system clipboard (`xclip`) when you release. Mouse mode is **on by default** (`Alt+m` toggles it; hold Shift to select text natively).
 - Reload the config with `Alt+r` after editing `~/.tmux.conf`.
 
 #### Without the prefix (Alt)
@@ -414,7 +414,7 @@ tmux keeps terminals alive: windows and panes live inside a *server* that keeps 
 | `alt+shift+w` | Kill the pane, no question |
 | `alt+space` | Next pane layout |
 | `alt+v` | Scroll / copy mode |
-| `alt+m` | Mouse mode on/off |
+| `alt+m` | Mouse mode on/off (on by default) |
 | `alt+r` | Reload ~/.tmux.conf |
 
 #### After the prefix (Ctrl+b, then the key)
