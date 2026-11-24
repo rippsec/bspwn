@@ -12,10 +12,22 @@ For porting to other hardware use the skill `.claude/skills/adapt-bspwn/` and it
 3. **Never run `xlock` / i3lock to test.** It really locks the session. Verify with logs (`journalctl -t xlock`, `-t idle-lock`, `-t bspwn-power`), `status` commands and the unit tests.
 4. **Ask before**: `./install.sh -full` (installs packages, system files, XFCE + LightDM as login manager), anything in `/etc` or `/usr/local` (keep a `.bak`, explain how to undo), PAM, the display manager, sudo installs, force-push, deleting user data.
 5. **Do not kill your own shell:** `pkill -f PATTERN` can match your command line. Use anchored patterns (`pkill -x name`) or PIDs.
-6. **Keep the repo public-safe.** Never commit IP addresses, Wi-Fi names, host names, e-mail, tokens, or screenshots that show the bar/HUD with them (redact first). Scan the staged diff before every push.
+6. **Keep the repo public-safe.** Never commit IP addresses, Wi-Fi names, host names, e-mail, tokens, or screenshots that show the bar/HUD with them (redact first). Scan the staged diff before every push. See "Privacy and opsec" below.
 7. **`git add` only your own files**; the user may have unrelated edits in the tree (theme files, `.netrwhist`). Normal commits and pushes only, never `--force`. Follow the commit trailer rules of your session.
 8. **Update the docs in the same commit** (see "Documentation" below) and report outcomes honestly, including what you could not test.
 9. **Respect authorship and the licence.** Code is GPL-2.0-only, docs CC BY-SA 4.0 (see `NOTICE.md`). Keep the SPDX/copyright header in files you edit, add it to new scripts, and never remove authorship notices.
+
+## Privacy and opsec (strict)
+
+This repo is public. Nothing in it, or in its history, may identify or describe the person who maintains or uses it.
+
+- **Never write** in files, docs, comments, screenshots, commit messages, PRs or issues: health conditions, disabilities or medical details, real name, age, location, employer, schedule, devices other than the generic hardware model, accounts, handles other than the project name, or the reasons behind personal preferences. If a setting exists "because of" a person's condition or situation, document only the technical fact (the value and what it does).
+- **Describe, do not explain the user.** Say what a colour, font size or option does, never who it was tuned for. Keep docs technical, brief and neutral.
+- **Screenshots:** use an empty desktop and redact addresses, SSIDs, host names and user names; close messengers, mail and other personal apps so no tray icon, notification or window title shows (see "Documentation").
+- **Commit messages:** short and generic (`update of documentation`, or the project's own tag). Never name personal details or what was removed.
+- **When adapting this setup for someone else**, apply the same rules to their data: keep it in untracked local files (`~/.zshrc.local`, `power.conf` overrides), never in the repo.
+- **If personal data slips in**: stop, tell the user, remove it from the tree, and ask before rewriting history (backup first, force-push only with their explicit approval).
+- Do not copy anything from private notes, memory files or other private repos into this one.
 
 ## Layout in one screen
 
