@@ -112,6 +112,7 @@ git clone https://github.com/rippsec/bspwn && cd bspwn
 ./install.sh --help       # read this first on a machine you care about
 ./install.sh -config      # link the configs only (also the way to update)
 ./install.sh -themes      # GTK theme + icons + Qt settings
+./install.sh -wallpaper   # personal wallpaper: the BSPWN layout with your user name in capitals
 ./install.sh -full        # everything (packages, fonts, system files, XFCE + LightDM as login manager)
 ```
 
@@ -293,6 +294,8 @@ python3 scripts/palette_check.py     # exit code 1 means a target was missed
 
 Wallpapers are generated with Pillow by `scripts/wallpaper/gen_*.py` into `assets/wallpaper/*.jpg`. The active one is `WALLPAPER=` in the mode profile
 (and the `feh` line in `bspwm/start`). Keep the art clear of the HUD column on the right (the screen is 1600x900).
+
+**Personal wallpaper:** `./install.sh -wallpaper` (also run by `-full`) runs `gen_bspwn.py --user`, which draws the same layout with your user name (`whoami`, in capitals) instead of BSPWN and saves it to `~/.local/share/bspwn/wallpaper.jpg`. The cockpit profile and `bspwm/start` use that file when it exists, otherwise the bundled `assets/wallpaper/bspwn.jpg`. Delete the file to go back to the BSPWN wordmark; `gen_bspwn.py --text WORD` makes one with any other word. Long names shrink to fit.
 
 # 10. Lock screen and idle
 

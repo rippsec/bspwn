@@ -3,8 +3,12 @@
 tech patterns (corner brackets, ticks, hatch).
 Flat design: only black and dark greys, no shadows, highlights or gradients. Pillow + numpy only; drawn at 2x and downsampled.
 
-usage: gen_bspwn.py [out.jpg] [font.ttf]
+usage: gen_bspwn.py [out.jpg] [font.ttf] [--text WORD | --user]
+  --text WORD  centre WORD instead of BSPWN (upper-cased)
+  --user       centre the current user name (whoami) in capitals: a personal wallpaper
+               (install.sh -wallpaper writes it to ~/.local/share/bspwn/wallpaper.jpg)
 """
+import getpass
 import math
 import sys
 from pathlib import Path
@@ -12,10 +16,23 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "assets/wallpaper/bspwn.jpg"
+_args, TEXT, _i = [], "BSPWN", 1
+while _i < len(sys.argv):
+    if sys.argv[_i] == "--user":
+        TEXT = getpass.getuser().upper()
+    elif sys.argv[_i] == "--text" and _i + 1 < len(sys.argv):
+        _i += 1
+        TEXT = sys.argv[_i].upper()
+    else:
+        _args.append(sys.argv[_i])
+    _i += 1
+OUT = Path(_args[0]) if _args else ROOT / "assets/wallpaper/bspwn.jpg"
 W, H, K = 1600, 900, 2
 CX, CY = W / 2, H / 2
-FONT = sys.argv[2] if len(sys.argv) > 2 else str(Path.home() / ".local/share/fonts/AtkinsonHyperlegibleMono/AtkinsonHyperlegibleMono-Bold.ttf")
+_FONT_NAME = "AtkinsonHyperlegibleMono/AtkinsonHyperlegibleMono-Bold.ttf"
+FONT = _args[1] if len(_args) > 1 else next(
+    (str(c) for c in (Path.home() / ".local/share/fonts" / _FONT_NAME, ROOT / "assets/fonts" / _FONT_NAME) if c.is_file()),
+    str(ROOT / "assets/fonts" / _FONT_NAME))
 
 # flat palette: everything stays dark grey on black
 BG = (11, 11, 13)
@@ -76,8 +93,14 @@ for i in range(7):
     ln(40 + o, 860, 40, 860 - o, DIM if i % 3 else MID, 1.0)
 
 # ---- the text
-font = ImageFont.truetype(FONT, 120 * K)
-d.text(P(CX, CY), "BSPWN", font=font, fill=GLYPH, anchor="mm")
+# long names shrink to fit between the frame (max 760 px wide, never above 120 px high)
+size = 120
+while size > 40:
+    font = ImageFont.truetype(FONT, size * K)
+    if d.textlength(TEXT, font=font) <= 760 * K:
+        break
+    size -= 4
+d.text(P(CX, CY), TEXT, font=font, fill=GLYPH, anchor="mm")
 
 # ---- output (flat: no grain, no vignette)
 out = img.resize((W, H), Image.LANCZOS)
