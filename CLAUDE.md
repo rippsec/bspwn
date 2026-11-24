@@ -57,7 +57,7 @@ Keys: **sxhkd** reads `sxhkdrc` and runs `bspc ...` (window actions), scripts, o
 ## Format traps (these have cost time before)
 
 - **sxhkd:** a capital letter in a key means **Shift** (`super + B` is `super+shift+b`). `{a,b}` and `{1-9}` expand into several hotkeys. The command is the **indented** line below. Duplicate combinations exist; search the file before adding one (`grep -n "super + p" sxhkdrc`).
-- **polybar:** icons are **real glyph characters** in the file. Polybar does not understand `\u{f059f}`; write them with Python: `python3 -c "print(chr(0xf059f))"`. Icon font: *Symbols Nerd Font Mono*. The bar is several processes (`left center right power`) started by `launch.sh`.
+- **polybar:** icons are **real glyph characters** in the file. Polybar does not understand `\u{f059f}`; write them with Python: `python3 -c "print(chr(0xf059f))"`. Icon font: *Symbols Nerd Font Mono*. The bar is several processes (`launcher left center right power`) started by `launch.sh`.
 - **tmux:** `bind-key -n M-x` = Alt+x without the prefix; `bind x` = prefix (`Ctrl+b`) then x. The prompt line is styled by `message-style` and `message-format`.
 - **Shell:** `ls` = lsd, `cat` = batcat, `rm` is verbose: use `command cat`; in scripts use absolute paths. The Bash tool resets cwd each call.
 - **zsh change check:** snapshot `alias`, `functions`, `bindkey`, `env` of `zsh -i` before and after, and diff them (that is how the refactor was verified).
