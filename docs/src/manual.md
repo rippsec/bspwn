@@ -133,7 +133,7 @@ The bar is a set of floating islands. Every symbol is listed here with what a cl
 
 <!--BAR-->
 
-The **power button (21)** has an island of its own, so a crowded tray can never push it off the screen. The **launcher button (1)** has a matching island on the far left.
+The **power button (21)** has an island of its own, so a crowded tray can never push it off the screen. The **launcher button (1)** has a matching island on the far left. Both are flush with the neighbouring island and joined by a thin separator, so the bar looks continuous.
 
 ## The HUD column
 
