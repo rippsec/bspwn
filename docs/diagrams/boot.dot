@@ -1,0 +1,12 @@
+digraph boot { rankdir=TB;
+//STYLE
+  ly   [label="ly (login on tty2)"];
+  xorg [label="Xorg :0 on vt2"];
+  rc   [label="bspwmrc\nenv, bspc config, window rules", fillcolor="#d7d4cc"];
+  start[label="bspwm/start\nautostart list", fillcolor="#d7d4cc"];
+  apps [label="dunst · sxhkd · xsettingsd\nidle-lock.sh · nm-applet · clipman\nconky/picom via power-mode.sh", shape=note];
+  mode [label="scripts/mode.sh apply\nreads modes/<mode>.conf", fillcolor="#c5c2ba"];
+  out  [label="GTK + icons + cursor (live)\nwallpaper (feh)\ngaps, borders, panel padding\npanel: polybar or tint2", shape=note];
+  ly -> xorg -> rc -> start -> apps;
+  start -> mode -> out;
+}

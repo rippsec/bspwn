@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-2.0-only
+# Copyright (c) 2025-2026 rip (rippsec) and contributors. See LICENSE and NOTICE.md.
 # Idle lock supervisor (started by bspwm/start).
 # LOCK FIRST, THEN SCREEN OFF: a watcher in this script reads the idle time (xssstate) and after IDLE_LOCK seconds runs
 # xlock; only once the lock is really on screen (i3lock running) plus 2 s does it turn the display off. So waking the

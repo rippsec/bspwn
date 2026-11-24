@@ -1,0 +1,10 @@
+digraph themes { rankdir=LR;
+//STYLE
+  th [label="themer\nGUI preview + Apply\nthemer --gtk X --icons Y", fillcolor="#c5c2ba"];
+  a [label="xsettingsd + gsettings\n(running apps, instantly)"];
+  b [label="GTK 2 / 3 / 4 settings"];
+  c [label="Qt: qt5ct / qt6ct"];
+  d [label="rofi theme colours"];
+  e [label="active mode profile\nmodes/<mode>.conf\n(so it survives a restart)"];
+  th -> a; th -> b; th -> c; th -> d; th -> e;
+}

@@ -1,4 +1,6 @@
 #!/bin/bash
+# SPDX-License-Identifier: GPL-2.0-only
+# Copyright (c) 2025-2026 rip (rippsec) and contributors. See LICENSE and NOTICE.md.
 # Battery popups (replaces the cbatticon tray icon): low / critical / charged, for every BAT*.
 # Called by power-watch.sh on power events and once a minute. Each state is announced once.
 #   PS_DIR=/path  overrides /sys/class/power_supply (testing)

@@ -1,0 +1,3 @@
+  graph [bgcolor="transparent", fontname="DejaVu Sans", fontsize=12, pad=0.2, nodesep=0.35, ranksep=0.5];
+  node  [shape=box, style="rounded,filled", fillcolor="#e9e6df", color="#3a3c42", fontcolor="#111214", fontname="DejaVu Sans", fontsize=11, margin="0.16,0.08"];
+  edge  [color="#555860", fontcolor="#33353b", fontname="DejaVu Sans", fontsize=9, arrowsize=0.7];

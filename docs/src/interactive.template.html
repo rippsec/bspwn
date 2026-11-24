@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>bspwn Interactive Manual</title>
+<style>
+:root{--bg:#16171a;--panel:#1d2024;--panel2:#25282d;--fg:#dddad3;--dim:#9a9ca3;--acc:#c9c6c0;--line:#3a3c42;--hi:#e6c07b;--ok:#8fbf8f;--bad:#d08a8a;--key:#2b2e34}
+:root[data-theme="light"]{--bg:#f4f2ec;--panel:#fff;--panel2:#ebe8e0;--fg:#1b1c20;--dim:#5c5e66;--acc:#33353b;--line:#c9c6bd;--hi:#9a5a00;--ok:#2c6e2c;--bad:#a03030;--key:#e9e6df}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);font:18px/1.55 "Atkinson Hyperlegible","Noto Sans",system-ui,sans-serif;display:flex;min-height:100vh}
+nav{position:sticky;top:0;height:100vh;width:250px;flex:none;background:var(--panel);border-right:1px solid var(--line);padding:16px 12px;overflow:auto}
+nav h1{font-size:20px;margin:0 0 4px}nav .sub{color:var(--dim);font-size:14px;margin-bottom:12px}
+nav a{display:block;padding:7px 10px;border-radius:6px;color:var(--fg);text-decoration:none;font-size:16px}
+nav a:hover{background:var(--panel2)}nav a.on{background:var(--panel2);box-shadow:inset 3px 0 var(--acc)}
+nav button{margin-top:12px;width:100%}
+main{flex:1;min-width:0;padding:24px clamp(16px,4vw,48px);max-width:1100px}
+h2{font-size:28px;margin:0 0 6px}h3{font-size:20px;margin:22px 0 6px}
+p.lead{color:var(--dim);margin-top:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin:12px 0}
+button,.btn{font:inherit;font-size:16px;color:var(--fg);background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:6px 14px;cursor:pointer}
+button:hover{border-color:var(--acc)}button.on{background:var(--acc);color:var(--bg)}
+input[type=search],input[type=text]{font:inherit;color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:8px 12px;width:100%}
+kbd,code{font:15px "Atkinson Hyperlegible Mono","DejaVu Sans Mono",monospace;background:var(--key);border:1px solid var(--line);border-radius:5px;padding:1px 6px;white-space:nowrap}
+pre{background:#101114;color:#dddad3;border-radius:8px;padding:12px 14px;overflow:auto;font:15px/1.45 "DejaVu Sans Mono",monospace;position:relative}
+pre button{position:absolute;right:8px;top:8px;font-size:13px;padding:2px 9px}
+table{border-collapse:collapse;width:100%}td,th{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+.row{display:flex;gap:16px;flex-wrap:wrap}.row>*{flex:1 1 300px}
+.imgwrap{position:relative;line-height:0;background:#0a0b0d;border-radius:8px;overflow:hidden}
+.imgwrap img{width:100%}
+.hot{position:absolute;top:50%;transform:translate(-50%,-50%);width:3.2%;aspect-ratio:1;border-radius:50%;border:2px solid transparent;cursor:pointer;background:transparent}
+.hot:hover,.hot.on{border-color:var(--hi);background:#e6c07b33}
+.diagram{background:#f4f2ec;border-radius:8px;padding:10px;text-align:center}.diagram img{max-width:100%;max-height:420px}
+.vk{display:flex;flex-direction:column;gap:6px;user-select:none;margin:10px 0}
+.vkrow{display:flex;gap:6px}.vkrow.o1{margin-left:2.5%}.vkrow.o2{margin-left:6%}.vkrow.o3{margin-left:11%}
+.k{flex:1;min-width:0;max-width:78px;aspect-ratio:1;background:var(--key);border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:17px;cursor:pointer;position:relative;line-height:1.1}
+.k small{font-size:10.5px;color:var(--dim);max-width:95%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.k.has{border-color:var(--hi);color:var(--fg)}.k.has small{color:var(--hi)}.k.sel{outline:3px solid var(--acc)}.k.dead{opacity:.45}
+.mods{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}
+.tile{position:absolute;background:var(--panel2);border:2px solid #4b4d55;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--dim);transition:all .12s}
+.tile.f{border-color:#c9c6c0;color:var(--fg)}.tile.pre{box-shadow:inset 0 0 0 3px #e6c07b55}
+#screen{position:relative;width:100%;aspect-ratio:16/9;background:#0e0f11;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+#sbar{position:absolute;left:0;right:0;top:0;height:6%;background:#16171a;display:flex;align-items:center;gap:6px;padding:0 8px;font-size:12px;color:var(--dim)}
+#sbar b{padding:0 6px;border-radius:9px}#sbar b.on{background:var(--acc);color:var(--bg)}
+#field{position:absolute;left:0;right:0;top:6%;bottom:0}
+.opt{display:block;width:100%;text-align:left;margin:6px 0}.opt.right{border-color:var(--ok);background:#8fbf8f22}.opt.wrong{border-color:var(--bad);background:#d08a8a22}
+details{border-top:1px solid var(--line);padding:6px 0}summary{cursor:pointer;font-weight:600}
+.tag{font-size:12px;border:1px solid var(--line);border-radius:10px;padding:0 8px;color:var(--dim);margin-left:6px}
+@media(max-width:820px){body{display:block}nav{position:static;height:auto;width:auto;display:flex;flex-wrap:wrap;gap:4px}nav h1,nav .sub{width:100%}nav a{display:inline-block}}
+</style>
+</head>
+<body>
+<nav id="nav"><h1>bspwn</h1><div class="sub">interactive manual</div></nav>
+<main id="main"></main>
+<script>
+const D=/*__DATA__*/null;
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const store={get(k,d){try{return JSON.parse(localStorage.getItem('bspwn.'+k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem('bspwn.'+k,JSON.stringify(v))}catch(e){}}};
+const ORDER=['super','ctrl','alt','shift'];
+const norm=c=>{const p=c.split('+');const k=p.pop();const m=ORDER.filter(x=>p.includes(x));return m.concat(k.toLowerCase()).join('+')};
+// ---- binding index (expands "1..9,0")
+function expandKey(k){const m=k.match(/^(.*?)(\d)\.\.(\d)(,0)?$/);if(!m)return [k];const out=[];for(let i=+m[2];i<=+m[3];i++)out.push(m[1]+i);if(m[4])out.push(m[1]+'0');return out}
+const BIND=[]; // {combo,desc,scope,section}
+for(const [sec,rows] of D.sxhkd)for(const [k,d] of rows)for(const e of expandKey(k))BIND.push({combo:norm(e.replace('left-drag','leftdrag').replace('right-drag','rightdrag')),raw:e,desc:d,scope:'desktop',section:sec});
+for(const [sec,rows] of D.tmux)for(const [k,d] of rows){if(/^(alt\+|prefix\+)/.test(k))for(const e of expandKey(k))BIND.push({combo:norm(e),raw:e,desc:d,scope:'tmux',section:sec})}
+const show=k=>k.replace(/^prefix\+/,'Ctrl+b, ').replace('C-','Ctrl+').replace(/\b(super|alt|ctrl|shift)\b/g,m=>m[0].toUpperCase()+m.slice(1));
+// ---- sections
+const S=[
+ {id:'start',t:'Start here',r:rStart},{id:'bar',t:'Tour of the bar',r:rBar},{id:'keys',t:'Key explorer',r:rKeys},
+ {id:'tile',t:'Tiling playground',r:rTile},{id:'quiz',t:'Practice quiz',r:rQuiz},{id:'tmux',t:'tmux',r:rTmux},
+ {id:'how',t:'How do I change...?',r:rHow},{id:'files',t:'Where things live',r:rFiles},{id:'pics',t:'Diagrams',r:rPics}];
+const nav=$('#nav');
+for(const s of S){const a=document.createElement('a');a.href='#'+s.id;a.textContent=s.t;a.dataset.id=s.id;nav.append(a)}
+const tb=document.createElement('button');tb.textContent='Light / dark';tb.onclick=()=>{const l=document.documentElement.dataset.theme==='light';document.documentElement.dataset.theme=l?'dark':'light';store.set('theme',l?'dark':'light')};nav.append(tb);
+if(store.get('theme','dark')==='light')document.documentElement.dataset.theme='light';
+let cleanup=null;
+function go(){const id=(location.hash||'#start').slice(1);const s=S.find(x=>x.id===id)||S[0];$$('nav a').forEach(a=>a.classList.toggle('on',a.dataset.id===s.id));if(cleanup){cleanup();cleanup=null}const m=$('#main');m.innerHTML='';const r=s.r(m);if(typeof r==='function')cleanup=r;scrollTo(0,0)}
+addEventListener('hashchange',go);
+const H=(h)=>{const d=document.createElement('div');d.innerHTML=h;return d};
+// ---- 1 start
+function rStart(m){m.innerHTML=`<h2>bspwn, interactively</h2><p class="lead">A tiling desktop you drive with the keyboard. Use the menu on the left to learn it by doing.</p>
+<div class="card"><b>The two modifier keys to remember</b><p><kbd>Super</kbd> (the Windows key) drives the <b>desktop</b>. <kbd>Alt</kbd> drives <b>tmux</b> inside the terminal.
+Almost everything else is a variation: add <kbd>Shift</kbd> to do the "bigger" version of an action, add <kbd>Ctrl</kbd> for the special ones.</p></div>
+<div class="row"><div class="card"><h3 style="margin-top:0">First five minutes</h3><table>
+<tr><td><kbd>Super</kbd>+<kbd>Return</kbd></td><td>open a terminal (with tmux)</td></tr>
+<tr><td><kbd>Super</kbd>+<kbd>r</kbd></td><td>open a program by name</td></tr>
+<tr><td><kbd>Super</kbd>+<kbd>h</kbd><kbd>j</kbd><kbd>k</kbd><kbd>l</kbd></td><td>move focus between windows</td></tr>
+<tr><td><kbd>Super</kbd>+<kbd>1</kbd>..<kbd>0</kbd></td><td>go to desktop 1-10</td></tr>
+<tr><td><kbd>Super</kbd>+<kbd>q</kbd></td><td>close the window</td></tr>
+<tr><td><kbd>Super</kbd>+<kbd>x</kbd></td><td>lock the screen</td></tr></table></div>
+<div class="card"><h3 style="margin-top:0">What is in this page</h3><ul>
+<li><a href="#bar">Tour of the bar</a>: click any symbol</li><li><a href="#keys">Key explorer</a>: a keyboard that lights up what each key does</li>
+<li><a href="#tile">Tiling playground</a>: a small simulated bspwm to practise</li><li><a href="#quiz">Practice quiz</a>: learn the shortcuts</li>
+<li><a href="#how">How do I change...?</a>: recipes with copy buttons</li></ul></div></div>
+<p style="color:var(--dim)">The printable <a href="BSPWN-manual.pdf">PDF manual</a> and <a href="BSPWN-cheatsheet.pdf">cheatsheet</a> are next to this file. Built ${esc(D.built)}.</p>`}
+// ---- 2 bar
+const XS=[35,170,297,335,373,452,507,560,612,664,800,985,1105,1268,1296,1330,1370,1413,1452,1500,1573];
+function rBar(m){m.innerHTML=`<h2>Tour of the bar</h2><p class="lead">Click a numbered circle (or a row) to see what it is and what the mouse does.</p>
+<div class="imgwrap" id="bw"><img src="screenshots/polybar.png" alt="the polybar with numbered symbols"></div><div class="card" id="bi">Pick a symbol.</div><div class="card"><table id="bt"></table></div>`;
+const w=$('#bw');D.bar.forEach((b,i)=>{const h=document.createElement('button');h.className='hot';h.style.left=(XS[i]/16)+'%';h.title=b[2];h.onclick=()=>pick(i);w.append(h)});
+function pick(i){const b=D.bar[i];$$('.hot').forEach((h,j)=>h.classList.toggle('on',i===j));$('#bi').innerHTML=`<b>${b[0]}. ${esc(b[2])}</b><br>${esc(b[3])}`}
+$('#bt').innerHTML=D.bar.map((b,i)=>`<tr data-i="${i}" style="cursor:pointer"><td>${b[0]}</td><td>${esc(b[2])}</td><td style="color:var(--dim)">${esc(b[3])}</td></tr>`).join('');
+$$('#bt tr').forEach(r=>r.onclick=()=>pick(+r.dataset.i));pick(0)}
+// ---- 3 key explorer
+const ROWS=[['1','2','3','4','5','6','7','8','9','0'],['q','w','e','r','t','y','u','i','o','p'],['a','s','d','f','g','h','j','k','l'],['z','x','c','v','b','n','m'],['Return','Tab','Escape','Left','Right','space']];
+const LBL={Return:'Enter',Escape:'Esc',Left:'←',Right:'→',space:'Space'};
+function rKeys(m){let mods=new Set(['super']),scope='desktop',sel=null;
+m.innerHTML=`<h2>Key explorer</h2><p class="lead">Switch the modifiers on, and the keys that do something light up. Click a key to read what it does. You can also press real keys (Alt, Ctrl and Shift are detected; browsers hide the Windows key, so use the Super button).</p>
+<div class="mods" id="md"></div><div class="vk" id="vk"></div><div class="card" id="ki"></div><h3>Search all shortcuts</h3><input type="search" id="q" placeholder="type: close, tmux, volume, desktop, super+shift ..."><div class="card"><table id="rs"></table></div>`;
+const md=$('#md');
+for(const x of ORDER){const b=document.createElement('button');b.textContent=x[0].toUpperCase()+x.slice(1);b.dataset.m=x;b.onclick=()=>{mods.has(x)?mods.delete(x):mods.add(x);draw()};md.append(b)}
+for(const s of ['desktop','tmux']){const b=document.createElement('button');b.textContent=s==='desktop'?'Desktop (Super)':'tmux (Alt)';b.dataset.s=s;b.onclick=()=>{scope=s;mods=new Set(s==='tmux'?['alt']:['super']);draw()};md.append(b)}
+const vk=$('#vk');ROWS.forEach((r,i)=>{const d=document.createElement('div');d.className='vkrow o'+(i<4?i:0);for(const k of r){const e=document.createElement('div');e.className='k';e.dataset.k=k;e.onclick=()=>{sel=k;draw()};d.append(e)}vk.append(d)});
+const find=(k)=>{const c=norm([...mods].concat(k.toLowerCase()).join('+'));return BIND.filter(b=>b.combo===c&&(scope==='both'||b.scope===scope))};
+function draw(){$$('#md button').forEach(b=>b.classList.toggle('on',b.dataset.m?mods.has(b.dataset.m):b.dataset.s===scope));
+$$('.k',vk).forEach(e=>{const k=e.dataset.k,f=find(k);e.className='k'+(f.length?' has':'')+(sel===k?' sel':'');e.innerHTML=`${esc(LBL[k]||k)}<small>${f.length?esc(f[0].desc.split(' (')[0]):''}</small>`});
+const c=[...mods].length?norm([...mods].concat((sel||'?').toLowerCase()).join('+')):(sel||'?');
+const f=sel?find(sel):[];$('#ki').innerHTML=sel?`<b>${esc(show(c))}</b> ${f.length?'':'<span style="color:var(--dim)">is not bound in this layer</span>'}${f.map(x=>`<div>${esc(x.desc)} <span class="tag">${x.scope}</span></div>`).join('')}`:'Click a key.'}
+const kd=e=>{if(/INPUT|TEXTAREA/.test(e.target.tagName))return;mods=new Set(mods);e.altKey?mods.add('alt'):0;e.ctrlKey?mods.add('ctrl'):0;e.shiftKey?mods.add('shift'):0;e.metaKey?mods.add('super'):0;
+let k=e.key;if(k.length===1)k=k.toLowerCase();else k={Enter:'Return',' ':'space',ArrowLeft:'Left',ArrowRight:'Right'}[k]||k;if(ROWS.flat().includes(k)){sel=k;draw();if(e.altKey)e.preventDefault()}};
+addEventListener('keydown',kd);draw();
+const q=$('#q');const rs=$('#rs');function list(){const t=q.value.toLowerCase().trim();const rows=BIND.filter(b=>b.raw.indexOf('..')<0||true).filter((b,i,a)=>a.findIndex(x=>x.raw===b.raw&&x.scope===b.scope)===i).filter(b=>!t||(b.desc+' '+b.raw+' '+b.scope+' '+show(b.raw)).toLowerCase().includes(t)).slice(0,80);
+rs.innerHTML=rows.map(b=>`<tr><td><code>${esc(show(b.raw))}</code></td><td>${esc(b.desc)}</td><td><span class="tag">${b.scope}</span></td></tr>`).join('')||'<tr><td>nothing found</td></tr>'}
+q.oninput=list;list();return()=>removeEventListener('keydown',kd)}
+// ---- 4 tiling playground
+function rTile(m){m.innerHTML=`<h2>Tiling playground</h2><p class="lead">A tiny simulation of bspwm. Click the box so it has focus, then use the keys below as if you were holding <kbd>Super</kbd>.</p>
+<div id="screen" tabindex="0"><div id="sbar"></div><div id="field"></div></div>
+<div class="row"><div class="card"><table>
+<tr><td><kbd>Enter</kbd></td><td>new window (splits the longer side)</td></tr><tr><td><kbd>h</kbd><kbd>j</kbd><kbd>k</kbd><kbd>l</kbd></td><td>move focus</td></tr>
+<tr><td><kbd>Shift</kbd>+<kbd>h/j/k/l</kbd></td><td>swap with the neighbour</td></tr><tr><td><kbd>q</kbd></td><td>close the window</td></tr><tr><td><kbd>m</kbd></td><td>monocle on/off</td></tr></table></div>
+<div class="card"><table><tr><td><kbd>Alt</kbd>+<kbd>h/j/k/l</kbd></td><td>grow towards that side</td></tr><tr><td><kbd>Ctrl</kbd>+<kbd>h/j/k/l</kbd></td><td>preselect where the next window opens</td></tr>
+<tr><td><kbd>Shift</kbd>+<kbd>r</kbd></td><td>rotate the layout 90°</td></tr><tr><td><kbd>1</kbd>..<kbd>4</kbd></td><td>desktop (add <kbd>Shift</kbd> to carry the window)</td></tr><tr><td><kbd>f</kbd></td><td>fullscreen</td></tr></table></div></div>
+<div class="mods" id="tb"></div><div class="card" id="tmsg">Open a few windows with Enter.</div>`;
+const desks=[null,null,null,null];let cur=0,focus=null,mono=false,full=false,nid=0,pre=null;const msg=t=>$('#tmsg').textContent=t;
+const leaf=()=>({id:++nid});const isLeaf=n=>n&&!n.a;
+function leaves(n,r,out=[],gap=8){if(!n)return out;if(isLeaf(n)){out.push({n,r});return out}
+const q=n.ratio;if(n.dir==='v'){const w=r.w*q;leaves(n.a,{x:r.x,y:r.y,w,h:r.h},out);leaves(n.b,{x:r.x+w,y:r.y,w:r.w-w,h:r.h},out)}else{const h=r.h*q;leaves(n.a,{x:r.x,y:r.y,w:r.w,h},out);leaves(n.b,{x:r.x,y:r.y+h,w:r.w,h:r.h-h},out)}return out}
+const R={x:0,y:0,w:1600,h:810};
+function parent(root,t,p=null){if(!root)return null;if(root===t)return p||'root';if(isLeaf(root))return null;return parent(root.a,t,root)??parent(root.b,t,root)}
+function replace(t,nw){const p=parent(desks[cur],t);if(p==='root')desks[cur]=nw;else if(p.a===t)p.a=nw;else p.b=nw}
+function add(){const nl=leaf();if(!desks[cur]){desks[cur]=nl;focus=nl;return}
+const L=leaves(desks[cur],R),f=L.find(x=>x.n===focus)||L[0];let dir=f.r.w>=f.r.h?'v':'h',first=false;
+if(pre){dir=(pre==='west'||pre==='east')?'v':'h';first=(pre==='west'||pre==='north');pre=null}
+const sp={dir,ratio:.5};if(first){sp.a=nl;sp.b=f.n}else{sp.a=f.n;sp.b=nl}replace(f.n,sp);focus=nl}
+function neigh(dir){const L=leaves(desks[cur],R),f=L.find(x=>x.n===focus);if(!f)return null;let best=null,bd=1e9;
+for(const o of L){if(o===f)continue;const a=f.r,b=o.r;let ok,d,ov;
+if(dir==='east'){ok=b.x>=a.x+a.w-1;d=b.x-(a.x+a.w);ov=Math.min(a.y+a.h,b.y+b.h)-Math.max(a.y,b.y)}
+if(dir==='west'){ok=b.x+b.w<=a.x+1;d=a.x-(b.x+b.w);ov=Math.min(a.y+a.h,b.y+b.h)-Math.max(a.y,b.y)}
+if(dir==='south'){ok=b.y>=a.y+a.h-1;d=b.y-(a.y+a.h);ov=Math.min(a.x+a.w,b.x+b.w)-Math.max(a.x,b.x)}
+if(dir==='north'){ok=b.y+b.h<=a.y+1;d=a.y-(b.y+b.h);ov=Math.min(a.x+a.w,b.x+b.w)-Math.max(a.x,b.x)}
+if(ok&&ov>0&&d<bd){bd=d;best=o}}return best}
+function close(){const t=focus;if(!t)return;const p=parent(desks[cur],t);if(p==='root'){desks[cur]=null;focus=null;return}
+const sib=p.a===t?p.b:p.a;replace(p,sib);const L=leaves(sib,R);focus=L.length?L[0].n:null}
+function rotate(n){if(!n||isLeaf(n))return;n.dir=n.dir==='v'?'h':'v';rotate(n.a);rotate(n.b)}
+function inTree(n,t){return n===t||(!isLeaf(n)&&(inTree(n.a,t)||inTree(n.b,t)))}
+function grow(dir){const horiz=(dir==='west'||dir==='east'),fwd=(dir==='east'||dir==='south');let t=focus;
+while(true){const p=parent(desks[cur],t);if(!p||p==='root')return;const inA=inTree(p.a,focus);
+if((p.dir==='v')===horiz&&inA===fwd){p.ratio=Math.min(.85,Math.max(.15,p.ratio+(fwd?.06:-.06)));return}t=p}}
+function draw(){const f=$('#field'),L=leaves(desks[cur],R);f.innerHTML='';
+$('#sbar').innerHTML=desks.map((d,i)=>`<b class="${i===cur?'on':''}">${i+1}${d?'•':''}</b>`).join('')+`<span style="margin-left:auto">${mono?'monocle ':''}${full?'fullscreen ':''}${pre?'preselect '+pre:''}</span>`;
+const g=0.5;for(const {n,r} of L){if((mono||full)&&n!==focus)continue;const e=document.createElement('div');e.className='tile'+(n===focus?' f':'');
+const rr=(mono||full)?R:r,gap=(full?0:8);e.style.left=((rr.x/1600*100))+'%';e.style.top=((rr.y/810*100))+'%';e.style.width=(rr.w/1600*100)+'%';e.style.height=(rr.h/810*100)+'%';
+e.style.margin=(gap/2)+'px';e.style.width=`calc(${rr.w/16}% - ${gap}px)`;e.style.height=`calc(${rr.h/8.1}% - ${gap}px)`;e.textContent=n.id;e.onclick=()=>{focus=n;draw()};f.append(e)}}
+const act={Enter:()=>{add();msg('New window: bspwm splits the focused window along its longer side.')},
+q:()=>{close();msg('Closed. The sibling takes the free space.')},m:()=>{mono=!mono;msg(mono?'Monocle: one window full size, the others are hidden behind it.':'Back to tiled.')},f:()=>{full=!full;msg(full?'Fullscreen: the window covers the bar.':'Left fullscreen.')},R:()=>{rotate(desks[cur]);msg('Rotated the whole layout 90 degrees.')}};
+const D4={h:'west',j:'south',k:'north',l:'east'};
+const key=e=>{if(document.activeElement!==$('#screen'))return;let k=e.key;const lk=k.toLowerCase();let did=false;
+if(k==='Enter'){act.Enter();did=true}else if(e.altKey&&D4[lk]){grow(D4[lk]);msg('Resized (Super+Alt+'+lk+' grows the window towards that side).');did=true}
+else if(e.ctrlKey&&D4[lk]){pre=D4[lk];msg('Preselected '+pre+': the next window opens there.');did=true}
+else if(e.shiftKey&&D4[lk]){const n=neigh(D4[lk]);if(n){const a=leaves(desks[cur],R).find(x=>x.n===focus);const t=a.n.id;a.n.id=n.n.id;n.n.id=t;focus=n.n;msg('Swapped with the window '+D4[lk]+'.')}did=true}
+else if(D4[lk]&&!e.shiftKey){const n=neigh(D4[lk]);if(n)focus=n.n;msg('Focus '+D4[lk]+'.');did=true}
+else if(k==='R'){act.R();did=true}else if(['q','m','f'].includes(k)){act[k]();did=true}
+else if(/^[1-4]$/.test(k)){cur=+k-1;if(!focus||!desks[cur])focus=(leaves(desks[cur],R)[0]||{}).n||null;msg('Desktop '+k+'.');did=true}
+else if(/^[!@#$]$/.test(k)){const t='!@#$'.indexOf(k);if(focus&&t!==cur){const n=focus;close();const o=cur;cur=t;const nl=n;if(!desks[cur])desks[cur]=nl;else{focus=(leaves(desks[cur],R)[0]||{}).n;add();desks[cur]=desks[cur]}focus=nl;msg('Sent the window to desktop '+(t+1)+' and followed it.')}did=true}
+if(did){e.preventDefault();draw()}};
+const sc=$('#screen');sc.addEventListener('keydown',key);
+const tb=$('#tb');for(const [l,fn] of [['New window',act.Enter],['Close',act.q],['Monocle',act.m],['Fullscreen',act.f],['Rotate',act.R],['Reset',()=>{desks.fill(null);focus=null;mono=full=false;pre=null;cur=0}]]){const b=document.createElement('button');b.textContent=l;b.onclick=()=>{fn();draw();sc.focus()};tb.append(b)}
+for(let i=0;i<3;i++)act.Enter();draw();sc.focus();}
+// ---- 5 quiz
+function rQuiz(m){const pool=BIND.filter((b,i,a)=>!/drag/.test(b.raw)&&a.findIndex(x=>x.raw===b.raw&&x.scope===b.scope)===i);
+let score=store.get('score',{ok:0,n:0}),streak=0;
+m.innerHTML=`<h2>Practice quiz</h2><p class="lead">Shortcuts as questions. Wrong answers show the right one. <span id="sc"></span></p><div class="card" id="qz"></div><button id="nx">Next question</button> <button id="rs2">Reset score</button>`;
+const sh=a=>a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(x=>x[1]);
+function show1(){const q=sh(pool)[0];const rev=Math.random()<.5;const others=sh(pool.filter(x=>x.scope===q.scope&&x.desc!==q.desc&&x.raw!==q.raw)).slice(0,3);const opts=sh([q,...others]);
+const dsc=x=>x.desc.split(' (')[0];
+$('#qz').innerHTML=rev?`<p>Which keys do this: <b>${esc(dsc(q))}</b>? <span class="tag">${q.scope}</span></p>`:`<p>What does <kbd>${esc(show(q.raw))}</kbd> do? <span class="tag">${q.scope}</span></p>`;
+for(const o of opts){const b=document.createElement('button');b.className='opt';b.innerHTML=rev?esc(show(o.raw)):esc(dsc(o));b.onclick=()=>{const ok=o===q;score.n++;if(ok){score.ok++;streak++}else streak=0;store.set('score',score);
+$$('.opt').forEach(x=>x.disabled=true);b.classList.add(ok?'right':'wrong');if(!ok)$$('.opt').find(x=>x.textContent===(rev?show(q.raw):dsc(q))).classList.add('right');upd()};$('#qz').append(b)}}
+function upd(){$('#sc').textContent=`Score ${score.ok}/${score.n}, streak ${streak}`}
+$('#nx').onclick=show1;$('#rs2').onclick=()=>{score={ok:0,n:0};store.set('score',score);streak=0;upd()};upd();show1()}
+// ---- 6 tmux
+function rTmux(m){m.innerHTML=`<h2>tmux</h2><p class="lead">Windows and panes inside one terminal that survive closing it. Most keys need only <kbd>Alt</kbd>.</p>
+<div class="row"><div class="card"><b>Mental model</b><ul><li>A <b>session</b> holds <b>windows</b> (tabs); a window holds <b>panes</b> (splits).</li><li><kbd>Super</kbd>+<kbd>Return</kbd> attaches to session 0.</li><li>Close the terminal: everything keeps running. Open it again: it is all there.</li></ul></div>
+<div class="card"><b>Try these first</b><table><tr><td><kbd>Alt</kbd>+<kbd>t</kbd></td><td>new window</td></tr><tr><td><kbd>Alt</kbd>+<kbd>|</kbd> / <kbd>Alt</kbd>+<kbd>-</kbd></td><td>split</td></tr><tr><td><kbd>Alt</kbd>+<kbd>h/j/k/l</kbd></td><td>move between panes</td></tr><tr><td><kbd>Alt</kbd>+<kbd>z</kbd></td><td>zoom a pane</td></tr><tr><td><kbd>Alt</kbd>+<kbd>e</kbd></td><td>rename the window</td></tr></table></div></div>
+<h3>All tmux keys</h3><input type="search" id="tq" placeholder="filter...">${D.tmux.map(([s,r])=>`<div class="card tsec"><b>${esc(s)}</b><table>${r.map(([k,d])=>`<tr class="tr"><td><code>${esc(show(k))}</code></td><td>${esc(d)}</td></tr>`).join('')}</table></div>`).join('')}`;
+$('#tq').oninput=e=>{const t=e.target.value.toLowerCase();$$('.tr').forEach(r=>r.style.display=r.textContent.toLowerCase().includes(t)?'':'none')}}
+// ---- 7 recipes
+const REC=[
+['Add a keyboard shortcut','Edit ~/.config/sxhkd/sxhkdrc. A capital letter in a key means Shift. Then reload.',`# in sxhkdrc
+super + shift + m
+    alacritty -e ncmpcpp
+# then reload:  Alt+Shift+Esc   (or: pkill -USR1 -x sxhkd)`],
+['Change the browser (button and key)','Key: edit the command under "super + B" in sxhkdrc. Button: module [module/app-brave] in polybar/config.ini (click-left = command, format = icon).',`click-left = firefox-esr &
+# icons are real characters; print one with:
+python3 -c "print(chr(0xf059f))"
+~/.config/polybar/launch.sh   # reload the bar`],
+['Add a button to the bar','Copy an app-* module, rename it, change icon and command, add its name to a modules-* line, reload.',`[module/app-music]
+type = custom/text
+format = "<icon>"
+format-font = 6
+click-left = alacritty -e ncmpcpp &
+# modules-left = ... app-music
+~/.config/polybar/launch.sh`],
+['Start a program with the session','Add it to process_list in ~/.config/bspwm/start, then restart bspwm.',`# in bspwm/start:  process_list=( ... "nm-applet" ... )
+Super+Esc   # restart bspwm`],
+['Float a program, or open it on a desktop','Window rules live in bspwmrc. Find the class with xprop.',`xprop WM_CLASS     # click the window
+bspc rule -a "Gimp" state=floating
+bspc rule -a firefox desktop='^2'`],
+['Change gaps and borders','They live in the mode profile (so the mode switch keeps them).',`# ~/.config/bspwm/modes/cockpit.conf
+GAP=8
+BORDER=2
+~/.config/bspwm/scripts/mode.sh apply`],
+['Change the theme / icons','Use themer: it updates GTK, Qt, rofi and the active mode profile together.',`themer                       # GUI with live preview
+themer --gtk Adwaita-dark --icons Papirus
+themer --list ; themer --current`],
+['Change terminal colours','Two files must match; then run the checker.',`# ~/.config/kitty/cockpit.conf   and   ~/.config/alacritty/alacritty.toml
+python3 ~/.bspwn/scripts/palette_check.py
+# kitty: Ctrl+Shift+F5     alacritty reloads by itself`],
+['Switch mode (cockpit / undercover)','Whole-desktop profile switch, live.',`Super+Ctrl+u
+~/.config/bspwm/scripts/mode.sh cockpit`],
+['Keyboard backlight timeout, server mode, battery guard','All in power.conf, read live.',`$EDITOR ~/.config/bspwm/power.conf
+KBD_IDLE_AC=9
+SERVER_BATTERY_MIN=auto
+~/.config/bspwm/scripts/servermode.py status`],
+['Change when the screen locks','IDLE_LOCK is seconds of inactivity (default 300).',`# top of ~/.config/bspwm/scripts/idle-lock.sh
+IDLE_LOCK=\${IDLE_LOCK:-300}
+Super+Esc`],
+['Undo a change that broke something','Everything is in git.',`git -C ~/.bspwn diff
+git -C ~/.bspwn checkout -- dot/.config/polybar/config.ini`],
+['Let Claude Code do it','The repo has a CLAUDE.md, so Claude knows how this place works.',`cd ~/.bspwn && claude
+> add a shortcut super+shift+m that opens the music player`]];
+function rHow(m){m.innerHTML=`<h2>How do I change...?</h2><p class="lead">Recipes. Copy, adapt, reload.</p><input type="search" id="hq" placeholder="filter: browser, shortcut, bar, theme...">
+<div id="hl"></div><div class="card"><b>Reload cheat table</b><table>
+<tr><td>shortcuts</td><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>Esc</kbd></td></tr><tr><td>bspwm, rules, autostart</td><td><kbd>Super</kbd>+<kbd>Esc</kbd></td></tr><tr><td>bar</td><td><code>~/.config/polybar/launch.sh</code></td></tr>
+<tr><td>tmux</td><td><kbd>Alt</kbd>+<kbd>r</kbd></td></tr><tr><td>look of everything</td><td><code>mode.sh apply</code></td></tr></table></div>`;
+const hl=$('#hl');for(const [t,d,c] of REC){const e=document.createElement('details');e.innerHTML=`<summary>${esc(t)}</summary><p>${esc(d)}</p><pre><button>Copy</button>${esc(c)}</pre>`;
+e.querySelector('button').onclick=ev=>{navigator.clipboard&&navigator.clipboard.writeText(c).then(()=>ev.target.textContent='Copied')};hl.append(e)}
+$('#hq').oninput=e=>{const t=e.target.value.toLowerCase();$$('details',hl).forEach(d=>d.style.display=d.textContent.toLowerCase().includes(t)?'':'none')}}
+// ---- 8 files
+const TREE=[['~/.bspwn','the git repository. Everything below lives here.',[
+['dot/.config/bspwm/','bspwmrc (rules, colours), start (autostart), power.conf, modes/, scripts/'],
+['dot/.config/sxhkd/sxhkdrc','every desktop shortcut'],['dot/.config/polybar/config.ini','the bar'],['dot/.config/conky/','the HUD column on the right'],
+['dot/.config/rofi/, dunst/','launcher and notifications'],['dot/.config/kitty/, alacritty/','terminals and their palette'],
+['dot/.tmux.conf','tmux'],['dot/.zsh/','shell: aliases, functions, plugins, prompt'],['dot/theme/','bundled GTK theme and icons'],
+['scripts/','themer, palette_check.py, wallpaper generators, tests, docs builder'],['system/','root-level files (lid handler, login manager, lock screen)'],
+['docs/','this page, the PDF manual, the cheatsheet'],['CLAUDE.md','instructions Claude Code reads automatically']]]];
+function rFiles(m){m.innerHTML=`<h2>Where things live</h2><p class="lead">Each folder in ~/.config is a symlink into the repo, so editing either path edits the same file.</p>`+TREE.map(([a,b,c])=>`<div class="card"><b>${esc(a)}</b> <span style="color:var(--dim)">${esc(b)}</span><table>${c.map(([x,y])=>`<tr><td><code>${esc(x)}</code></td><td>${esc(y)}</td></tr>`).join('')}</table></div>`).join('')}
+// ---- 9 diagrams
+function rPics(m){const L=[['boot','From login to desktop'],['input','What happens when you press a key'],['layout','Repository and symlinks'],['modes','Modes'],['themes','What themer changes'],['lock','Lock and idle'],['power','Power tools'],['tmux','tmux structure'],['repo-flow','The safe way to change anything']];
+m.innerHTML=`<h2>Diagrams</h2>`+L.map(([f,t])=>`<h3>${t}</h3><div class="diagram"><img src="diagrams/${f}.svg" alt="${t}"></div>`).join('')}
+go();
+</script>
+</body>
+</html>

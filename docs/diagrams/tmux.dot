@@ -1,0 +1,8 @@
+digraph tmux { rankdir=TB;
+//STYLE
+  srv [label="tmux server\n(keeps running when you close the terminal)", fillcolor="#c5c2ba"];
+  s0  [label="session 0\nsuper+Return attaches here"]; s1 [label="session ...\nprefix+S creates one"];
+  w1  [label="window 1:PROJECT"]; w2 [label="window 2:BSPWN"]; w3 [label="window 3:zsh"];
+  p1  [label="pane", shape=component]; p2 [label="pane", shape=component];
+  srv -> s0; srv -> s1; s0 -> w1; s0 -> w2; s0 -> w3; w2 -> p1; w2 -> p2;
+}

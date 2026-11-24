@@ -1,0 +1,15 @@
+digraph input { rankdir=TB;
+//STYLE
+  kb   [label="Keyboard\nsuper + key", shape=ellipse];
+  ms   [label="Mouse\nsuper + drag", shape=ellipse];
+  bar  [label="Polybar\nclick / scroll", shape=ellipse];
+  sx   [label="sxhkd\nsxhkdrc maps keys\nto commands", fillcolor="#c5c2ba"];
+  bspc [label="bspc\n(command line)"];
+  wm   [label="bspwm\nwindow tree", fillcolor="#c5c2ba"];
+  scr  [label="scripts\nmode.sh, servermode.py,\nlauncher.sh, ..."];
+  apps [label="apps\nalacritty, brave, rofi ..."];
+  kb -> sx; sx -> bspc [label="window / desktop keys"]; bspc -> wm;
+  sx -> scr [label="system keys"]; sx -> apps [label="launch keys"];
+  ms -> wm [label="pointer_action"];
+  bar -> scr; bar -> apps; bar -> bspc;
+}

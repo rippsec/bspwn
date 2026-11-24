@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0-only
+# Copyright (c) 2025-2026 rip (rippsec) and contributors. See LICENSE and NOTICE.md.
 """themer - live GTK / icon theme switcher for the bspwn rice.
 
 GUI:  themer.py                      pick a theme: the window previews it live, Apply commits it

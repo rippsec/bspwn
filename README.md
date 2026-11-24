@@ -5,13 +5,16 @@ and a handful of small custom tools (live theme switcher, keyboard backlight, "s
 
 ![desktop](docs/screenshots/desktop-hud.png)
 
-This README is also the **manual**: [Reading the screen](#reading-the-screen) explains every symbol in the bar and every block of the HUD, and [Settings you can tweak](#settings-you-can-tweak)
+**Full documentation:** the [user manual](docs/BSPWN-manual.md) ([PDF](docs/BSPWN-manual.pdf), with diagrams and a table of contents), a one-page [cheatsheet](docs/BSPWN-cheatsheet.md) ([PDF](docs/BSPWN-cheatsheet.pdf))
+and an [interactive manual](docs/interactive.html) (open the file in a browser: clickable bar, key explorer, tiling playground, quiz, recipes).
+
+This README is the front page and the **reference for every custom setting**: [Reading the screen](#reading-the-screen) explains every symbol in the bar and every block of the HUD, and [Settings you can tweak](#settings-you-can-tweak)
 lists every custom setting. To make it fit your own computer, see [Adapting it to your machine](#adapting-it-to-your-machine-with-claude-code).
 
 ## Contents
 
 [What is in here](#what-is-in-here) · [Install](#install) · [Reading the screen](#reading-the-screen) · [Keys](#everyday-keys) · [Settings you can tweak](#settings-you-can-tweak) ·
-[Themes](#themes) · [Terminal colours](#terminal-colours) · [Other pieces](#other-pieces) · [Adapting it](#adapting-it-to-your-machine-with-claude-code) · [Layout](#repo-layout)
+[Themes](#themes) · [Terminal colours](#terminal-colours) · [Other pieces](#other-pieces) · [Adapting it / Claude Code](#adapting-it-to-your-machine-with-claude-code) · [Layout](#repo-layout) · [License](#license)
 
 ## What is in here
 
@@ -256,7 +259,6 @@ Edit both files together, re-run the checker, and look at it in a real terminal.
 ## Other pieces
 
 - **Wallpapers**: generated with Pillow by `scripts/wallpaper/gen_*.py` into `assets/wallpaper/`; the active one is set in `modes/cockpit.conf` and `bspwm/start`.
-- **jarvis/**: an optional voice assistant driven by Claude Code (see `jarvis/README.md`, in Spanish). Not installed unless you set it up.
 - **system/**: root-level files (ACPI lid handler, X11, tlp, display manager) installed by `./install.sh -system`.
 
 ## Adapting it to your machine (with Claude Code)
@@ -270,7 +272,8 @@ claude             # Claude Code picks up .claude/skills/adapt-bspwn automatical
 > adapt this setup to my laptop        # or: "my battery is called BAT0 only", "I have a 4K screen", "port it to Arch"
 ```
 
-The skill ([`.claude/skills/adapt-bspwn/SKILL.md`](.claude/skills/adapt-bspwn/SKILL.md)) makes Claude inspect your hardware first (read-only), show you a plan, change only what differs, and verify with the tests and the palette checker.
+The repo also has a [`CLAUDE.md`](CLAUDE.md) at its root: Claude Code reads it automatically and learns how this desktop is organised, how to reload each part and what it must not touch,
+so you can ask it for any change ("add a shortcut", "change the browser button", "make the bar bigger"). The skill ([`.claude/skills/adapt-bspwn/SKILL.md`](.claude/skills/adapt-bspwn/SKILL.md)) makes Claude inspect your hardware first (read-only), show you a plan, change only what differs, and verify with the tests and the palette checker.
 It will not run the full installer, touch system files or lock your screen without asking. The table of machine-specific places is in
 [`references/hardware-map.md`](.claude/skills/adapt-bspwn/references/hardware-map.md), which is also a good checklist to follow by hand.
 Only the ThinkPad has been tested so far: expect other laptops (a Dell, say) to need some of the items in that table, and verify each one instead of assuming.
@@ -283,9 +286,12 @@ dot/.config/bspwm/      bspwmrc, start (autostart), modes/, power.conf, scripts/
 scripts/                themer/, palette_check.py, wallpaper/, tests/
 install.sh, install/    installer (packages, fonts, themes, configs, ...)       system/   root-level files
 .claude/skills/         adapt-bspwn: the Claude Code skill for adapting this setup to another machine
-docs/screenshots/       the images used in this README
+docs/                   manual (md+pdf), cheatsheet, interactive.html, screenshots/, diagrams/; sources in docs/src/ (built by scripts/docs/build.py)
+CLAUDE.md, NOTICE.md    instructions for Claude Code; authorship and third-party licences
 ```
 
 ## License
 
-GPL-2.0, see [LICENSE](LICENSE).
+Code and configuration: **GPL-2.0-only**, see [LICENSE](LICENSE). Copyright (c) 2025-2026 **rip ([rippsec](https://github.com/rippsec)) and contributors**.
+Documentation (`docs/`): **CC BY-SA 4.0**. You are free to use, change and share this, but you must keep the copyright and licence notices, publish your changes under the same licence and not present
+it as your own work. [NOTICE.md](NOTICE.md) has the details, the authorship record and the licences of the bundled third-party themes, icons and fonts. The public git history is the proof of who made what and when.

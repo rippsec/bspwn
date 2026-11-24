@@ -1,4 +1,6 @@
 #!/bin/bash
+# SPDX-License-Identifier: GPL-2.0-only
+# Copyright (c) 2025-2026 rip (rippsec) and contributors. See LICENSE and NOTICE.md.
 #
 # ██████╗ ███████╗██████╗ ██╗    ██╗███╗   ██╗
 # ██╔══██╗██╔════╝██╔══██╗██║    ██║████╗  ██║

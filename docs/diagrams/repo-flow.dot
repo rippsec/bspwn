@@ -1,0 +1,9 @@
+digraph flow { rankdir=LR;
+//STYLE
+  edit [label="1. edit the file\nin ~/.bspwn/dot/..."];
+  rel  [label="2. reload that one thing\n(table in section 4)"];
+  look [label="3. look at it\n(screenshot / use it)"];
+  doc  [label="4. update README / manual\n(+ keys.py if you changed a key)"];
+  git  [label="5. git add <your files>\ncommit, push"];
+  edit -> rel -> look -> doc -> git;
+}

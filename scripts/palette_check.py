@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0-only
+# Copyright (c) 2025-2026 rip (rippsec) and contributors. See LICENSE and NOTICE.md.
 """Check the terminal palette (kitty/cockpit.conf) for legibility and colour separation.
 
     python3 scripts/palette_check.py [path/to/kitty-colors.conf]

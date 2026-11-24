@@ -1,0 +1,13 @@
+digraph modes { rankdir=LR;
+//STYLE
+  key  [label="super+ctrl+u\nor the mask in the bar", shape=ellipse];
+  ms   [label="mode.sh\ntoggle / apply", fillcolor="#c5c2ba"];
+  prof [label="modes/cockpit.conf\nmodes/undercover.conf\nGTK, icons, wallpaper, panel,\ngaps, borders, colours"];
+  st   [label="~/.cache/bspwn-mode\n(remembers the mode)", shape=note];
+  x    [label="xsettingsd + gsettings\n(GTK / icons / cursor, live)"];
+  w    [label="feh wallpaper"];
+  p    [label="panel: polybar or tint2\nconky HUD on/off"];
+  b    [label="bspc: gaps, borders,\ntop padding, floating"];
+  key -> ms; ms -> prof [label="reads"]; ms -> st [label="writes"];
+  ms -> x; ms -> w; ms -> p; ms -> b;
+}
