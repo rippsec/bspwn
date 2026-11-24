@@ -1,4 +1,6 @@
 #!/bin/bash
+# SPDX-License-Identifier: GPL-2.0-only
+# Copyright (c) 2025-2026 rippsec and contributors. See LICENSE and NOTICE.md.
 # Event-driven power watcher (one process, no polling loop of its own):
 #   AC plug/unplug  -> power-mode.sh (stop/start picom, conky, ...) + battery popups
 #   BAT events      -> battery-notify.sh

@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0-only
+# Copyright (c) 2025-2026 rippsec and contributors. See LICENSE and NOTICE.md.
 """Server mode: keep the laptop running with the lid closed (remote control, ssh, ftp, ...).
 
 While ON, closing the lid does NOT suspend. The screen locks and goes dark, the keyboard backlight turns

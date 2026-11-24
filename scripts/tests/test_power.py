@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0-only
+# Copyright (c) 2025-2026 rippsec and contributors. See LICENSE and NOTICE.md.
 """Tests for the power tools (kbd-backlight.py, servermode.py, powerlib.py) against a fake sysfs.
 
     python3 scripts/tests/test_power.py
@@ -553,6 +555,28 @@ class KbdTest(unittest.TestCase):
         self.assertIsNone(k.step(106, 2, 5, False, 1))                         # ... for the timeout
         self.assertEqual(k.step(107.1, 2, 5, False, 1), 0)
 
+    def test_manual_off_stays_off_until_a_keypress(self):
+        k = kb.Kbd(0.0); k.key(1.0)
+        self.assertEqual(k.step(1.0, 0, 5, False, 1), 1)                       # typing lit it
+        self.assertIsNone(k.step(2.0, 1, 5, False, 1))
+        self.assertEqual(k.step(2.5, 0, 5, False, 1), None)                    # Fn+Space switched it off by hand: leave it off
+        self.assertIsNone(k.step(3.0, 0, 5, False, 1))                         # ... even inside the timeout
+        k.key(3.5)
+        self.assertEqual(k.step(3.5, 0, 5, False, 1), 1)                       # next keypress lights it again
+
+    def test_manual_off_then_manual_on_is_respected(self):
+        k = kb.Kbd(0.0); k.key(1.0); k.step(1.0, 0, 5, False, 1)
+        k.step(2.0, 0, 5, False, 1)                                            # user turned it off
+        self.assertIsNone(k.step(3.0, 2, 5, False, 1))                         # then on to level 2: kept
+        self.assertEqual(k.step(9.0, 2, 5, False, 1), 0)                       # and it still times out
+
+    def test_daemon_start_with_light_off_does_not_light_it(self):
+        k = kb.Kbd(100.0)
+        self.assertIsNone(k.step(101.0, 0, 5, False, 1))                       # no keypress yet: stays off
+        self.assertIsNone(k.step(102.0, 0, 5, False, 1))
+        k.key(103.0)
+        self.assertEqual(k.step(103.0, 0, 5, False, 1), 1)                     # first keypress lights it
+
     def test_level_zero_restores_the_previous_level(self):
         k = kb.Kbd(0.0); k.step(1.0, 2, 5, False, 0)                           # saw level 2 earlier
         self.assertEqual(k.step(20, 2, 5, False, 0), 0)
@@ -572,6 +596,7 @@ class KbdTest(unittest.TestCase):
     def test_only_keyboard_events_count_by_default(self):
         key = "EVENT type 13 (RawKeyPress)\n    device: 12"
         self.assertTrue(kb.is_activity(key))
+        self.assertTrue(kb.is_activity("EVENT type 2 (KeyPress)\n    detail: 45\n    flags: repeat"))   # held key (auto-repeat)
         self.assertFalse(kb.is_activity("EVENT type 14 (RawKeyRelease)\nEVENT type 17 (RawMotion)\nEVENT type 15 (RawButtonPress)"))
         self.assertTrue(kb.is_activity("EVENT type 17 (RawMotion)", pointer=True))
         self.assertFalse(kb.is_activity("EVENT type 17 (RawMotion)", pointer=False))

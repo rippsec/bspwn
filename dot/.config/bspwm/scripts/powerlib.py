@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0-only
+# Copyright (c) 2025-2026 rippsec and contributors. See LICENSE and NOTICE.md.
 """Shared helpers for the bspwn power tools (kbd-backlight.py, servermode.py).
 
 Everything that touches the machine goes through small functions here so it can be faked in tests:
@@ -26,8 +28,8 @@ RUN_DIR = Path(os.environ.get("BSPWN_RUNTIME_DIR") or os.environ.get("XDG_RUNTIM
 
 DEFAULTS = {
     "KBD_AUTO": "1",              # keyboard backlight idle-off (0 disables the daemon)
-    "KBD_IDLE_AC": "5",           # seconds after the last keypress before the backlight turns off, on AC
-    "KBD_IDLE_BAT": "5",          # ... on battery
+    "KBD_IDLE_AC": "9",           # seconds after the last keypress before the backlight turns off, on AC
+    "KBD_IDLE_BAT": "9",          # ... on battery
     "KBD_LEVEL": "1",             # level used when a key lights it (1 = minimal; 0 = the level it had before)
     "KBD_WAKE_POINTER": "0",      # 1 = touchpad/mouse input also lights it (default: keyboard only)
     "SERVER_BATTERY_MIN": "auto",  # server mode ends below this % on battery; auto = 20 (2+ batteries) or 55

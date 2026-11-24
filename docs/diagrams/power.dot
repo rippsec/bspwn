@@ -1,0 +1,11 @@
+digraph power { rankdir=LR;
+//STYLE
+  conf [label="power.conf\nKEY=VALUE, read live", fillcolor="#c5c2ba"];
+  pm   [label="power-mode.sh\nAC <-> battery:\npicom, conky, brightness"];
+  kb   [label="kbd-backlight.py\nlight follows keypresses"];
+  sm   [label="servermode.py\nlid closed = keep running\n+ battery guard"];
+  lg   [label="logind\ninhibitor lock", shape=component];
+  ev   [label="udev / power-watch.sh\nAC plugged or unplugged", shape=ellipse];
+  conf -> pm; conf -> kb; conf -> sm;
+  ev -> pm; sm -> lg [label="holds while on"];
+}

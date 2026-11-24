@@ -1,0 +1,13 @@
+digraph lock { rankdir=LR;
+//STYLE
+  idle [label="idle 300 s\n(IDLE_LOCK)", shape=ellipse];
+  lid  [label="lid closed", shape=ellipse];
+  sus  [label="suspend / hibernate", shape=ellipse];
+  key  [label="super+x or\npower menu: Lock", shape=ellipse];
+  il   [label="idle-lock.sh\nwatcher + xss-lock keeper", fillcolor="#c5c2ba"];
+  ac   [label="acpi lid.sh"];
+  xl   [label="/usr/local/bin/xlock\ni3lock-color, BSOD scene\nPAM: pam_unix", fillcolor="#c5c2ba"];
+  off  [label="screen off (DPMS)\nonly after the lock is up"];
+  idle -> il; il -> xl; xl -> off [label="waits until locked"];
+  lid -> ac -> xl; sus -> il [label="xss-lock hook"]; key -> xl;
+}

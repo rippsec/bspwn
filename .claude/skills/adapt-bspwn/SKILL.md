@@ -15,7 +15,7 @@ Your job: discover what the user's machine has, change only what differs, verify
    Prefer `-config` (symlink configs), `-themes`, `-fonts`, or run pieces by hand. Back up existing configs first (`./install.sh -backup`).
 3. **System files need confirmation** (`/etc/*`, PAM, display manager, sudo installs). Keep a `.bak` next to anything you replace and say how to undo it.
 4. **Do not lock the screen to test.** Locker commands really lock the session. Verify with unit tests, `status` commands and screenshots instead.
-5. **Keep the repo public-safe**: never commit IP addresses, Wi-Fi names, hostnames, e-mail or tokens. Screenshots must be redacted (the bar and HUD show the IP and SSID).
+5. **Keep the repo public-safe**: never commit IP addresses, Wi-Fi names, hostnames, e-mail or tokens. Screenshots must be redacted (the bar and HUD show the IP and SSID) and must not show personal apps. Never write personal details about the user (health, disabilities, identity, location, habits) or the reasons for their preferences in any file, comment or commit message; document only the technical setting. See "Privacy and opsec" in `CLAUDE.md`.
 6. **Publishing**: the maintainer of this repo has given standing permission to **commit and push every completed change** (code, configs, docs) to GitHub
    without asking again. If you are working for someone else on their own clone, follow their wishes instead (default: commit/push only when asked).
    **Every behaviour change also updates the README manual in the same commit** (and `references/hardware-map.md` if it is hardware related).

@@ -63,7 +63,7 @@ function draw_calendar(cr, w)
   end
 end
 
--- clock header: [四  HH:MM] centred on the panel, date centred underneath
+-- clock header: [HH:MM] centred on the panel, date centred underneath
 function draw_clock(cr, w)
   local function ext_of(str, face, weight, size)
     cairo_select_font_face(cr, face, CAIRO_FONT_SLANT_NORMAL, weight)
@@ -73,20 +73,13 @@ function draw_clock(cr, w)
     return e
   end
   local t = os.date("%H:%M")
-  local g = ext_of("四", CJK, CAIRO_FONT_WEIGHT_BOLD, 26)
   local c = ext_of(t, FONT, CAIRO_FONT_WEIGHT_BOLD, 34)
-  local gap = 12
-  local total = g.x_advance + gap + c.x_advance
-  local x = (w - total) / 2
+  local x = (w - c.x_advance) / 2
   local base = 68
-  cairo_select_font_face(cr, CJK, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD)
-  cairo_set_font_size(cr, 26)
-  cairo_set_source_rgba(cr, table.unpack(DIM))
-  cairo_move_to(cr, x, base); cairo_show_text(cr, "四")
   cairo_select_font_face(cr, FONT, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD)
   cairo_set_font_size(cr, 34)
   cairo_set_source_rgba(cr, table.unpack(WHITE))
-  cairo_move_to(cr, x + g.x_advance + gap, base); cairo_show_text(cr, t)
+  cairo_move_to(cr, x, base); cairo_show_text(cr, t)
   local d = os.date("%A %d %B %Y")
   local de = ext_of(d, FONT, CAIRO_FONT_WEIGHT_NORMAL, 12)
   cairo_set_source_rgba(cr, table.unpack(DIM))

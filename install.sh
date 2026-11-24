@@ -1,4 +1,6 @@
 #!/bin/bash
+# SPDX-License-Identifier: GPL-2.0-only
+# Copyright (c) 2025-2026 rippsec and contributors. See LICENSE and NOTICE.md.
 #
 # ██████╗ ███████╗██████╗ ██╗    ██╗███╗   ██╗
 # ██╔══██╗██╔════╝██╔══██╗██║    ██║████╗  ██║
@@ -162,6 +164,11 @@ run_packages() {
 run_fonts() {
   source "$INSTALL_DIR/fonts.sh"
   install_fonts
+}
+
+run_wallpaper() {
+  source "$INSTALL_DIR/wallpaper.sh"
+  install_wallpaper
 }
 
 run_themes() {
@@ -547,6 +554,10 @@ full_install() {
   log "=== Installing Themes (GTK/Qt/cursor) ==="
   run_themes
   echo ""
+
+  log "=== Personal wallpaper (user name) ==="
+  run_wallpaper
+  echo ""
   
   log "=== Installing Neovim ==="
   run_nvim
@@ -589,6 +600,7 @@ Options:
   -pkg        Install system packages only
   -fonts      Install fonts only
   -themes     Install GTK/Qt themes only
+  -wallpaper  Generate the personal wallpaper (BSPWN layout with your user name in capitals)
   -config     Link configuration files only
   -nvim       Install Neovim only
   -obsidian   Install Obsidian only
@@ -618,7 +630,7 @@ EOF
 
 parse_arguments() {
   local has_options=0
-  local do_full=0 do_pkg=0 do_fonts=0 do_themes=0 do_config=0 do_nvim=0 do_obsidian=0 do_yazi=0 do_backup=0 do_ly=0 do_xfce=0 do_system=0 do_boot=0
+  local do_full=0 do_pkg=0 do_fonts=0 do_themes=0 do_wallpaper=0 do_config=0 do_nvim=0 do_obsidian=0 do_yazi=0 do_backup=0 do_ly=0 do_xfce=0 do_system=0 do_boot=0
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -626,6 +638,7 @@ parse_arguments() {
       -pkg)      do_pkg=1; has_options=1 ;;
       -fonts)    do_fonts=1; has_options=1 ;;
       -themes)   do_themes=1; has_options=1 ;;
+      -wallpaper) do_wallpaper=1; has_options=1 ;;
       -config)   do_config=1; has_options=1 ;;
       -nvim)     do_nvim=1; has_options=1 ;;
       -obsidian) do_obsidian=1; has_options=1 ;;
@@ -668,6 +681,7 @@ parse_arguments() {
   [[ $do_fonts -eq 1 ]]    && run_fonts
   [[ $do_config -eq 1 ]]   && run_configs
   [[ $do_themes -eq 1 ]]   && run_themes
+  [[ $do_wallpaper -eq 1 ]] && run_wallpaper
   [[ $do_nvim -eq 1 ]]     && run_nvim
   [[ $do_obsidian -eq 1 ]] && install_obsidian
   [[ $do_yazi -eq 1 ]]     && install_yazi

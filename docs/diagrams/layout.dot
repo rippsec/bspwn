@@ -1,0 +1,10 @@
+digraph layout { rankdir=TB;
+//STYLE
+  repo [label="~/.bspwn   (git repo)\ndot/.config/<app>/\ndot/.zsh, dot/.tmux.conf\ndot/theme/ (GTK + icons)\nscripts/ · system/ · assets/", fillcolor="#c5c2ba"];
+  cfg  [label="~/.config/<app>\n(symlink into the repo)"];
+  home [label="~/.zsh, ~/.tmux.conf\n(linked or copied by the installer)"];
+  sys  [label="/etc/..., /usr/local/bin/xlock\n(root files, copied)"];
+  inst [label="install.sh\n-config  -themes  -system ...", shape=component];
+  repo -> cfg [label="symlink"]; repo -> home; repo -> sys [label="install.sh -system\n(asks for sudo)"];
+  inst -> repo [style=dashed, arrowhead=none];
+}

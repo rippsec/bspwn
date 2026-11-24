@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0-only
+# Copyright (c) 2025-2026 rippsec and contributors. See LICENSE and NOTICE.md.
 """Keyboard backlight that follows your typing: any keypress lights it (minimal level), and it turns off
-KBD_IDLE seconds after the last keypress (default 5). Stays off while the lid is closed.
+KBD_IDLE seconds after the last keypress (default 9). Stays off while the lid is closed.
 
 Keypresses come from XInput raw events (`xinput test-xi2 --root`), so only the keyboard counts, they are seen even
 while the lock screen holds the keyboard, and the reaction is immediate (no polling for idle time). Falls back to
@@ -28,8 +30,10 @@ FALLBACK_IDLE_MS = 700       # without xinput: input newer than this counts as t
 
 
 def is_activity(chunk, pointer=False):
-    """True if an xinput output chunk contains a key press (or, optionally, pointer input)."""
-    if "(RawKeyPress)" in chunk:
+    """True if an xinput output chunk contains a key press (or, optionally, pointer input).
+    A held key produces ONE RawKeyPress and then only plain `KeyPress` events flagged `repeat` (X auto-repeat), so those
+    count too: holding k/j/w/a/s/d, an arrow or shift keeps the light on for as long as it is held."""
+    if "(RawKeyPress)" in chunk or "(KeyPress)" in chunk:
         return True
     return pointer and ("(RawButtonPress)" in chunk or "(RawMotion)" in chunk)
 
@@ -39,19 +43,26 @@ class Kbd:
 
     def __init__(self, now):
         self.last_key = now          # startup grace: the first timeout counts from the daemon start
+        self.keyed = False           # no keypress seen yet: do not light an unlit keyboard just because the daemon started
+        self.manual_off = False      # the user switched it off by hand (Fn+Space): stay off until the next keypress
         self.last_set = None         # level we last asked for (to notice changes made behind our back)
         self.prev = 0                # last non-zero level seen
 
     def key(self, now):
         self.last_key = now
+        self.keyed = True
+        self.manual_off = False
 
     def step(self, now, cur, timeout, lid_closed, level):
         if self.last_set is not None and cur != self.last_set:
             self.last_key = now      # changed by someone else (Fn+Space): treat as activity, do not fight it
+            self.manual_off = cur == 0   # ... and if they turned it OFF, keep it off (until a keypress)
         if cur > 0:
             self.prev = cur
-        if lid_closed:
+        if lid_closed or self.manual_off:
             want = 0
+        elif cur == 0 and not self.keyed and timeout > 0:
+            want = 0                 # daemon just (re)started with the light off: leave it off until a key is pressed
         elif timeout <= 0 or now - self.last_key < timeout:
             want = cur if cur > 0 else (level or self.prev or 1)   # typing: light it, keep a level the user chose
         else:

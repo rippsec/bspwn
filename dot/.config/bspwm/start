@@ -7,7 +7,7 @@ xrandr --output eDP-1 --mode 1600x900
 # Emblem wallpaper 四 (generated: ~/.bspwn/scripts/wallpaper/gen_emblem.py)
 # alternatives in assets/wallpaper: dragon.jpg (gen_dragon.py), cockpit.jpg (gen_wallpaper.py)
 # Minimal flat wallpaper (centred 四): scripts/wallpaper/gen_minimal.py (mode.sh sets it too, from modes/cockpit.conf)
-feh --no-fehbg --bg-fill "$HOME/.bspwn/assets/wallpaper/minimal.jpg" 2>/dev/null || hsetroot -solid "#111214"
+feh --no-fehbg --bg-fill "$([[ -f $HOME/.local/share/bspwn/wallpaper.jpg ]] && echo "$HOME/.local/share/bspwn/wallpaper.jpg" || echo "$HOME/.bspwn/assets/wallpaper/bspwn.jpg")" 2>/dev/null || hsetroot -solid "#111214"
 #feh --no-fehbg --bg-fill "$HOME/.bspwn/assets/wallpaper/batascii.jpg"     # ASCII bat: scripts/wallpaper/gen_batascii.py
 #feh --no-fehbg --bg-fill "$HOME/.bspwn/assets/wallpaper/cheatsheet.jpg"   # cheatsheet: scripts/wallpaper/gen_cheatsheet.py
 #feh --no-fehbg --bg-fill "$HOME/.bspwn/assets/wallpaper/emblem.jpg"
@@ -37,6 +37,7 @@ xset r rate 350 25
 # this setting doesn't suspend or shutdowns the system only the display
 # After 5 min idle: lock (xss-lock -> xlock), then turn the display off ~10s later.
 # Only the display sleeps; the machine keeps running.
+# (Dell: X's own timer drives xss-lock; the ThinkPad on main uses idle-lock.sh instead.)
 xset s 300 0
 xset dpms 310 310 310
 
@@ -58,10 +59,6 @@ restart_process() {
 # In your autostart script, before restarting processes:
 #pkill -f "xss-lock.*slock" || true # Force-kill existing instances
 pkill -f xfce4-notifyd || true  # Ensure dunst is used instead of xfce4-notifyd
-
-# JARVIS (systemd user service) needs the X session env to control the desktop
-systemctl --user import-environment DISPLAY XAUTHORITY DBUS_SESSION_BUS_ADDRESS 2>/dev/null
-[[ -f ~/.config/jarvis/config.toml ]] && systemctl --user start jarvis &
 
 # Define processes (use quotes for commands with arguments)
 process_list=(
