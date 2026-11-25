@@ -1,0 +1,6 @@
+/* wifi.rasi — Wi-Fi dropdown (polybar Wi-Fi icon, scripts/wifimenu.sh) */
+@import "shared/pentest-input.rasi"
+
+* {
+    lines: 10;
+}
