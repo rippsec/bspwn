@@ -317,7 +317,7 @@ All settings are in **`~/.config/bspwm/power.conf`**, a plain `KEY=VALUE` file t
 
 | Tool | What it does | Main settings |
 | --- | --- | --- |
-| **compositor** | picom (shadows, transparency) runs only on AC, and not at all by default | `PICOM=0/1` |
+| **compositor** | picom (window animations only in cockpit mode) runs only on AC | `PICOM=0/1` |
 | **keyboard backlight** | lights at the first keypress, off after the last one (held keys count) | `KBD_IDLE_AC`, `KBD_IDLE_BAT`, `KBD_LEVEL`, `KBD_AUTO` |
 | **server mode** | closing the lid does not suspend: the laptop keeps running (ssh, downloads) with the screen locked and dark. Button 14 or `Super+Ctrl+s` | `SERVER_BATTERY_MIN`, `SERVER_BATTERY`, `SERVER_LOCK`, `SERVER_SCREEN_OFF` |
 | **battery guard** | warns at 15%, counts down and hibernates at 7%, never suspends below 30%, and also watches battery voltage | `GUARD_*` |
