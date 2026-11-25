@@ -83,7 +83,7 @@ case "$1" in
       out=$(render "$f")
       if [[ $out != "$last" ]]; then echo "$out"; last=$out; fi
       if grep -qx busy "$DIR"/* 2>/dev/null && ! grep -qx wait "$DIR"/* 2>/dev/null; then
-        f=$(( (f + 1) % ${#RAMP[@]} )); sleep 0.25
+        f=$(( (f + 1) % ${#RAMP[@]} )); sleep 0.12
       else
         f=0; sleep 0.5
       fi
