@@ -1,6 +1,6 @@
 # BSPWN user manual
 
-*Using it, changing it, making it yours.* Built 2026-11-24 from the repository. This manual has a printable PDF ([BSPWN-manual.pdf](BSPWN-manual.pdf)),
+*Using it, changing it, making it yours.* Built 2026-11-25 from the repository. This manual has a printable PDF ([BSPWN-manual.pdf](BSPWN-manual.pdf)),
 a one-page [cheatsheet](BSPWN-cheatsheet.md) ([PDF](BSPWN-cheatsheet.pdf)) and an [interactive version](interactive.html) you open in a browser to practise the keys.
 
 ## Contents
@@ -567,7 +567,7 @@ All settings are in **`~/.config/bspwm/power.conf`**, a plain `KEY=VALUE` file t
 
 | Tool | What it does | Main settings |
 | --- | --- | --- |
-| **compositor** | picom (window animations only in cockpit mode) runs only on AC, and is off by default | `PICOM=0/1` |
+| **compositor** | picom (subtle window fade only in cockpit mode) runs only on AC, and is off by default | `PICOM=0/1` |
 | **keyboard backlight** | lights at the first keypress, off after the last one (held keys count) | `KBD_IDLE_AC`, `KBD_IDLE_BAT`, `KBD_LEVEL`, `KBD_AUTO` |
 | **server mode** | closing the lid does not suspend: the laptop keeps running (ssh, downloads) with the screen locked and dark. Button 14 or `Super+Ctrl+s` | `SERVER_BATTERY_MIN`, `SERVER_BATTERY`, `SERVER_LOCK`, `SERVER_SCREEN_OFF` |
 | **battery guard** | warns at 15%, counts down and hibernates at 7%, never suspends below 30%, and also watches battery voltage | `GUARD_*` |

@@ -147,7 +147,7 @@ No root is needed: the keyboard LED is set through logind and the lid is handled
 
 | Setting | Shipped | Meaning |
 | --- | --- | --- |
-| `PICOM` | `0` | `1` = run [picom](https://github.com/yshui/picom) on AC; it is always stopped on battery. `0` = never run it. The cockpit mode uses `picom/animations.conf` (window open/close animations only: no shadows, blur, fading or transparency; fullscreen windows bypass the compositor; about 80 MB and 3% of one core). Set `PICOM_CONF` in the mode profile to `picom.conf` for the full-effects config. |
+| `PICOM` | `0` | `1` = run [picom](https://github.com/yshui/picom) on AC; it is always stopped on battery. `0` = never run it. The cockpit mode uses `picom/animations.conf` (a subtle fade in/out only: no shadows, blur, scale animations or transparency; fullscreen windows bypass the compositor; about 80 MB and 3% of one core). Set `PICOM_CONF` in the mode profile to `picom.conf` for the full-effects config. |
 
 `scripts/power-mode.sh` reads it whenever the power source changes or a mode is applied; to apply it at once run `~/.config/bspwm/scripts/power-mode.sh auto --force`.
 Without picom, window transparency (e.g. alacritty's `opacity`), shadows and animations are off.
