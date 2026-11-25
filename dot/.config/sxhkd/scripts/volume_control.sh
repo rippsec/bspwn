@@ -3,6 +3,12 @@
 # Usage: volume_control.sh up|down|mute
 SINK=@DEFAULT_SINK@
 
+# Holding a key repeats ~25x/s, faster than one run (~0.1 s) finishes, so runs used to pile up and the
+# volume kept moving after the key was released. Serialize: a press that arrives while one is still
+# running is dropped (the key repeat supplies the next one).
+exec 9>"${XDG_RUNTIME_DIR:-/tmp}/volume_control.lock"
+flock -n 9 || exit 0
+
 notify() {  # $1 = text, $2 = optional percent for the progress bar
     notify-send -u low -h string:x-canonical-private-synchronous:volume \
         ${2:+-h int:value:$2} -t 1000 "$1"

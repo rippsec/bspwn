@@ -113,12 +113,17 @@ redshift -P -O 4500
   /usr/lib/chromium/chromium \
   2>/dev/null) &
 
-rm -rfv ~/.jgmenu-lockfile
-jgmenu --hide-on-startup
+# jgmenu --hide-on-startup is a daemon that never exits. Run it in the background and replace the old copy:
+# in the foreground this script never returned, so every `bspc wm -r` left another `start` shell and
+# another jgmenu behind (and the lines after it never ran).
+pkill -x jgmenu || true
+rm -f ~/.jgmenu-lockfile
+jgmenu --hide-on-startup &
 
 
 if pgrep -f "skippy-xd --start-daemon" > /dev/null; then
   pkill -USR1 skippy-xd
 fi
-skippy-xd --start-daemon
-unclutter -idle 0.5
+skippy-xd --start-daemon &
+pkill -x unclutter || true
+unclutter -idle 0.5 &
