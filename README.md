@@ -143,6 +143,15 @@ All power settings live in **`~/.config/bspwm/power.conf`** (a symlink to `dot/.
 within a few seconds, no restart. The scripts are in `dot/.config/bspwm/scripts/` (`kbd-backlight.py`, `servermode.py`, shared `powerlib.py`) and start from `bspwm/start`.
 No root is needed: the keyboard LED is set through logind and the lid is handled with a logind inhibitor lock.
 
+#### Idle lock and screen off
+
+| Setting | Shipped | Meaning |
+| --- | --- | --- |
+| `IDLE_LOCK` | `300` | Seconds without input before the screen locks (`xss-lock` runs `xlock`). `0` = never; `60` = one minute |
+| `IDLE_SCREEN_OFF` | `10` | Seconds after the lock before the display powers off (the machine keeps running) |
+
+Applied at session start; after editing run `~/.config/bspwm/scripts/idle-set.sh`. The lock screen is one static blue screen: a wrong password only changes the text under the bar.
+
 #### Compositor (picom)
 
 | Setting | Shipped | Meaning |

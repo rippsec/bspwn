@@ -38,8 +38,7 @@ xset r rate 350 25
 # After 5 min idle: lock (xss-lock -> xlock), then turn the display off ~10s later.
 # Only the display sleeps; the machine keeps running.
 # (Dell: X's own timer drives xss-lock; the ThinkPad on main uses idle-lock.sh instead.)
-xset s 300 0
-xset dpms 310 310 310
+"$HOME/.config/bspwm/scripts/idle-set.sh"   # IDLE_LOCK / IDLE_SCREEN_OFF in power.conf
 
 ### Process Management
 
