@@ -31,8 +31,10 @@ fi
 known=$(nmcli -t -f NAME connection show)
 # fields: IN-USE:SSID:SIGNAL:SECURITY ('\:' inside a value is protected)
 mapfile -t nets < <(nmcli -t -f IN-USE,SSID,SIGNAL,SECURITY device wifi list --rescan no | sed 's/\\:/\x01/g' \
-  | awk -F: '$2!="" && !seen[$2]++ {gsub(/\x01/,":");
-      printf "%s\t%s\t%s\t%s\n", ($1=="*"?"●":" "), $2, $3, $4}')
+  | awk -F: '$2!="" { gsub(/\x01/,":"); s=$2
+      if (!(s in sig)) { order[++n]=s; sig[s]=$3; sec[s]=$4 }   # strongest access point first
+      if ($1=="*") use[s]=1 }                                   # the active one may not be the strongest
+    END { for (i=1;i<=n;i++) { s=order[i]; printf "%s\t%s\t%s\t%s\n", (use[s]?"●":" "), s, sig[s], sec[s] } }')
 
 lines=()
 for n in "${nets[@]}"; do
