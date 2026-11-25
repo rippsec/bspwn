@@ -13,7 +13,7 @@ For porting to other hardware use the skill `.claude/skills/adapt-bspwn/` and it
 4. **Ask before**: `./install.sh -full` (installs packages, system files, XFCE + LightDM as login manager), anything in `/etc` or `/usr/local` (keep a `.bak`, explain how to undo), PAM, the display manager, sudo installs, force-push, deleting user data.
 5. **Do not kill your own shell:** `pkill -f PATTERN` can match your command line. Use anchored patterns (`pkill -x name`) or PIDs.
 6. **Keep the repo public-safe.** Never commit IP addresses, Wi-Fi names, host names, e-mail, tokens, or screenshots that show the bar/HUD with them (redact first). Scan the staged diff before every push. See "Privacy and opsec" below.
-7. **`git add` only your own files**; the user may have unrelated edits in the tree (theme files, `.netrwhist`). Normal commits and pushes only, never `--force`. Follow the commit trailer rules of your session.
+7. **`git add` only your own files**; the user may have unrelated edits in the tree (theme files). Normal commits and pushes only, never `--force`. Follow the commit trailer rules of your session.
 8. **Update the docs in the same commit** (see "Documentation" below) and report outcomes honestly, including what you could not test.
 9. **Respect authorship and the licence.** Code is GPL-2.0-only, docs CC BY-SA 4.0 (see `NOTICE.md`). Keep the SPDX/copyright header in files you edit, add it to new scripts, and never remove authorship notices.
 
@@ -28,6 +28,7 @@ This repo is public. Nothing in it, or in its history, may identify or describe 
 - **When adapting this setup for someone else**, apply the same rules to their data: keep it in untracked local files (`~/.zshrc.local`, `power.conf` overrides), never in the repo.
 - **If personal data slips in**: stop, tell the user, remove it from the tree, and ask before rewriting history (backup first, force-push only with their explicit approval).
 - Do not copy anything from private notes, memory files or other private repos into this one.
+- Shell, editor and tool histories (`.*history`, `.netrwhist`, `.viminfo`, `*.shada`, ...) are in `.gitignore`; never force-add one.
 
 ## Layout in one screen
 
