@@ -71,6 +71,7 @@ Three islands plus the launcher (far left) and power button (far right), joined 
 | 17 | sun/gear + block | **Screen brightness** | scroll: up/down (with a notification) |
 | 18 | battery | **Battery, all batteries combined** into one icon (a bolt when charging on AC) | click: notification with each battery and the AC state |
 | 19 | microphone | **Mic.** Dim crossed-out mic = muted; **red** lit mic = live (unmuted) | click: mute/unmute |
+| 20 | Wi-Fi icon | Click opens a dropdown (`polybar/scripts/wifimenu.sh`, theme `rofi/wifi.rasi`): list of networks with signal and lock, click to connect (asks for the password the first time), click the active one to disconnect, Wi-Fi on/off, advanced settings (`nm-connection-editor`) | click |
 | 20 | tray icons | **System tray**, collapsed: the arrow button (right island) opens/closes a drawer (`polybar/scripts/traytoggle.sh`, bar `[bar/tray]`; icon size `tray-size`) with the network applet, clipboard manager and any app that puts an icon there | per app |
 | 21 | power symbol | **Power menu** | click: full-screen menu with Lock, Sleep, **Hibernate** (suspend to disk: no battery drain while off; it powers off and on resume the machine boots, asks the disk passphrase, then restores your session, so it looks like a reboot but nothing is lost), Logout, Restart, Shutdown; Esc or a second click closes it |
 
