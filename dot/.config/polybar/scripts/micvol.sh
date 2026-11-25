@@ -24,9 +24,13 @@ if [ "$1" = "--toggle" ]; then
 fi
 
 get_mic_status
-pactl subscribe | while read -r event; do
-    if echo "$event" | grep -q "source"; then
-        get_mic_status
-    fi
-done
 
+# Run `pactl subscribe` as a coprocess and kill it whenever this script exits,
+# so a polybar restart can no longer leave orphaned listeners behind.
+coproc SUB { exec pactl subscribe; }
+trap 'kill "$SUB_PID" 2>/dev/null' EXIT
+trap 'exit 0' TERM INT HUP
+
+while read -r event <&"${SUB[0]}"; do
+    [[ $event == *source* ]] && get_mic_status
+done
