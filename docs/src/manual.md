@@ -279,6 +279,8 @@ as well as hue. After changing a colour run:
 python3 scripts/palette_check.py     # exit code 1 means a target was missed
 ```
 
+**Cursor:** a steady bar in the shell (reset before every prompt by `dot/.zsh/prompt/cursor.zsh`, `BSPWN_CURSOR=2` for a block), a block in vim/nvim normal mode and a bar in insert mode. Programs switch it with DECSCUSR (`\e[N q`); tmux passes it through (`Ss`/`Se` in `dot/.tmux.conf`). Default shape: `[cursor.style]` in `alacritty.toml`, `cursor_shape` in `kitty.conf`.
+
 ## Other colours
 
 | What | File |

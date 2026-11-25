@@ -1,6 +1,6 @@
 # BSPWN user manual
 
-*Using it, changing it, making it yours.* Built 2026-11-23 from the repository. This manual has a printable PDF ([BSPWN-manual.pdf](BSPWN-manual.pdf)),
+*Using it, changing it, making it yours.* Built 2026-11-24 from the repository. This manual has a printable PDF ([BSPWN-manual.pdf](BSPWN-manual.pdf)),
 a one-page [cheatsheet](BSPWN-cheatsheet.md) ([PDF](BSPWN-cheatsheet.pdf)) and an [interactive version](interactive.html) you open in a browser to practise the keys.
 
 ## Contents
@@ -526,6 +526,8 @@ as well as hue. After changing a colour run:
 ```sh
 python3 scripts/palette_check.py     # exit code 1 means a target was missed
 ```
+
+**Cursor:** a steady bar in the shell (reset before every prompt by `dot/.zsh/prompt/cursor.zsh`, `BSPWN_CURSOR=2` for a block), a block in vim/nvim normal mode and a bar in insert mode. Programs switch it with DECSCUSR (`\e[N q`); tmux passes it through (`Ss`/`Se` in `dot/.tmux.conf`). Default shape: `[cursor.style]` in `alacritty.toml`, `cursor_shape` in `kitty.conf`.
 
 ## Other colours
 

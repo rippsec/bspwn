@@ -98,7 +98,7 @@ unfocused_hollow = true
 thickness = 0.15
 
 [cursor.style]
-shape = "Block"
+shape = "Beam"          # default shape; apps change it with DECSCUSR (vim/nvim: block in normal mode)
 blinking = "Off"
 
 [terminal]
