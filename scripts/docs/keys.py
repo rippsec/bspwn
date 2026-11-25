@@ -119,7 +119,7 @@ TMUX = [
   ("prefix+|", "Split side by side"), ("prefix+-", "Split top / bottom"), ("prefix+b", "Break the pane out into its own window"),
   ("prefix+Escape", "Scroll / copy mode"), ("prefix+p", "Paste buffer"), ("prefix+P", "Choose a paste buffer"),
   ("prefix+r", "Reload ~/.tmux.conf"), ("prefix+T", "Clock"), ("prefix+C-l", "Clear screen and history"),
-  ("prefix+C-s", "Show / hide the status bar"),
+  ("prefix+C-s", "Show / hide the status bar"), ("prefix+C-b", "Send Ctrl+b to the program inside"),
  ]),
  ("Scroll / copy mode (vim keys)", [
   ("v", "Start selecting"), ("y", "Copy to the clipboard (stay in copy mode)"), ("Y", "Copy and leave"),

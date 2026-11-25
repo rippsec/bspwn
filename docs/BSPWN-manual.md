@@ -437,6 +437,7 @@ tmux keeps terminals alive: windows and panes live inside a *server* that keeps 
 | `Ctrl+b, T` | Clock |
 | `Ctrl+b, Ctrl+l` | Clear screen and history |
 | `Ctrl+b, Ctrl+s` | Show / hide the status bar |
+| `Ctrl+b, Ctrl+b` | Send Ctrl+b to the program inside |
 
 #### Scroll / copy mode (vim keys)
 
