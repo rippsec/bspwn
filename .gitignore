@@ -3,3 +3,24 @@
 *.bak.*
 __pycache__/
 *.pyc
+
+# Shell, editor and tool histories: never commit (they leak paths, hosts and commands)
+.*history
+*_history
+*.history
+*.hist
+.histfile
+.zhistory
+.netrwhist
+.viminfo*
+*.shada
+.lesshst
+.wget-hsts
+.recently-used*
+recently-used.xbel
+.vimtmp/
+*.swp
+*.swo
+*.un~
+history
+!dot/.zsh/config/history.zsh

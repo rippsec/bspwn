@@ -10,6 +10,17 @@ set directory=~/.vimtmp/swap//
 set undodir=~/.vimtmp/undo//
 set undofile                " Enable persistent undo
 
+" netrw: keep no directory history (.netrwhist would live inside the repo via the ~/.vim symlink)
+let g:netrw_dirhistmax = 0
+
+" Cursor shape (DECSCUSR, works in alacritty/kitty and through tmux):
+" block in normal mode, bar in insert mode, underline in replace mode; bar again on exit.
+let &t_SI = "\e[6 q"
+let &t_SR = "\e[4 q"
+let &t_EI = "\e[2 q"
+let &t_ti .= "\e[2 q"   " block when vim starts
+let &t_te .= "\e[6 q"   " bar again when vim exits
+
 " Basic UI and editing
 syntax on
 filetype plugin indent on   " Better than just 'on'

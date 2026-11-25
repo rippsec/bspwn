@@ -65,6 +65,7 @@ Three islands plus the launcher (far left) and power button (far right), joined 
 | 11 | date and time | **Clock** | click: calendar dropdown under the clock |
 | 12 | link icon + address | **LHOST**: your address for lab work (a chosen interface or a custom IP) | left: pick an interface or type an IP inline; right or double click: copy. Saved in `~/.current_ip` |
 | 13 | crosshair + address | **RHOST**: the target address, `none` when unset | left: set/edit inline; right or double click: copy. Saved in `~/.current_target`, and it **writes `export rhost=...` into `~/.zshrc`** so shells see `$rhost` |
+| - | 󰳓 / bell / 󱁣 | **Claude Code status**, shown only while a session is active (not in the picture): 󰳓 = working, **red** bell = needs an answer or a permission, underlined 󱁣 = done (plays a chime). See [Claude Code indicator](#claude-code-indicator) | click: clear finished sessions |
 | 14 | server rack | **Server mode** (lid closed = keep running). Dim = off; bright and underlined = on; shows the battery % while on battery | click: toggle (same as `super+ctrl+s`), see [Server mode](#server-mode-lid-closed-laptop-keeps-running) |
 | 15 | mask | **Mode switch**: cockpit <-> undercover (Windows look) | click: switch (same as `super+ctrl+u`) |
 | 16 | speaker + block | **Volume.** A **red** speaker with lines above and below means muted | scroll: volume up/down (with a notification) |
@@ -74,6 +75,23 @@ Three islands plus the launcher (far left) and power button (far right), joined 
 | 20 | Wi-Fi icon | Click opens a dropdown (`polybar/scripts/wifimenu.sh`, theme `rofi/wifi.rasi`): list of networks with signal and lock, click to connect (asks for the password the first time), click the active one to disconnect, Wi-Fi on/off, advanced settings (`nm-connection-editor`) | click |
 | 20 | tray icons | **System tray**, collapsed: the arrow button (right island) opens/closes a drawer (`polybar/scripts/traytoggle.sh`, bar `[bar/tray]`; icon size `tray-size`) with the network applet, clipboard manager and any app that puts an icon there | per app |
 | 21 | power symbol | **Power menu** | click: full-screen menu with Lock, Sleep, **Hibernate** (suspend to disk: no battery drain while off; it powers off and on resume the machine boots, asks the disk passphrase, then restores your session, so it looks like a reboot but nothing is lost), Logout, Restart, Shutdown; Esc or a second click closes it |
+
+### Claude Code indicator
+
+`dot/.config/polybar/scripts/claude-status.sh` shows the state of every running [Claude Code](https://claude.com/claude-code) session in the bar, fed by hooks in `~/.claude/settings.json`:
+
+```json
+"hooks": {
+  "UserPromptSubmit": [{"hooks": [{"type": "command", "command": "~/.config/polybar/scripts/claude-status.sh set busy"}]}],
+  "PreToolUse":   [{"matcher": "AskUserQuestion|ExitPlanMode", "hooks": [{"type": "command", "command": "~/.config/polybar/scripts/claude-status.sh set wait"}]}],
+  "PostToolUse":  [{"matcher": "*", "hooks": [{"type": "command", "command": "~/.config/polybar/scripts/claude-status.sh set busy"}]}],
+  "Notification": [{"matcher": "permission_prompt|elicitation_dialog", "hooks": [{"type": "command", "command": "~/.config/polybar/scripts/claude-status.sh set wait"}]}],
+  "Stop":         [{"hooks": [{"type": "command", "command": "~/.config/polybar/scripts/claude-status.sh set done"}]}],
+  "SessionEnd":   [{"hooks": [{"type": "command", "command": "~/.config/polybar/scripts/claude-status.sh end"}]}]
+}
+```
+
+The most urgent state wins (needs input > working > done); a number shows when several sessions run. "Done" plays `complete.oga` from the freedesktop sound theme; set `BSPWN_CLAUDE_SOUND` to another file, or to `none`, in `~/.zshrc.local`. Needs `jq` and `paplay` or `pw-play`.
 
 ### The HUD column (right side)
 
@@ -129,10 +147,10 @@ No root is needed: the keyboard LED is set through logind and the lid is handled
 
 | Setting | Shipped | Meaning |
 | --- | --- | --- |
-| `PICOM` | `0` | `1` = run [picom](https://github.com/yshui/picom) (shadows, fades, transparency) on AC; it is always stopped on battery. `0` = never run it (this ThinkPad). |
+| `PICOM` | `0` | `1` = run [picom](https://github.com/yshui/picom) on AC; it is always stopped on battery. `0` = never run it. The cockpit mode uses `picom/animations.conf` (window open/close animations only: no shadows, blur, fading or transparency; fullscreen windows bypass the compositor; about 80 MB and 3% of one core). Set `PICOM_CONF` in the mode profile to `picom.conf` for the full-effects config. |
 
 `scripts/power-mode.sh` reads it whenever the power source changes or a mode is applied; to apply it at once run `~/.config/bspwm/scripts/power-mode.sh auto --force`.
-Without picom, window transparency (e.g. alacritty's `opacity`) and shadows are off.
+Without picom, window transparency (e.g. alacritty's `opacity`), shadows and animations are off.
 
 #### Keyboard backlight
 
@@ -260,6 +278,9 @@ Edit both files together, re-run the checker, and look at it in a real terminal.
 
 - **Wallpapers**: generated with Pillow by `scripts/wallpaper/gen_*.py` into `assets/wallpaper/`; the active one is set in `modes/cockpit.conf` and `bspwm/start`.
 - **system/**: root-level files (ACPI lid handler, X11, tlp, display manager) installed by `./install.sh -system`.
+- **Volume keys**: `sxhkd/scripts/volume_control.sh` uses `pactl` only and takes a lock, so a held key (about 25 repeats per second) cannot queue more runs than the machine can finish; a press that arrives while one is running is dropped.
+- **Autostart**: `bspwm/start` runs `jgmenu`, `skippy-xd` and `unclutter` in the background and replaces any old copy, so `bspc wm -r` no longer leaves extra `start` shells or helpers behind.
+- **Stale polybar helpers**: `bspwm/scripts/polybar-reap.sh` stops module scripts (`tail = true` modules such as `micvol.sh` or `servermode.py bar --follow`) that outlive their bar. `polybar/launch.sh` and `mode.sh` run `polybar-reap.sh all` after stopping polybar, and `power-watch.sh` runs `polybar-reap.sh orphans` every 60 s. The module list is read from `polybar/config.ini`. Log: `journalctl -t bspwn-reap`.
 
 ## Adapting it to your machine (with Claude Code)
 

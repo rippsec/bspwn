@@ -1,27 +1,15 @@
 #!/usr/bin/env zsh
+# SPDX-License-Identifier: GPL-2.0-only
+# Copyright (c) 2025-2026 rippsec and contributors. See LICENSE and NOTICE.md.
+# cursor.zsh - cursor shape for the shell.
+# DECSCUSR (\e[N q): 0 terminal default, 1/2 block, 3/4 underline, 5/6 vertical bar (odd = blinking, even = steady).
+# Programs such as vim/nvim change the shape and may not restore it; resetting before every prompt
+# means the shell always shows the steady bar again after they exit.
 
-# cursor.zsh - A module to manage terminal cursor styles
-# Usage: source ~/path/to/cursor.zsh
+BSPWN_CURSOR=${BSPWN_CURSOR:-6}
 
-# --- Available Styles Reference ---
-# 0 or 1 -> Blinking Block
-# 2      -> Steady Block
-# 3      -> Blinking Underline
-# 4      -> Steady Underline
-# 5      -> Blinking Vertical Line (Bar)
-# 6      -> Steady Vertical Line (Bar)
+_bspwn_cursor() { print -n "\e[${BSPWN_CURSOR} q"; }
 
-set_terminal_cursor() {
-    local style=${1:-5} # Defaults to 5 (Blinking Vertical Line) if no arg provided
-    
-    # Check if 'tput' supports the 'Ps' capability for the current terminal
-    if tput Ps $style >/dev/null 2>&1; then
-        tput Ps $style
-    else
-        # Fallback to raw escape sequence if tput capability is missing
-        echo -ne "\e[$style q"
-    fi
-}
-
-# Execute immediately upon sourcing
-set_terminal_cursor 2
+autoload -Uz add-zsh-hook
+add-zsh-hook precmd _bspwn_cursor
+_bspwn_cursor

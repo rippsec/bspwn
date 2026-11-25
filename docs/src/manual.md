@@ -279,6 +279,8 @@ as well as hue. After changing a colour run:
 python3 scripts/palette_check.py     # exit code 1 means a target was missed
 ```
 
+**Cursor:** a steady bar in the shell (reset before every prompt by `dot/.zsh/prompt/cursor.zsh`, `BSPWN_CURSOR=2` for a block), a block in vim/nvim normal mode and a bar in insert mode. Programs switch it with DECSCUSR (`\e[N q`); tmux passes it through (`Ss`/`Se` in `dot/.tmux.conf`). Default shape: `[cursor.style]` in `alacritty.toml`, `cursor_shape` in `kitty.conf`.
+
 ## Other colours
 
 | What | File |
@@ -315,7 +317,7 @@ All settings are in **`~/.config/bspwm/power.conf`**, a plain `KEY=VALUE` file t
 
 | Tool | What it does | Main settings |
 | --- | --- | --- |
-| **compositor** | picom (shadows, transparency) runs only on AC, and not at all by default | `PICOM=0/1` |
+| **compositor** | picom (window animations only in cockpit mode) runs only on AC, and is off by default | `PICOM=0/1` |
 | **keyboard backlight** | lights at the first keypress, off after the last one (held keys count) | `KBD_IDLE_AC`, `KBD_IDLE_BAT`, `KBD_LEVEL`, `KBD_AUTO` |
 | **server mode** | closing the lid does not suspend: the laptop keeps running (ssh, downloads) with the screen locked and dark. Button 14 or `Super+Ctrl+s` | `SERVER_BATTERY_MIN`, `SERVER_BATTERY`, `SERVER_LOCK`, `SERVER_SCREEN_OFF` |
 | **battery guard** | warns at 15%, counts down and hibernates at 7%, never suspends below 30%, and also watches battery voltage | `GUARD_*` |
@@ -450,7 +452,8 @@ For adapting the setup to a different laptop there is also a dedicated skill, `.
 | Nothing responds in a tmux prompt | Press `Esc`. The prompt owns the keyboard until you accept or cancel. |
 | The touchpad is frozen | `Super+Shift+e` reconnects it; `Super+e` toggles it. |
 | Server mode does not hold | `servermode.py status`, `systemd-inhibit --list | grep bspwn`, `journalctl -t bspwn-power`. |
-| I want to see the log of something | `journalctl -t <tag>` with `idle-lock`, `xlock`, `bspwn-power`. |
+| CPU is high after days of uptime | `ps -eo pid,ppid,etime,args | grep -E 'polybar/scripts|servermode.py bar'` lists leftover bar helpers; `~/.config/bspwm/scripts/polybar-reap.sh orphans` stops them (it also runs every 60 s). |
+| I want to see the log of something | `journalctl -t <tag>` with `idle-lock`, `xlock`, `bspwn-power`, `bspwn-reap`. |
 | I broke a config | `git -C ~/.bspwn diff` to see it, `git -C ~/.bspwn checkout -- <file>` to restore it. |
 
 # 15. Licence, credits and reuse
