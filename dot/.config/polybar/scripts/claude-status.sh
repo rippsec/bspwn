@@ -9,10 +9,10 @@
 #   claude-status.sh clear                drop finished sessions (click on the icon)
 # One state file per session in $XDG_RUNTIME_DIR/bspwn-claude. The bar shows the most urgent state:
 # wait (needs input) > busy (working) > done. Nothing is shown when no session is active.
-# "done" plays a toaster pop; set BSPWN_CLAUDE_SOUND to another file, or to "none" to mute it.
+# "done" plays a toaster ding; set BSPWN_CLAUDE_SOUND to another file, or to "none" to mute it.
 
 DIR="${XDG_RUNTIME_DIR:-/tmp}/bspwn-claude"
-SOUND="${BSPWN_CLAUDE_SOUND:-$HOME/.bspwn/assets/sounds/toaster.wav}"   # toaster pop (synthesised, no third-party audio)
+SOUND="${BSPWN_CLAUDE_SOUND:-$HOME/.bspwn/assets/sounds/toaster.mp3}"
 
 ICON_BUSY=$'\U000f0cd3'   # working
 ICON_WAIT=$'\U000f009e'   # bell: waiting for an answer or a permission

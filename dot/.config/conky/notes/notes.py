@@ -8,7 +8,7 @@
   notes.py scroll N  scroll the widget by N lines (negative = up)
   notes.py watch     daemon: click the widget to edit, wheel over it to scroll
 
-Notes file: $DESKNOTES, default ~/notes/desktop.md
+Notes file: $DESKNOTES, default ~/Documents/notes/desktop.md
 """
 import argparse
 import datetime as dt
@@ -18,7 +18,7 @@ import subprocess
 import sys
 import time
 
-NOTES = os.environ.get("DESKNOTES", os.path.expanduser("~/notes/desktop.md"))
+NOTES = os.environ.get("DESKNOTES", os.path.expanduser("~/Documents/notes/desktop.md"))
 FONT = "BlexMono Nerd Font"
 STATE = os.path.expanduser("~/.cache/desknotes.offset")
 ROFI_THEME = os.path.expanduser("~/.config/rofi/notes.rasi")
