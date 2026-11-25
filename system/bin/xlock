@@ -47,8 +47,7 @@ dunst_pause() {   # dunst_pause true|false
 dunst_pause true
 trap 'dunst_pause false' EXIT
 
-# Style: "bsod" (default) = static blue-screen parody with live error clock and
-# a 'recovery code' progress bar; "classic" = monochrome clock + ring.
+# Style: "bsod" (default) = static blue-screen picture, no animation or overlay; "classic" = monochrome clock + ring.
 # Override with XLOCK_STYLE=classic.
 style=${XLOCK_STYLE:-bsod}
 
@@ -74,53 +73,19 @@ lock_classic() {
 }
 
 # ---------------------------------------------------------------- bsod style
-# Starts i3lock on one scene image (xlock-bsod renders it + prints positions).
+# Starts i3lock on the static blue-screen picture rendered by xlock-bsod. Nothing is drawn on top:
+# no progress bar, no ticking clock, no status text, so the screen never changes while locked.
 # Sets $pid to the new i3lock.
 start_scene() {   # start_scene SCENE FAILS
-  local scene=$1 fails=$2 img="$dir/$1-$2.png" vars
-  vars=$(/usr/local/bin/xlock-bsod "$scene" "$img" "$w" "$h" "$fails") || return 1
-  local BAR_X BAR_Y BAR_W BAR_H TEXT_X TIME_Y DATE_Y TINY STATUS_X STATUS_Y STATUS_SIZE CLOCK
-  eval "$vars"
-  local font="Noto Sans" white=ffffffff
-  local track keyhl status_c verif wrong
-  case $scene in
-    bsod)  track=4da0e6ff keyhl=$white status_c=$white verif="checking recovery code..." wrong="invalid recovery code" ;;
-    alert) track=ff3b3bff keyhl=$white status_c=$white verif="VERIFYING IDENTITY..." wrong="ACCESS DENIED" ;;
-    final) track=1a1a1aff keyhl=7a0000ff status_c=5a0000ff verif="..." wrong="no." ;;
-  esac
-  local args=(
-    --nofork --image="$img" --color=000000
-    --bar-indicator --bar-orientation=horizontal
-    --bar-pos="$BAR_X:$BAR_Y" --bar-total-width="$BAR_W" --bar-max-height="$BAR_H"
-    --bar-base-width=3 --bar-count=64 --bar-step=2 --bar-periodic-step=8
-    --bar-color=$track --keyhl-color=$keyhl --bshl-color=$keyhl
-    --ringver-color=$keyhl --ringwrong-color=$keyhl
-    --verif-font="$font" --wrong-font="$font" --verif-size="$STATUS_SIZE" --wrong-size="$STATUS_SIZE"
-    --verif-align=1 --wrong-align=1
-    --verif-pos="$STATUS_X:$STATUS_Y" --wrong-pos="$STATUS_X:$STATUS_Y"
-    --verif-color=$status_c --wrong-color=$status_c
-    --verif-text="$verif" --wrong-text="$wrong"
-    --noinput-text="" --lock-text="" --lockfailed-text=""
-    --ignore-empty-password
-    --pass-media-keys --pass-volume-keys --pass-screen-keys
-  )
-  case $CLOCK in
-    1) args+=(--clock --force-clock
-              --time-str="Error time: %H:%M:%S" --date-str="Error date: %A, %d %B %Y"
-              --time-font="$font" --date-font="$font" --time-size="$TINY" --date-size="$TINY"
-              --time-color=$white --date-color=$white --time-align=1 --date-align=1
-              --time-pos="$TEXT_X:$TIME_Y" --date-pos="$TEXT_X:$DATE_Y") ;;
-    2) args+=(--clock --force-clock
-              --time-str="i am still here. %H:%M:%S" --date-str=""
-              --time-font="$font" --time-size="$TINY" --time-color=5a0000ff --time-align=1
-              --time-pos="$TEXT_X:$TIME_Y") ;;
-  esac
-  i3lock "${args[@]}" &
+  local scene=$1 fails=$2 img="$dir/$1-$2.png"
+  /usr/local/bin/xlock-bsod "$scene" "$img" "$w" "$h" "$fails" >/dev/null || return 1
+  i3lock --nofork --image="$img" --color=0078d7 --ignore-empty-password \
+    --pass-media-keys --pass-volume-keys --pass-screen-keys &
   pid=$!
 }
 
-# BSOD lock: one static blue screen, nothing else. A wrong password only shows the
-# status text under the bar (no scene swaps, no journal watcher: those made the lock lag).
+# BSOD lock: one static blue screen, nothing else. A wrong password changes nothing
+# on screen (no scene swaps, no journal watcher: those made the lock lag).
 # If i3lock dies without a correct password (e.g. lost the grab) it is started again
 # right away; after 5 tries it gives up to the caller, which falls back to the classic lock.
 lock_bsod() {
