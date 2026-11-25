@@ -14,9 +14,9 @@
 DIR="${XDG_RUNTIME_DIR:-/tmp}/bspwn-claude"
 SOUND="${BSPWN_CLAUDE_SOUND:-/usr/share/sounds/freedesktop/stereo/complete.oga}"
 
-ICON_BUSY=$'\U000f10e0'   # pot with steam: working
+ICON_BUSY=$'\U000f0cd3'   # working
 ICON_WAIT=$'\U000f009e'   # bell: waiting for an answer or a permission
-ICON_DONE=$'\U000f05e0'   # check: finished
+ICON_DONE=$'\U000f1063'   # finished
 
 refresh() { polybar-msg action "#claude.hook.0" >/dev/null 2>&1 & }
 
