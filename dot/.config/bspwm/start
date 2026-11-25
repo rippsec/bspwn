@@ -39,6 +39,7 @@ xset r rate 350 25
 # Only the display sleeps; the machine keeps running.
 # (Dell: X's own timer drives xss-lock; the ThinkPad on main uses idle-lock.sh instead.)
 "$HOME/.config/bspwm/scripts/idle-set.sh"   # IDLE_LOCK / IDLE_SCREEN_OFF in power.conf
+setsid "$HOME/.config/bspwm/scripts/idle-guard.sh" >/dev/null 2>&1 &   # no lock while a video plays
 
 ### Process Management
 

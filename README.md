@@ -147,7 +147,8 @@ No root is needed: the keyboard LED is set through logind and the lid is handled
 
 | Setting | Shipped | Meaning |
 | --- | --- | --- |
-| `IDLE_LOCK` | `300` | Seconds without input before the screen locks (`xss-lock` runs `xlock`). `0` = never; `60` = one minute |
+| `IDLE_LOCK` | `180` | Seconds without input before the screen locks (`xss-lock` runs `xlock`). `0` = never; `60` = one minute |
+| `IDLE_VIDEO_INHIBIT` | `1` | `1` = no lock or screen-off while a video plays: a fullscreen window on the current desktop, or mpv / vlc / celluloid / totem reporting "Playing" (checked every 30 s by `scripts/idle-guard.sh`). A non-fullscreen video in a browser is not detected |
 | `IDLE_SCREEN_OFF` | `10` | Seconds after the lock before the display powers off (the machine keeps running) |
 
 Applied at session start; after editing run `~/.config/bspwm/scripts/idle-set.sh`. The lock screen is one static blue screen: a wrong password only changes the text under the bar.
