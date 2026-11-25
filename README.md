@@ -147,11 +147,11 @@ No root is needed: the keyboard LED is set through logind and the lid is handled
 
 | Setting | Shipped | Meaning |
 | --- | --- | --- |
-| `IDLE_LOCK` | `180` | Seconds without input before the screen locks (`xss-lock` runs `xlock`). `0` = never; `60` = one minute |
+| `IDLE_LOCK` | `180` | Seconds without input before the screen locks (`idle-lock.sh` runs `xlock`). `0` = never; `60` = one minute |
 | `IDLE_VIDEO_INHIBIT` | `1` | `1` = no lock or screen-off while a video plays: a fullscreen window on the current desktop, or mpv / vlc / celluloid / totem reporting "Playing" (checked every 30 s by `scripts/idle-guard.sh`). A non-fullscreen video in a browser is not detected |
 | `IDLE_SCREEN_OFF` | `10` | Seconds after the lock before the display powers off (the machine keeps running) |
 
-Applied at session start; after editing run `~/.config/bspwm/scripts/idle-set.sh`. The lock screen is one static blue picture (no progress bar, clock or other overlay); a wrong password changes nothing on screen.
+Read live by `scripts/idle-lock.sh`; no reload needed. The lock screen is one static blue picture (no progress bar, clock or other overlay); a wrong password changes nothing on screen.
 
 #### Compositor (picom)
 
@@ -333,10 +333,8 @@ This branch runs the same desktop on a Dell Precision 7780 (panel driven at 1600
 I2C-HID touchpad, Dell keyboard backlight). What differs from the ThinkPad on `main`:
 
 - **Compositor**: `PICOM=1` in `bspwm/power.conf` (picom on AC, off on battery). The ThinkPad runs without it.
-- **Lock screen**: the animated `xlock` and plain `xss-lock -- xlock` stay; the ThinkPad's static BSOD,
-  `xss-lock --transfer-sleep-lock` and `idle-lock.sh` supervisor were workarounds for bugs on that machine only.
-  Idle locking here is still X's own timer (`xset s 300`, display off at 310 s) driving `xss-lock`; main switched
-  those timers off because `idle-lock.sh` does the locking there.
+- **Lock screen**: same as `main` (static BSOD `xlock`, `idle-lock.sh` supervisor with `xss-lock --transfer-sleep-lock`).
+  `IDLE_LOCK` / `IDLE_SCREEN_OFF` are read from `power.conf` by `idle-lock.sh`.
 - **Battery guard**: one healthy battery whose % gauge is reliable, so the voltage trigger and the
   pull-the-external-battery hint are off; the guard works on % and minutes left.
 - **Charge thresholds** (`system/etc/tlp.d/01-rip.conf`): 85/90 on the single Dell battery.

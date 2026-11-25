@@ -1,5 +1,5 @@
 #!/bin/bash
-# Screen locker (i3lock-color): static blue-screen parody by default, or a
+# Screen locker (i3lock-color): a fake blue screen (one scene) by default, or a
 # monochrome clock + ring with XLOCK_STYLE=classic.
 # Used by sxhkd (super+x), polybar power menu and /etc/acpi/lid.sh.
 
@@ -11,7 +11,34 @@ if [[ $EUID -eq 0 ]]; then
 fi
 
 # Single instance: a second i3lock stacked on top means you unlock one and
-# are still stuck behind the other.
+# are still stuck behind the other. On lid close acpid (lid.sh) and xss-lock
+# (suspend) both call xlock in the same second, before either i3lock exists,
+# so the pgrep check below can miss; a lock file per display, held for the
+# whole time the screen is locked, makes the second caller exit at once.
+rundir=/run/user/$EUID; [[ -d $rundir && -w $rundir ]] || rundir=/tmp
+lockfile="$rundir/xlock-${DISPLAY//[^0-9A-Za-z]/_}.lock"
+exec {xlock_fd}>>"$lockfile" || exit 1
+if ! flock -n "$xlock_fd"; then
+  logger -t xlock "already locking (DISPLAY=$DISPLAY), not starting a second lock"
+  # Called by xss-lock before a suspend: logind waits until we close the sleep
+  # lock fd, so wait for the other caller's i3lock to be on screen first.
+  if [[ -n $XSS_SLEEP_LOCK_FD ]]; then
+    for _ in {1..30}; do pgrep -u "$EUID" -x i3lock >/dev/null && break; sleep 0.1; done
+    sleep 0.5
+  fi
+  exit 0
+fi
+
+# xss-lock (-l, --transfer-sleep-lock) hands us logind's sleep delay lock: the
+# laptop does not suspend until it is closed. release_sleep_lock closes it once
+# i3lock is on screen, so the desktop is never visible on resume.
+release_sleep_lock() {
+  [[ -n $XSS_SLEEP_LOCK_FD ]] || return 0
+  eval "exec $XSS_SLEEP_LOCK_FD<&-" 2>/dev/null
+  logger -t xlock "lock is up, suspend may continue"
+  XSS_SLEEP_LOCK_FD=
+}
+trap 'release_sleep_lock' EXIT
 # Only i3locks on THIS display count (a stale one on another X display, e.g. a
 # test Xvfb, must not stop the real screen from locking).
 for p in $(pgrep -u "$EUID" -x i3lock); do
@@ -28,26 +55,10 @@ playerctl --all-players pause 2>/dev/null
 
 # Notifications would be drawn ON TOP of the lock screen (message previews,
 # chat contents...). Hold them while locked; they show up after unlocking.
-# A notifier that lacks the session bus address (needrestart after apt, cron,
-# acpi scripts) makes D-Bus autolaunch a private bus with a SECOND dunst on it,
-# which a plain `dunstctl` never reaches: stop those strays, and pause every
-# remaining dunst on the bus it actually listens on.
-session_bus="unix:path=${XDG_RUNTIME_DIR:-/run/user/$EUID}/bus"
-dunst_pause() {   # dunst_pause true|false
-  local p bus
-  for p in $(pgrep -u "$EUID" -x dunst); do
-    bus=$(tr '\0' '\n' < "/proc/$p/environ" 2>/dev/null | sed -n 's/^DBUS_SESSION_BUS_ADDRESS=//p')
-    if [[ $1 == true && -n $bus && $bus != "$session_bus"* ]]; then
-      kill "$p" 2>/dev/null        # stray dunst on an autolaunched bus
-      continue
-    fi
-    DBUS_SESSION_BUS_ADDRESS=${bus:-$session_bus} dunstctl set-paused "$1" 2>/dev/null
-  done
-}
-dunst_pause true
-trap 'dunst_pause false' EXIT
+dunstctl set-paused true 2>/dev/null
+trap 'dunstctl set-paused false 2>/dev/null; release_sleep_lock' EXIT
 
-# Style: "bsod" (default) = static blue-screen picture, no animation or overlay; "classic" = monochrome clock + ring.
+# Style: "bsod" (default) = static fake blue screen (no animations); "classic" = monochrome clock + ring.
 # Override with XLOCK_STYLE=classic.
 style=${XLOCK_STYLE:-bsod}
 
@@ -55,7 +66,7 @@ lock_classic() {
   local font="Atkinson Hyperlegible Mono" fg=e6e3ddff accent=f2efe9ff red=ffffffff dim=11121499
   # Solid background: no screenshot of the desktop is ever used, so nothing
   # of what was open (even blurred) is visible while locked.
-  i3lock --nofork \
+  ( [[ -n $XSS_SLEEP_LOCK_FD ]] && eval "exec $XSS_SLEEP_LOCK_FD<&-"; exec i3lock --nofork \
     --color=111214 \
     --clock --indicator \
     --time-str="%H:%M" --date-str="%A, %d %B" \
@@ -69,44 +80,79 @@ lock_classic() {
     --insidewrong-color=$dim --ringwrong-color=$red --wrong-color=$red --wrong-text="Wrong" \
     --noinput-text="" \
     --ignore-empty-password --show-failed-attempts \
-    --pass-media-keys --pass-volume-keys --pass-screen-keys
+    --pass-media-keys --pass-volume-keys --pass-screen-keys ) &
+  local p=$!
+  sleep 0.7
+  release_sleep_lock
+  wait "$p"
 }
 
 # ---------------------------------------------------------------- bsod style
-# Starts i3lock on the static blue-screen picture rendered by xlock-bsod. Nothing is drawn on top:
-# no progress bar, no ticking clock, no status text, so the screen never changes while locked.
+# Starts i3lock on the bsod image (xlock-bsod renders it + prints positions).
 # Sets $pid to the new i3lock.
 start_scene() {   # start_scene SCENE FAILS
-  local scene=$1 fails=$2 img="$dir/$1-$2.png"
-  /usr/local/bin/xlock-bsod "$scene" "$img" "$w" "$h" "$fails" >/dev/null || return 1
-  i3lock --nofork --image="$img" --color=0078d7 --ignore-empty-password \
-    --pass-media-keys --pass-volume-keys --pass-screen-keys &
+  local scene=$1 fails=$2 img="$dir/$1-$2.png" vars
+  vars=$(/usr/local/bin/xlock-bsod "$scene" "$img" "$w" "$h" "$fails") || return 1
+  local BAR_X BAR_Y BAR_W BAR_H TEXT_X TIME_Y DATE_Y TINY STATUS_X STATUS_Y STATUS_SIZE CLOCK
+  eval "$vars"
+  local font="Noto Sans" white=ffffffff
+  local verif="checking recovery code..." wrong="invalid recovery code" none=00000000
+  # Static: no bar indicator (its bars jump on every key), no live clock, no
+  # Caps Lock text. The indicator ring is fully transparent, only the status
+  # text below "0% complete" appears while checking / after a wrong password.
+  local args=(
+    --nofork --image="$img" --color=000000
+    --radius=1 --ring-width=1 --line-uses-inside
+    --inside-color=$none --ring-color=$none --separator-color=$none
+    --keyhl-color=$none --bshl-color=$none
+    --insidever-color=$none --ringver-color=$none --insidewrong-color=$none --ringwrong-color=$none
+    --verif-font="$font" --wrong-font="$font" --verif-size="$STATUS_SIZE" --wrong-size="$STATUS_SIZE"
+    --verif-align=1 --wrong-align=1
+    --verif-pos="$STATUS_X:$STATUS_Y" --wrong-pos="$STATUS_X:$STATUS_Y"
+    --verif-color=$white --wrong-color=$white
+    --verif-text="$verif" --wrong-text="$wrong"
+    --noinput-text="" --lock-text="" --lockfailed-text="" --no-modkey-text
+    --ignore-empty-password
+    --pass-media-keys --pass-volume-keys --pass-screen-keys
+  )
+  ( [[ -n $XSS_SLEEP_LOCK_FD ]] && eval "exec $XSS_SLEEP_LOCK_FD<&-"; exec i3lock "${args[@]}" ) &
   pid=$!
+  logger -t xlock "i3lock started: scene=$scene fails=$fails pid=$pid"
 }
 
-# BSOD lock: one static blue screen, nothing else. A wrong password changes nothing
-# on screen (no scene swaps, no journal watcher: those made the lock lag).
-# If i3lock dies without a correct password (e.g. lost the grab) it is started again
-# right away; after 5 tries it gives up to the caller, which falls back to the classic lock.
+# Troll lock: one fake blue screen. A wrong password just shows "invalid recovery
+# code" (i3lock's own text); there are no scene swaps, so one i3lock holds the
+# keyboard grab from lock to unlock. If i3lock dies without the right password it
+# is started again (5 times), then the classic lock takes over.
 lock_bsod() {
   dir="${XDG_RUNTIME_DIR:-/tmp}/xlock"
   mkdir -p "$dir" && chmod 700 "$dir"
-  local geo rc retries=0
+  local geo
   geo=$(xdpyinfo 2>/dev/null | awk '/dimensions:/ {print $2; exit}')
   w=${geo%x*}; h=${geo#*x}
   [[ -n $w && -n $h ]] || { w=1600; h=900; }
 
+  logger -t xlock "lock requested (DISPLAY=$DISPLAY)"
+  start_scene bsod 0 || return 1
+  sleep 0.7                                      # mapped and painted
+  release_sleep_lock
+  local rc retries=0
   while :; do
-    start_scene bsod 0 || return 1
     wait "$pid"; rc=$?
+    logger -t xlock "i3lock pid=$pid exited rc=$rc (retries=$retries)"
     (( rc == 0 )) && break                         # correct password: unlocked
-    (( ++retries > 5 )) && break
+    (( ++retries > 5 )) && { logger -t xlock "giving up after $retries restarts, falling back to classic lock"; break; }
+    logger -t xlock "restarting i3lock (retry $retries/5)"
+    start_scene bsod 0 || break
   done
+
+  logger -t xlock "unlocked (rc=$rc)"
   rm -f "$dir"/*.png
   return $rc
 }
 
 if [[ $style == classic ]]; then
+  logger -t xlock "classic lock"
   lock_classic
 else
   lock_bsod || lock_classic        # never leave the screen unlocked

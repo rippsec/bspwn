@@ -35,10 +35,13 @@ xset r rate 350 25
 
 # Enable DPMS (timeouts in seconds)
 # this setting doesn't suspend or shutdowns the system only the display
-# After 5 min idle: lock (xss-lock -> xlock), then turn the display off ~10s later.
+# After IDLE_LOCK s idle: lock (idle-lock.sh -> xlock), then turn the display off.
 # Only the display sleeps; the machine keeps running.
-# (Dell: X's own timer drives xss-lock; the ThinkPad on main uses idle-lock.sh instead.)
-"$HOME/.config/bspwm/scripts/idle-set.sh"   # IDLE_LOCK / IDLE_SCREEN_OFF in power.conf
+# X's own screensaver/DPMS timers are off so they cannot blank the screen before the lock is up.
+# (the timeouts IDLE_LOCK / IDLE_SCREEN_OFF are read from power.conf by idle-lock.sh)
+xset s off
+xset +dpms
+xset dpms 0 0 0
 setsid "$HOME/.config/bspwm/scripts/idle-guard.sh" >/dev/null 2>&1 &   # no lock while a video plays
 
 ### Process Management
@@ -70,7 +73,7 @@ process_list=(
   "sxhkd"
   #"lxde-settings-daemon"
   "xsettingsd"
-  "xss-lock -- xlock"  # locks on idle (xset s) and before suspend; xlock is single-instance
+  # xss-lock (lock when the screen blanks and before suspend): started below by scripts/idle-lock.sh, which restarts it if it dies
   "conky -q -c $HOME/.config/conky/hud.conf"
   "xfce4-notes"
   "picom -b --config $HOME/.config/picom/picom.conf"  # power-mode.sh stops it on battery (PICOM=1 in power.conf)
@@ -94,6 +97,8 @@ done
 # Desktop mode (cockpit | undercover): theme, panel, geometry, wallpaper, picom/conky + power profile
 "$HOME/.config/bspwm/scripts/mode.sh" apply &
 setsid "$HOME/.config/bspwm/scripts/power-watch.sh" >/dev/null 2>&1 &
+# Idle lock: locks after IDLE_LOCK s idle, then switches the display off; also xss-lock for locking before suspend
+setsid "$HOME/.config/bspwm/scripts/idle-lock.sh" >/dev/null 2>&1 &
 # Keyboard backlight idle-off and server-mode watcher (single-instance daemons; settings in bspwm/power.conf)
 setsid "$HOME/.config/bspwm/scripts/kbd-backlight.py" >/dev/null 2>&1 &
 setsid "$HOME/.config/bspwm/scripts/servermode.py" daemon >/dev/null 2>&1 &
