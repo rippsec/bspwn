@@ -110,6 +110,7 @@ kill_polybar() {
   killall -q polybar
   for _ in $(seq 20); do pgrep -x polybar >/dev/null || return 0; sleep 0.1; done
   killall -q -9 polybar 2>/dev/null
+  "$HOME/.config/bspwm/scripts/polybar-reap.sh" all
 }
 mkdir -p "$HOME/.cache/bspwn"
 cat > "$HOME/.cache/bspwn/start-menu.desktop" <<DT

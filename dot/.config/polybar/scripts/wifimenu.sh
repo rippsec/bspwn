@@ -27,10 +27,10 @@ if [[ $radio != enabled ]]; then
   exit 0
 fi
 
-nmcli device wifi rescan >/dev/null 2>&1 &
+# list the cached scan (instant); `wifi list` alone waits up to ~4 s for a fresh scan. Rescan afterwards for the next open.
 known=$(nmcli -t -f NAME connection show)
 # fields: IN-USE:SSID:SIGNAL:SECURITY ('\:' inside a value is protected)
-mapfile -t nets < <(nmcli -t -f IN-USE,SSID,SIGNAL,SECURITY device wifi list | sed 's/\\:/\x01/g' \
+mapfile -t nets < <(nmcli -t -f IN-USE,SSID,SIGNAL,SECURITY device wifi list --rescan no | sed 's/\\:/\x01/g' \
   | awk -F: '$2!="" && !seen[$2]++ {gsub(/\x01/,":");
       printf "%s\t%s\t%s\t%s\n", ($1=="*"?"●":" "), $2, $3, $4}')
 
@@ -42,6 +42,7 @@ for n in "${nets[@]}"; do
 done
 lines+=("── Turn Wi-Fi off" "── Advanced settings…")
 
+(nmcli device wifi rescan >/dev/null 2>&1 &)
 sel=$(printf '%s\n' "${lines[@]}" | menu "wifi" -format i)
 [[ -z $sel ]] && exit 0
 if (( sel >= ${#nets[@]} )); then

@@ -22,21 +22,25 @@ echo "All Applications,^tag(jgmenu-all-apps)"
 echo "Back,^back(),go-previous"
 echo "---"
 
-# Parse all .desktop files, skip hidden/non-apps, sort by name
-{
-    for dir in /usr/share/applications ~/.local/share/applications; do
-        [[ -d "$dir" ]] || continue
-        for f in "$dir"/*.desktop; do
-            [[ -f "$f" ]] || continue
-            type=$(grep -m1 '^Type=' "$f" | cut -d= -f2-)
-            [[ "$type" == "Application" ]] || continue
-            nodisplay=$(grep -m1 '^NoDisplay=' "$f" | cut -d= -f2-)
-            [[ "$nodisplay" == "true" ]] && continue
-            name=$(grep -m1 '^Name=' "$f" | cut -d= -f2-)
-            exec_cmd=$(grep -m1 '^Exec=' "$f" | cut -d= -f2- | sed 's/ *%[a-zA-Z]//g; s/[[:space:]]*$//')
-            icon=$(grep -m1 '^Icon=' "$f" | cut -d= -f2-)
-            [[ -z "$name" || -z "$exec_cmd" ]] && continue
-            echo "$name,$exec_cmd,$icon"
-        done
-    done
-} | sort -f
+# Parse all .desktop files, skip hidden/non-apps, sort by name.
+# One awk pass over every file: the old per-file grep/cut/sed pipeline forked ~6000 processes and took
+# over a minute of CPU on every session start. For each file the first Type=, NoDisplay=, Name=,
+# Exec= and Icon= line wins (same as `grep -m1`); %f/%u style field codes are dropped from Exec.
+shopt -s nullglob
+files=(/usr/share/applications/*.desktop ~/.local/share/applications/*.desktop)
+(( ${#files[@]} )) && awk '
+  function val(l) { return substr(l, index(l, "=") + 1) }
+  function flush() {
+    if (cur != "" && ty == "Application" && nd != "true" && name != "") {
+      gsub(/ *%[a-zA-Z]/, "", ex); sub(/[ \t\r\f\v]+$/, "", ex)
+      if (ex != "") print name "," ex "," icon
+    }
+  }
+  FNR == 1 { flush(); cur = FILENAME; ty = nd = name = ex = icon = ""; ht = hn = hm = he = hi = 0 }
+  /^Type=/      && !ht { ht = 1; ty   = val($0) }
+  /^NoDisplay=/ && !hn { hn = 1; nd   = val($0) }
+  /^Name=/      && !hm { hm = 1; name = val($0) }
+  /^Exec=/      && !he { he = 1; ex   = val($0) }
+  /^Icon=/      && !hi { hi = 1; icon = val($0) }
+  END { flush() }
+' "${files[@]}" 2>/dev/null | sort -f
