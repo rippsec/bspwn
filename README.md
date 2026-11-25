@@ -65,6 +65,7 @@ Three islands plus the launcher (far left) and power button (far right), joined 
 | 11 | date and time | **Clock** | click: calendar dropdown under the clock |
 | 12 | link icon + address | **LHOST**: your address for lab work (a chosen interface or a custom IP) | left: pick an interface or type an IP inline; right or double click: copy. Saved in `~/.current_ip` |
 | 13 | crosshair + address | **RHOST**: the target address, `none` when unset | left: set/edit inline; right or double click: copy. Saved in `~/.current_target`, and it **writes `export rhost=...` into `~/.zshrc`** so shells see `$rhost` |
+| - | pot / bell / check | **Claude Code status**, shown only while a session is active (not in the picture): pot = working, **red** bell = needs an answer or a permission, underlined check = done (plays a chime). See [Claude Code indicator](#claude-code-indicator) | click: clear finished sessions |
 | 14 | server rack | **Server mode** (lid closed = keep running). Dim = off; bright and underlined = on; shows the battery % while on battery | click: toggle (same as `super+ctrl+s`), see [Server mode](#server-mode-lid-closed-laptop-keeps-running) |
 | 15 | mask | **Mode switch**: cockpit <-> undercover (Windows look) | click: switch (same as `super+ctrl+u`) |
 | 16 | speaker + block | **Volume.** A **red** speaker with lines above and below means muted | scroll: volume up/down (with a notification) |
@@ -73,6 +74,23 @@ Three islands plus the launcher (far left) and power button (far right), joined 
 | 19 | microphone | **Mic.** Dim crossed-out mic = muted; **red** lit mic = live (unmuted) | click: mute/unmute |
 | 20 | tray icons | **System tray**: network applet (Wi-Fi), clipboard manager (paperclip) and any app that puts an icon there | per app |
 | 21 | power symbol | **Power menu** | click: full-screen menu with Lock, Sleep, **Hibernate** (suspend to disk: no battery drain while off; it powers off and on resume the machine boots, asks the disk passphrase, then restores your session, so it looks like a reboot but nothing is lost), Logout, Restart, Shutdown; Esc or a second click closes it |
+
+### Claude Code indicator
+
+`dot/.config/polybar/scripts/claude-status.sh` shows the state of every running [Claude Code](https://claude.com/claude-code) session in the bar, fed by hooks in `~/.claude/settings.json`:
+
+```json
+"hooks": {
+  "UserPromptSubmit": [{"hooks": [{"type": "command", "command": "~/.config/polybar/scripts/claude-status.sh set busy"}]}],
+  "PreToolUse":   [{"matcher": "AskUserQuestion|ExitPlanMode", "hooks": [{"type": "command", "command": "~/.config/polybar/scripts/claude-status.sh set wait"}]}],
+  "PostToolUse":  [{"matcher": "*", "hooks": [{"type": "command", "command": "~/.config/polybar/scripts/claude-status.sh set busy"}]}],
+  "Notification": [{"matcher": "permission_prompt|elicitation_dialog", "hooks": [{"type": "command", "command": "~/.config/polybar/scripts/claude-status.sh set wait"}]}],
+  "Stop":         [{"hooks": [{"type": "command", "command": "~/.config/polybar/scripts/claude-status.sh set done"}]}],
+  "SessionEnd":   [{"hooks": [{"type": "command", "command": "~/.config/polybar/scripts/claude-status.sh end"}]}]
+}
+```
+
+The most urgent state wins (needs input > working > done); a number shows when several sessions run. "Done" plays `complete.oga` from the freedesktop sound theme; set `BSPWN_CLAUDE_SOUND` to another file, or to `none`, in `~/.zshrc.local`. Needs `jq` and `paplay` or `pw-play`.
 
 ### The HUD column (right side)
 

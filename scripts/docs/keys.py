@@ -151,6 +151,7 @@ BAR = [
  ("11", "Date and time", "Clock", "click: calendar dropdown"),
  ("12", "Link icon", "LHOST: your address for lab work", "left: pick an interface or type an IP; right/double click: copy"),
  ("13", "Crosshair", "RHOST: the target address", "left: set/edit; right/double click: copy"),
+ ("-", "Pot / bell / check", "Claude Code status, shown only while a session is active (not in the picture)", "click: clear finished sessions"),
  ("14", "Server rack", "Server mode (lid closed = keep running)", "click: toggle"),
  ("15", "Mask", "Mode switch cockpit <-> undercover", "click: switch"),
  ("16", "Speaker", "Volume", "scroll: volume; red speaker = muted"),
