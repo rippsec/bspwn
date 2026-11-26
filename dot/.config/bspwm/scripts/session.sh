@@ -1,7 +1,7 @@
 #!/bin/bash
 # SPDX-License-Identifier: GPL-2.0-only
 # Copyright (c) 2025-2026 rippsec and contributors. See LICENSE and NOTICE.md.
-# Session launcher (run by ~/.xsession). One login session, two window managers:
+# Session launcher (run by /usr/local/bin/bspwn-session, the LightDM "bspwn" session; also ~/.xsession). One login session, two window managers:
 #   bspwm  (cockpit mode: tiling)
 #   xfwm4  (undercover mode: floating windows with Windows-10 frames, title bars and buttons)
 # Usage:

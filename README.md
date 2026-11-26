@@ -111,7 +111,7 @@ A [conky](https://github.com/brndnmtthws/conky) widget, `dot/.config/conky/hud.c
 
 `super+ctrl+u` (or symbol 15) switches the whole desktop live, with no logout: **cockpit** is the monochrome rice described here; **undercover** is a Windows 10 look (theme, icons, tint2 panel, floating windows).
 Each mode is a profile in `dot/.config/bspwm/modes/*.conf` (theme names, wallpaper, panel, gaps, borders). The active mode is remembered in `~/.cache/bspwn-mode`.
-In the **bspwn** login session (`~/.xsession` -> `scripts/session.sh`) undercover swaps bspwm for **xfwm4** (`WM=xfwm4`), so windows get real Windows-10 frames; the switch keeps all windows open and bspwm puts them back on their desktops on return. In the plain **bspwm** session undercover only floats the windows.
+In the **bspwn** login session (`/usr/local/bin/bspwn-session` -> `scripts/session.sh`) undercover swaps bspwm for **xfwm4** (`WM=xfwm4`), so windows get real Windows-10 frames; the switch keeps all windows open and bspwm puts them back on their desktops on return. In the plain **bspwm** session undercover only floats the windows.
 `super+ctrl+e` switches to undercover, minimises every window and opens an OnlyOffice spreadsheet maximised on top (`scripts/boss.sh`).
 
 ## Everyday keys

@@ -1,0 +1,8 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-2.0-only
+# Copyright (c) 2025-2026 rippsec and contributors. See LICENSE and NOTICE.md.
+# LightDM "bspwn" session (/etc/lightdm/xsessions/bspwn.desktop): starts the user's bspwn session launcher
+# (bspwm in cockpit mode, xfwm4 with Windows-10 frames in undercover mode). Falls back to plain bspwm.
+launcher="$HOME/.config/bspwm/scripts/session.sh"
+[ -x "$launcher" ] && exec "$launcher"
+exec bspwm
