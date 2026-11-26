@@ -68,7 +68,7 @@ Nothing here is one big program. Each job is done by a small, replaceable tool, 
 
 ![Start-up sequence](diagrams/boot.svg)
 
-1. **ly** (the login screen on tty2) starts **Xorg** on virtual terminal 2.
+1. **ly** (the login screen on tty2, white on black) starts **Xorg** on virtual terminal 2 and runs the chosen session: *bspwm*, or *bspwn* (the session launcher that also switches to xfwm4 in undercover mode). `ly-watchdog.service` restarts ly if a login hangs after Xorg starts.
 2. **`bspwmrc`** runs first: environment variables, the 10 desktops, border colours, gaps, and the *window rules* (which programs float).
 3. **`bspwm/start`** runs next: it restarts the helper programs listed in `process_list` (dunst, sxhkd, xsettingsd, nm-applet, ...), starts the power
    daemons and the idle locker, and finally calls `mode.sh apply`.
@@ -452,12 +452,13 @@ For adapting the setup to a different laptop there is also a dedicated skill, `.
 | An icon shows as a box or text like `\u{...}` | Polybar does not understand escapes: put the real glyph character in the file (see the browser recipe). |
 | The look reverts after a restart | The mode profile still has the old values: edit `modes/<mode>.conf`, or use `themer`. |
 | The HUD is gone | You are on battery (it is stopped on purpose), or run the conky command from chapter 12. |
+| Black screen right after logging in, only Fn keys work | ly hung after starting Xorg. `ly-watchdog` returns to the login prompt within about 40 s (`journalctl -t ly-watchdog`). By hand: `Ctrl+Alt+F1`, log in, `sudo systemctl restart ly@tty2`, then `Ctrl+Alt+F2`. |
 | The screen is solid blue | It is locked: type your password. Do not kill the locker from a terminal. |
 | Nothing responds in a tmux prompt | Press `Esc`. The prompt owns the keyboard until you accept or cancel. |
 | The touchpad is frozen | `Super+Shift+e` reconnects it; `Super+e` toggles it. |
 | Server mode does not hold | `servermode.py status`, `systemd-inhibit --list | grep bspwn`, `journalctl -t bspwn-power`. |
 | CPU is high after days of uptime | `ps -eo pid,ppid,etime,args | grep -E 'polybar/scripts|servermode.py bar'` lists leftover bar helpers; `~/.config/bspwm/scripts/polybar-reap.sh orphans` stops them (it also runs every 60 s). |
-| I want to see the log of something | `journalctl -t <tag>` with `idle-lock`, `xlock`, `bspwn-power`, `bspwn-reap`. |
+| I want to see the log of something | `journalctl -t <tag>` with `idle-lock`, `xlock`, `bspwn-power`, `bspwn-reap`, `bspwn-session`, `ly-watchdog`. |
 | I broke a config | `git -C ~/.bspwn diff` to see it, `git -C ~/.bspwn checkout -- <file>` to restore it. |
 
 # 15. Licence, credits and reuse

@@ -1,0 +1,49 @@
+#!/bin/bash
+# SPDX-License-Identifier: GPL-2.0-only
+# Copyright (c) 2025-2026 rippsec and contributors. See LICENSE and NOTICE.md.
+# ly-watchdog: restart ly when a login hangs on a black screen.
+# ly logs "starting x server", then "got x server pid" once Xorg answers, then "launching environment"
+# (which runs /etc/ly/setup.sh SESSION). Rarely ly stops after "starting x server": Xorg is up and empty,
+# no session starts, the screen stays black and only firmware keys work.
+# The login counts as stuck only when ALL of these hold for GRACE seconds:
+#   - the newest "starting x server" line in the ly log has no "got x server pid" after it
+#   - ly's Xorg (started with -auth .../lyxauth) is running
+#   - no ly session setup and no window manager / desktop session is running
+# Then it restarts the ly unit (back to the login prompt). A working session never matches.
+# Usage: ly-watchdog            loop (systemd: ly-watchdog.service)
+#        ly-watchdog --check    print the state once; exit 0 = stuck, 1 = fine
+# Env: LY_LOG (/var/log/ly.log) LY_UNIT (ly@tty2.service) GRACE (30) INTERVAL (10) LY_SESSIONS (pgrep -x pattern)
+# Log: journalctl -t ly-watchdog
+LOG=${LY_LOG:-/var/log/ly.log}
+UNIT=${LY_UNIT:-ly@tty2.service}
+GRACE=${GRACE:-30}
+INTERVAL=${INTERVAL:-10}
+SESSIONS=${LY_SESSIONS:-'bspwm|xfwm4|xfce4-session|startxfce4'}
+
+# prints "stuck <age>" or "fine <reason>"; exit 0 when stuck
+state() {
+  [[ -r $LOG ]] || { echo "fine no-log"; return 1; }
+  local last ts age
+  last=$(grep -n 'starting x server' "$LOG" | tail -1 | cut -d: -f1)
+  [[ -n $last ]] || { echo "fine no-x-start"; return 1; }
+  tail -n +"$last" "$LOG" | grep -q 'got x server pid' && { echo "fine x-answered"; return 1; }
+  pgrep -f -- '-auth [^ ]*lyxauth' >/dev/null || { echo "fine no-ly-xorg"; return 1; }
+  pgrep -f '/etc/ly/setup\.sh' >/dev/null && { echo "fine setup-running"; return 1; }
+  pgrep -x -- "$SESSIONS" >/dev/null && { echo "fine session-running"; return 1; }
+  ts=$(sed -n "${last}p" "$LOG" | cut -c1-19)
+  ts=$(date -d "$ts" +%s 2>/dev/null) || { echo "fine bad-timestamp"; return 1; }
+  age=$(( $(date +%s) - ts ))
+  (( age >= GRACE )) || { echo "fine waiting-${age}s"; return 1; }
+  echo "stuck ${age}s"
+}
+
+if [[ $1 == --check ]]; then state; exit; fi
+
+logger -t ly-watchdog "watching $UNIT (log $LOG, grace ${GRACE}s)"
+while sleep "$INTERVAL"; do
+  if s=$(state); then
+    logger -t ly-watchdog "login hung after starting Xorg ($s): restarting $UNIT"
+    systemctl restart "$UNIT"
+    sleep "$GRACE"
+  fi
+done
