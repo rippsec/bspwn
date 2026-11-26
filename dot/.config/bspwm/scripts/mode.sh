@@ -7,9 +7,13 @@
 # explicit bspc paddings (not panel struts), panels/compositor restarted, wallpaper set.
 # The chosen mode is stored in ~/.cache/bspwn-mode; "apply" re-applies it (login, bspc wm -r).
 # Cockpit is the default and is restored by re-applying its profile, nothing is undone.
+# Window manager: under the session launcher (scripts/session.sh, from ~/.xsession) a profile with WM=xfwm4
+# runs xfwm4 instead of bspwm (real window frames). The switch restarts the WM, keeping every window open:
+# bspwm's desktops are remembered and restored when bspwm comes back. Without the launcher bspwm stays.
 BASE="$HOME/.config/bspwm"
 STATE="$HOME/.cache/bspwn-mode"
 FLOATED="$HOME/.cache/bspwn-mode-floated"
+DESKS="$HOME/.cache/bspwn-mode-desktops"   # "window desktop" pairs saved when bspwm hands over to xfwm4
 mkdir -p "$HOME/.cache"
 
 # PID lock (not flock: a flock fd would leak into the panels/daemons started below and stay held)
@@ -32,9 +36,36 @@ esac
 source "$BASE/modes/$new.conf"
 echo "$new" > "$STATE"
 
+# ---- window manager (bspwm | xfwm4): switch first, the new WM runs `mode.sh apply` itself
+want_wm=bspwm
+[[ ${WM:-bspwm} == xfwm4 && -n $BSPWN_SESSION ]] && command -v xfwm4 >/dev/null && want_wm=xfwm4
+cur_wm=$("$BASE/scripts/session.sh" wm)
+if [[ -n $BSPWN_SESSION && $cur_wm != none && $cur_wm != "$want_wm" ]]; then
+  if [[ $cur_wm == bspwm ]]; then
+    # xfwm4 only manages mapped windows: remember each window's desktop, then gather them all
+    # (shown) on the first desktop. bspwm puts them back when it returns (see below).
+    : > "$DESKS"
+    first=$(bspc query -D -d '^1')
+    for n in $(bspc query -N -n .window); do
+      echo "$n $(bspc query -D -n "$n" --names)" >> "$DESKS"
+      bspc node "$n" -g hidden=off 2>/dev/null
+      bspc node "$n" -d "$first" 2>/dev/null
+    done
+    bspc desktop -f "$first"
+  fi
+  [[ $1 == apply ]] || notify-send -u low "Mode: $new (restarting the window manager)" 2>/dev/null
+  rm -f "$LOCK"
+  exec "$BASE/scripts/session.sh" switch "$want_wm"
+fi
+if [[ $cur_wm == bspwm && -s $DESKS ]]; then
+  # back from xfwm4: bspwm adopted every window on one desktop, return them to where they were
+  while read -r n d; do bspc node "$n" -d "$d" 2>/dev/null; done < "$DESKS"
+  : > "$DESKS"
+fi
+
 # ---- snapshot tiled rectangles BEFORE any geometry changes (used to float windows in place)
 declare -A RECT
-if [[ $FLOATING == 1 ]]; then
+if [[ $FLOATING == 1 && $cur_wm != xfwm4 ]]; then
   for n in $(bspc query -N -n .tiled.window); do
     RECT[$n]=$(bspc query -T -n "$n" | python3 -c \
       'import json,sys;r=json.load(sys.stdin)["client"]["tiledRectangle"];print(r["x"],r["y"],r["width"],r["height"])')
@@ -67,6 +98,7 @@ xsetroot -cursor_name left_ptr 2>/dev/null
 # ---- wallpaper
 [[ -f $WALLPAPER ]] && feh --no-fehbg --bg-fill "$WALLPAPER" 2>/dev/null
 
+if [[ $cur_wm != xfwm4 ]]; then   # xfwm4 places windows itself and honours tint2's strut
 # ---- bspwm geometry: explicit, so it never depends on a panel's struts (no stale sizes)
 bspc config ignore_ewmh_struts true
 for m in $(bspc query -M); do
@@ -104,6 +136,7 @@ elif [[ -s $FLOATED ]]; then
   done < "$FLOATED"
   : > "$FLOATED"
 fi
+fi   # bspwm only
 
 # ---- panels
 kill_polybar() {

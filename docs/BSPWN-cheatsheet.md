@@ -27,10 +27,11 @@
 | --- | --- |
 | `Super+x` | Lock the screen |
 | `Super+ctrl+u` | Switch mode live: cockpit <-> undercover |
+| `Super+ctrl+e` | Spreadsheet key: undercover mode, minimise all windows, OnlyOffice sheet on top |
 | `Super+ctrl+s` | Server mode on/off |
 | `Super+Escape` | Restart bspwm |
 | `alt+shift+Escape` | Reload sxhkd |
-| `Super+alt+Escape` | Quit bspwm |
+| `Super+alt+Escape` | Log out |
 | `Super+shift+Escape` | Restart the D-Bus daemon and bspwm |
 | `Super+p` | Toggle focus-follows-pointer |
 | `Super+e` | Toggle touchpad |

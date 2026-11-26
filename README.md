@@ -17,7 +17,7 @@ lists every custom setting. To make it fit your own computer, see [Adapting it t
 
 ## What is in here
 
-- **Two modes, switched live** (`super+ctrl+u`): *cockpit* (default: monochrome, polybar, conky HUD, tiling) and *undercover* (a Windows 10 look, tint2, floating windows).
+- **Two modes, switched live** (`super+ctrl+u`): *cockpit* (default: monochrome, polybar, conky HUD, tiling) and *undercover* (a Windows 10 look, tint2, floating windows with Windows-10 frames drawn by xfwm4).
 - **Terminal palette** (kitty + alacritty) with a contrast checker.
 - **Themer**: a small GTK app that previews GTK and icon themes and applies them live, no relogin.
 - **Keyboard backlight that follows your typing** and **server mode** (keep running with the lid closed).
@@ -112,6 +112,8 @@ A [conky](https://github.com/brndnmtthws/conky) widget, `dot/.config/conky/hud.c
 
 `super+ctrl+u` (or symbol 15) switches the whole desktop live, with no logout: **cockpit** is the monochrome rice described here; **undercover** is a Windows 10 look (theme, icons, tint2 panel, floating windows).
 Each mode is a profile in `dot/.config/bspwm/modes/*.conf` (theme names, wallpaper, panel, gaps, borders). The active mode is remembered in `~/.cache/bspwn-mode`.
+In the **bspwn** login session (`~/.xsession` -> `scripts/session.sh`) undercover swaps bspwm for **xfwm4** (`WM=xfwm4`), so windows get real Windows-10 frames; the switch keeps all windows open and bspwm puts them back on their desktops on return. In the plain **bspwm** session undercover only floats the windows.
+`super+ctrl+e` switches to undercover, minimises every window and opens an OnlyOffice spreadsheet maximised on top (`scripts/boss.sh`).
 
 ## Everyday keys
 
@@ -121,6 +123,7 @@ Each mode is a profile in `dot/.config/bspwm/modes/*.conf` (theme names, wallpap
 | `super+d` / `super+r` | app menu (jgmenu) / launcher (rofi) |
 | `super+Tab`, `alt+Tab` | window overview / switcher (skippy-xd) |
 | `super+ctrl+u` | toggle cockpit / undercover mode |
+| `super+ctrl+e` | undercover + minimise everything + OnlyOffice spreadsheet on top |
 | `super+ctrl+s` | **toggle server mode** |
 | `super+x` | lock the screen (it also locks by itself after 5 min idle, turning the screen off once the lock is up, and before suspend) |
 | `super+Left/Right`, `super+alt+Left/Right` | previous/next desktop, move window there |

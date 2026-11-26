@@ -80,6 +80,9 @@ gsettings set org.gnome.desktop.interface cursor-size 24
 
 vibrant-cli eDP-1 0.5
 
+# manage the windows left by a previous window manager (xfwm4 in undercover mode, see scripts/session.sh)
+bspc wm --adopt-orphans
+
 #scripts
 $HOME/.config/bspwm/start
 # $HOME/.config/bspwm/custom/touchgrass daemon

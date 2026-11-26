@@ -56,6 +56,10 @@ super + r
 super + ctrl + u
 	~/.config/bspwm/scripts/mode.sh toggle
 
+# spreadsheet key: undercover mode, minimise every window, OnlyOffice spreadsheet maximised on top
+super + ctrl + e
+	~/.config/bspwm/scripts/boss.sh
+
 # server mode: keep running with the lid closed (screen locks and goes dark); ends on low battery / overheat
 super + ctrl + s
 	~/.config/bspwm/scripts/servermode.py toggle
@@ -192,9 +196,9 @@ XF86MonBrightnessDown
 
 #============BSPWM HOTKEYS==============
 
-# quit bspwm normally
+# log out (quits bspwm, or xfwm4 in undercover mode)
 super + alt + Escape
-	bspc quit
+	~/.config/bspwm/scripts/session.sh quit || bspc quit
 
 # close and kill
 super + q
