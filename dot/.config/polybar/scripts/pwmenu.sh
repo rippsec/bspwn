@@ -26,7 +26,7 @@ case "$chosen" in
   0) command -v xlock >/dev/null && xlock ;;
   1) mpc -q pause 2>/dev/null; amixer set Master mute >/dev/null 2>&1; systemctl suspend ;;
   2) mpc -q pause 2>/dev/null; amixer set Master mute >/dev/null 2>&1; systemctl hibernate ;;  # to disk: no battery drain
-  3) bspc quit ;;
+  3) "$HOME/.config/bspwm/scripts/session.sh" quit || bspc quit ;;
   4) shutdown -r now ;;
   5) shutdown -h now ;;
 esac

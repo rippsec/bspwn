@@ -1,0 +1,5 @@
+[Desktop Entry]
+Name=bspwn
+Comment=bspwm (cockpit) / xfwm4 with Windows-10 frames (undercover), switched without logging out (runs ~/.xsession)
+Exec=default
+Type=Application

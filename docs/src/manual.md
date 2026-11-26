@@ -246,13 +246,17 @@ Machine-specific things (a language manager's PATH line, a GPU variable) belong 
 | --- | --- | --- |
 | look | monochrome rice | a Windows 10 look |
 | panel | polybar + conky HUD | tint2 |
-| windows | tiling | floating |
+| windows | tiling (bspwm) | floating with Windows-10 frames (xfwm4) |
 
 ![Mode switching](diagrams/modes.svg)
 
 Each mode is a profile: `dot/.config/bspwm/modes/<mode>.conf` (theme names, icon theme, cursor, font, wallpaper, panel, gaps, border width and colours, `CONKY=1/0`, `FLOATING=1/0`).
 `scripts/mode.sh` reads it and applies it; the active mode is remembered in `~/.cache/bspwn-mode`.
 **Important:** `mode.sh apply` rewrites the GTK settings from the profile on every start, so a look change must also go into the active profile or it will be undone on the next apply (themer does this for you).
+
+**Window frames in undercover.** bspwm draws no title bars, so with `WM=xfwm4` in the profile undercover runs **xfwm4** (Windows-10 theme: title bar, minimise, maximise, close, drag to move, snap to the edges). This needs the session launcher `scripts/session.sh`, started by `~/.xsession` through the **bspwn** login session (`system/etc/lightdm/xsessions/bspwn.desktop`). Switching mode restarts the window manager and keeps every window open: going to undercover, the windows of all bspwm desktops are gathered on one xfwm4 workspace; going back, bspwm puts each one on its old desktop. xfwm4 reads its own settings (`dot/.config/bspwm/xfwm4/xfwm4.xml`, copied into a private xfconf in `~/.cache/bspwn/xfwm4`), so XFCE's settings are not changed. Under xfwm4 the bspwm window keys (`super+h/j/k/l`, desktops, ...) do nothing; app and system keys still work, and `alt+F4`, `alt+Tab` are xfwm4's. Logging in with the plain **bspwm** session keeps bspwm in undercover too (floating windows without frames, `FLOATING=1`). Log: `journalctl -t bspwn-session`.
+
+**Spreadsheet key** (`Super+Ctrl+e`, `scripts/boss.sh`): switches to undercover, minimises every window to the taskbar and puts an OnlyOffice spreadsheet (a new one, or the one already open) maximised on top. Log: `journalctl -t bspwn-boss`.
 
 To make a new mode: copy `cockpit.conf` to `modes/mymode.conf` and edit the values. `mode.sh` only knows the names `cockpit` and `undercover` today, so add your name to its two `case` lines (the `toggle` branch and the `cockpit|undercover)` branch) to be able to switch to it.
 

@@ -28,10 +28,11 @@ SXHKD = [
  ("Desktop, power and system", [
   ("super+x", "Lock the screen"),
   ("super+ctrl+u", "Switch mode live: cockpit <-> undercover"),
+  ("super+ctrl+e", "Spreadsheet key: undercover mode, minimise all windows, OnlyOffice sheet on top"),
   ("super+ctrl+s", "Server mode on/off (keep running with the lid closed)"),
   ("super+Escape", "Restart bspwm (re-reads bspwmrc, applies the mode)"),
   ("alt+shift+Escape", "Reload sxhkd (this file)"),
-  ("super+alt+Escape", "Quit bspwm (log out)"),
+  ("super+alt+Escape", "Log out (quits bspwm, or xfwm4 in undercover)"),
   ("super+shift+Escape", "Restart the D-Bus daemon and bspwm (last resort)"),
   ("super+p", "Toggle focus-follows-pointer"),
   ("super+e", "Toggle touchpad"),
