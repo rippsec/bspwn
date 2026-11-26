@@ -48,7 +48,7 @@ y = 0
 # Design notes and the checker: see the header of kitty/cockpit.conf, `python3 scripts/palette_check.py`.
 [colors.cursor]
 text = "#1d2024"
-cursor = "#ebe8e2"
+cursor = "#808080"
 
 [colors.primary]
 background = "#22242a"
