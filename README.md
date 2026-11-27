@@ -155,7 +155,9 @@ In the **bspwn** login session (`/usr/local/bin/bspwn-session` -> `scripts/sessi
 
 **Idle lock: lock first, then screen off.** `bspwm/start` turns X's own screensaver and DPMS timers off (`xset s off`, `xset dpms 0 0 0`) and starts
 `scripts/idle-lock.sh`. Its watcher reads the idle time; after 300 s (`IDLE_LOCK`) it runs `xlock`, waits until the lock is on screen, and only then turns the
-display off, so waking the screen shows the lock, never the desktop. The script also keeps `xss-lock` running (it locks before suspend) and restarts it if it exits
+display off, so waking the screen shows the lock, never the desktop. While the screen is locked (by the timer, `super+x`, the power menu or the lid) the idle timer
+does not run: the display goes off after `IDLE_SCREEN_OFF` s without input, and after an unlock the timer starts again from zero, so an unlock is never followed
+by a second lock. The script also keeps `xss-lock` running (it locks before suspend) and restarts it if it exits
 (log: `journalctl -t idle-lock`). xss-lock has to run inside the login session.
 Started from a tmux shell it aborts after each lock ("NoSessionForPID"), so restart it with `super+Escape`, not by hand.
 
@@ -173,7 +175,7 @@ No root is needed: the keyboard LED is set through logind and the lid is handled
 | --- | --- | --- |
 | `IDLE_LOCK` | `180` | Seconds without input before the screen locks (`idle-lock.sh` runs `xlock`). `0` = never; `60` = one minute |
 | `IDLE_VIDEO_INHIBIT` | `1` | `1` = no lock or screen-off while a video plays: a fullscreen window on the current desktop, or mpv / vlc / celluloid / totem reporting "Playing" (checked every 30 s by `scripts/idle-guard.sh`). A non-fullscreen video in a browser is not detected |
-| `IDLE_SCREEN_OFF` | `10` | Seconds after the lock before the display powers off (the machine keeps running) |
+| `IDLE_SCREEN_OFF` | `10` | Seconds after the lock (any lock, also `super+x`) without input before the display powers off (the machine keeps running; minimum 5) |
 
 Read live by `scripts/idle-lock.sh`; no reload needed. The lock screen is one static blue picture (no progress bar, clock or other overlay); a wrong password changes nothing on screen.
 

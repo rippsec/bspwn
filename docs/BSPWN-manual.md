@@ -581,6 +581,7 @@ Wallpapers are generated with Pillow by `scripts/wallpaper/gen_*.py` into `asset
 - `Super+x` (or the power menu) locks the screen. It also locks by itself after **300 seconds** idle, when the lid closes, and **before suspend**.
 - **Lock first, then screen off:** the display is only turned off once the lock is really on screen, so waking it shows the lock and never the desktop.
 - The lock screen is a full-screen blue "crash" scene. Type your password and press Enter to unlock; it uses PAM (`/etc/pam.d/i3lock`).
+- While locked, the idle timer is paused: the display goes off after `IDLE_SCREEN_OFF` seconds without input, and after unlocking the timer starts from zero (no second lock right after an unlock).
 - `scripts/idle-lock.sh` supervises the idle timer and keeps `xss-lock` alive. Log: `journalctl -t idle-lock`; the locker logs to `journalctl -t xlock`.
 - **Never run `xlock` just to test it**: it really locks the session. Test by reading the logs and screenshots instead.
 
@@ -678,7 +679,7 @@ Find a window's class with `xprop WM_CLASS` and click the window.
 
 ### Change the lock or idle time
 
-`IDLE_LOCK=${IDLE_LOCK:-300}` near the top of `dot/.config/bspwm/scripts/idle-lock.sh` (seconds of inactivity). Restart the session (`Super+Esc`) to apply it.
+`IDLE_LOCK` (seconds of inactivity, `0` = never) and `IDLE_SCREEN_OFF` in `dot/.config/bspwm/power.conf`. They are read live by `scripts/idle-lock.sh`; no restart needed.
 
 ### Change a tmux key
 
