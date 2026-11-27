@@ -12,4 +12,8 @@ if [[ -r /usr/share/doc/fzf/examples/key-bindings.zsh ]] && (( $+commands[fdfind
     # key-bindings.zsh binds Ctrl+T / Ctrl+R / Alt+C; add Ctrl+F for the file widget
     bindkey -M emacs '^F' fzf-file-widget
     bindkey -M viins '^F' fzf-file-widget 2>/dev/null
+    # fzf history list on Ctrl+R is DISABLED: Ctrl+R is zsh's own incremental history search.
+    # (To get the fzf list back: bind '^R' to fzf-history-widget instead.)
+    bindkey -M emacs '^R' history-incremental-search-backward
+    bindkey -M viins '^R' history-incremental-search-backward 2>/dev/null
 fi

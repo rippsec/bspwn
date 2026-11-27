@@ -132,7 +132,8 @@ TMUX = [
 ZSH = [
  ("Ctrl+F", "Fuzzy-find any file and paste its path (exact, case-insensitive; 'word' quotes whole words)"),
  ("Tab / Shift+Tab", "Cycle the completion menu forward / back"),
- ("Left / Right", "Move the text cursor (closes the menu)"),
+ ("Left / Right", "Move the text cursor; Right (or End) at the end of the line accepts the grey suggestion"),
+ ("Ctrl+R", "Search the history backward, inline (zsh's own search; Ctrl+R again for older matches)"),
  ("Ctrl+Left / Right", "Jump a word"), ("Ctrl+Delete", "Delete the next word"),
  ("PageUp / PageDown", "Start / end of history"),
 ]

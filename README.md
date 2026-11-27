@@ -295,7 +295,7 @@ Edit both files together, re-run the checker, and look at it in a real terminal.
 
 - **`Ctrl+F`** fuzzy-finds any file on the system and pastes it (`dot/.zsh/plugins/fzf.zsh`). Matching is exact and case-insensitive, so `claude` is a plain substring.
   For a whole word, quote it: `'claude'` matches `claude-code` and `/x/claude/y` but not `claudette`. Also `!word` (exclude), `^word`, `word$`, and space = AND.
-- **Completion menu**: opens only on Tab (the as-you-type menu of `zsh-autocomplete` is permanently disabled; its settings are kept, unused, in `dot/.zsh/config/completion.zsh`). Autosuggestions (`zsh-autosuggestions`) show a grey history hint after the cursor; Right arrow or End accepts it. Tab / Shift-Tab cycle through the options (Tab next, Shift-Tab previous; Shift-Tab used to be `undo`)
+- **Completion menu**: opens only on Tab (the as-you-type menu of `zsh-autocomplete` is permanently disabled; its settings are kept, unused, in `dot/.zsh/config/completion.zsh`). Autosuggestions (`zsh-autosuggestions`) show a grey history hint after the cursor; Right arrow or End accepts it. `Ctrl+R` is zsh's own inline history search (fzf's history list on `Ctrl+R` is disabled; fzf stays on `Ctrl+F` for files). Tab / Shift-Tab cycle through the options (Tab next, Shift-Tab previous; Shift-Tab used to be `undo`)
   (`dot/.zsh/config/completion.zsh`).
 
 ## Other pieces

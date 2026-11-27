@@ -192,7 +192,8 @@
 | --- | --- |
 | `Ctrl+F` | Fuzzy-find any file and paste its path |
 | `Tab / Shift+Tab` | Cycle the completion menu forward / back |
-| `Left / Right` | Move the text cursor |
+| `Left / Right` | Move the text cursor; Right |
+| `Ctrl+R` | Search the history backward, inline |
 | `Ctrl+Left / Right` | Jump a word |
 | `Ctrl+Delete` | Delete the next word |
 | `PageUp / PageDown` | Start / end of history |

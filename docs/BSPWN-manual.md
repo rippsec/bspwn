@@ -467,7 +467,7 @@ tmux keeps terminals alive: windows and panes live inside a *server* that keeps 
 | --- | --- |
 | `config/` | shell options (`main.zsh`), history, completion (zsh-autocomplete permanently disabled; lists appear only on Tab), key bindings, the X display fix |
 | `prompt/` | the prompt, IP detection (`get_ipaddr`), cursor style |
-| `plugins/` | fzf (`Ctrl+F`), autosuggestions (grey history hint; Right arrow or End accepts it), syntax highlighting (sourced once, with palette-friendly styles) |
+| `plugins/` | fzf (`Ctrl+F` file finder; its `Ctrl+R` history list is disabled, `Ctrl+R` is zsh's inline history search), autosuggestions (grey history hint; Right arrow or End accepts it), syntax highlighting (sourced once, with palette-friendly styles) |
 | `aliases/` | aliases such as `ls` = `lsd`, `cat` = `batcat` |
 | `functions/` | helpers: the `setg` / `unsetg` lab variables, apt wrappers, small tools |
 | `pentest/` | optional lab helpers; a failure here never stops the shell |
@@ -481,7 +481,8 @@ Machine-specific things (a language manager's PATH line, a GPU variable) belong 
 | --- | --- |
 | `Ctrl+F` | Fuzzy-find any file and paste its path (exact, case-insensitive; 'word' quotes whole words) |
 | `Tab / Shift+Tab` | Cycle the completion menu forward / back |
-| `Left / Right` | Move the text cursor (closes the menu) |
+| `Left / Right` | Move the text cursor; Right (or End) at the end of the line accepts the grey suggestion |
+| `Ctrl+R` | Search the history backward, inline (zsh's own search; Ctrl+R again for older matches) |
 | `Ctrl+Left / Right` | Jump a word |
 | `Ctrl+Delete` | Delete the next word |
 | `PageUp / PageDown` | Start / end of history |
