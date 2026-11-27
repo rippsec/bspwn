@@ -145,7 +145,7 @@ A *conky* widget on the right: a clock and calendar, then blocks for **SYSTEM**,
 
 ![Three tiled windows: terminals and a tmux session](screenshots/tiling.png)
 
-1. **Open windows.** The first window fills the screen. The second splits it in two, the third splits one of those, and so on. Gaps are 8 px and the focused window has a lighter border.
+1. **Open windows.** The first window fills the screen. The second splits it in two, the third splits one of those, and so on. Gaps are 8 px. Each window has a thin frame (lighter on the focused window) with an 8 px inner gap inside it.
 2. **Move around.** `Super+h/j/k/l` moves the focus left / down / up / right (like vim). `Super+Shift+h/j/k/l` swaps the window with its neighbour.
 3. **Resize.** `Super+Alt+h/j/k/l` grows the window towards that side, `Super+Alt+Shift+h/j/k/l` shrinks it. Or drag with `Super+right-button`.
 4. **Choose where the next window goes (preselect).** `Super+Ctrl+h/j/k/l` marks a side, `Super+Ctrl+3` sets the split ratio to 0.3, `Super+Ctrl+Space` cancels.
@@ -293,7 +293,7 @@ python3 scripts/palette_check.py     # exit code 1 means a target was missed
 | HUD | `dot/.config/conky/hud.lua` (palette) and `hud.conf` |
 | launcher | `dot/.config/rofi/colors/cockpit.rasi` |
 | notifications | `dot/.config/dunst/dunstrc` |
-| window borders | `FOCUSED_COLOR`, `ACTIVE_COLOR`, `NORMAL_COLOR` in the mode profile |
+| window borders | `FOCUSED_COLOR`, `ACTIVE_COLOR`, `NORMAL_COLOR` in the mode profile; inner gap colour `BORDER_GAP_COLOR` |
 | tmux status bar | `status-style` and friends in `dot/.tmux.conf` |
 
 ## Wallpaper
@@ -402,6 +402,8 @@ Find a window's class with `xprop WM_CLASS` and click the window.
 ### Change gaps and borders
 
 `GAP=` and `BORDER=` in `modes/cockpit.conf` (plus `TOP_PAD=` so windows do not hide under the bar); the colours are in the same file. Apply with `mode.sh apply`.
+
+**Double border (line + inner gap).** With `DOUBLE_BORDER=1` the border is split in two bands: a 1 px line in the border colour and, inside it, `BORDER - 1` px in `BORDER_GAP_COLOR` (the terminal background), which reads as padding around every window. Cockpit uses `BORDER=9`: 1 px line + 8 px gap. bspwm itself can only paint one colour, so `scripts/double-border.py` (started by `mode.sh`, needs `python3-xlib`) sets a two-band border pixmap after each bspwm event. It costs no CPU while idle: it waits on `bspc subscribe`, reads the windows from `_NET_CLIENT_LIST` instead of running `bspc`, and repaints once per burst of events (30 ms). For a plain border set `DOUBLE_BORDER=0` and `BORDER=1`.
 
 ### Change the lock or idle time
 
