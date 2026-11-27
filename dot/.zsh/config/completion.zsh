@@ -1,11 +1,11 @@
 # Completion — compinit runs exactly ONCE per shell.
 #
-# zsh-autocomplete (live completion menu while typing) is DISABLED: completion
-# lists only appear on Tab. Its settings below are kept for reference; set
-# _bspwn_autocomplete=1 here to use it again. When used, it must be sourced
-# before any compdef and runs compinit itself. Otherwise: a cached compinit
-# (-C: skip the security audit; full rebuild at most once a day).
-_bspwn_autocomplete=0
+# zsh-autocomplete (live completion menu while typing) is PERMANENTLY DISABLED:
+# completion lists only appear on Tab. Its settings below are kept for reference
+# only and never run (it would have to be sourced before any compdef and runs
+# compinit itself). Used instead: a cached compinit (-C: skip the security
+# audit; full rebuild at most once a day).
+_bspwn_autocomplete=0   # keep 0
 if (( _bspwn_autocomplete )) && [[ -r /usr/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh ]]; then
     # Tuned for a slow CPU: the live menu only runs after a pause, on 3+ chars,
     # and shows a short list; history search is kept (cheap), file globbing is not.

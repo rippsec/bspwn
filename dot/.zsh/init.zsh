@@ -5,7 +5,7 @@
 # Load order (it matters, do not sort it alphabetically):
 #   config/     shell options, history, completion (zsh-autocomplete disabled, Tab-only menu), keybindings, display fix
 #   prompt/     prompt, IP detection (get_ipaddr), cursor style
-#   plugins/    fzf, autosuggestions (disabled, kept for reference), syntax highlighting
+#   plugins/    fzf, autosuggestions, syntax highlighting
 #   aliases/    aliases
 #   functions/  helper functions (setg/unsetg pentest variables, apt wrappers, ...)
 #   pentest/    optional lab helpers; a failure here never stops the shell

@@ -221,9 +221,9 @@ tmux keeps terminals alive: windows and panes live inside a *server* that keeps 
 
 | Folder / file | What is in it |
 | --- | --- |
-| `config/` | shell options (`main.zsh`), history, completion (zsh-autocomplete is disabled; lists appear only on Tab), key bindings, the X display fix |
+| `config/` | shell options (`main.zsh`), history, completion (zsh-autocomplete permanently disabled; lists appear only on Tab), key bindings, the X display fix |
 | `prompt/` | the prompt, IP detection (`get_ipaddr`), cursor style |
-| `plugins/` | fzf (`Ctrl+F`), autosuggestions (disabled; the settings stay in `plugins/autosuggestions.zsh`, delete its `return` line to use them), syntax highlighting (sourced once, with palette-friendly styles) |
+| `plugins/` | fzf (`Ctrl+F`), autosuggestions (grey history hint; Right arrow or End accepts it), syntax highlighting (sourced once, with palette-friendly styles) |
 | `aliases/` | aliases such as `ls` = `lsd`, `cat` = `batcat` |
 | `functions/` | helpers: the `setg` / `unsetg` lab variables, apt wrappers, small tools |
 | `pentest/` | optional lab helpers; a failure here never stops the shell |
