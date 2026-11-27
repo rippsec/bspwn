@@ -505,6 +505,26 @@ Each mode is a profile: `dot/.config/bspwm/modes/<mode>.conf` (theme names, icon
 `scripts/mode.sh` reads it and applies it; the active mode is remembered in `~/.cache/bspwn-mode`.
 **Important:** `mode.sh apply` rewrites the GTK settings from the profile on every start, so a look change must also go into the active profile or it will be undone on the next apply (themer does this for you).
 
+> **Cockpit settings, all in one file: `dot/.config/bspwm/modes/cockpit.conf`**
+>
+> Change a value, then apply it with `~/.config/bspwm/scripts/mode.sh apply` (or `Super+Esc`). It stays across reloads and logins.
+>
+> | Setting | What it does |
+> | --- | --- |
+> | `CONKY=1` / `CONKY=0` | conky HUD on / off (on battery it is always off) |
+> | `PANEL` | `polybar` or `tint2` |
+> | `FLOATING` | `1` = new windows float, `0` = tiling |
+> | `GAP` | space between windows, in px |
+> | `BORDER`, `DOUBLE_BORDER`, `BORDER_GAP_COLOR` | window frame: `BORDER=9` with `DOUBLE_BORDER=1` = 1 px line + 8 px inner gap |
+> | `FOCUSED_COLOR`, `ACTIVE_COLOR`, `NORMAL_COLOR` | frame line colours (focused / other windows) |
+> | `GTK_THEME_NAME`, `ICON_THEME`, `CURSOR_THEME`, `UI_FONT`, `COLOR_SCHEME` | look of the apps (`themer` writes these) |
+> | `WALLPAPER` | background image |
+> | `TOP_PAD`, `BOTTOM_PAD` | room kept free for the bar |
+> | `PICOM_CONF` | picom config, used only when `PICOM=1` in `power.conf` |
+>
+> Power, battery and compositor on/off are in `dot/.config/bspwm/power.conf`. Undercover mode has the same keys in `modes/undercover.conf`.
+
+
 **Window frames in undercover.** bspwm draws no title bars, so with `WM=xfwm4` in the profile undercover runs **xfwm4** (Windows-10 theme: title bar, minimise, maximise, close, drag to move, snap to the edges). This needs the session launcher `scripts/session.sh`, started by the **bspwn** login session (`system/etc/lightdm/xsessions/bspwn.desktop` -> `/usr/local/bin/bspwn-session`, from `system/bin`). Switching mode restarts the window manager and keeps every window open: going to undercover, the windows of all bspwm desktops are gathered on one xfwm4 workspace; going back, bspwm puts each one on its old desktop. xfwm4 reads its own settings (`dot/.config/bspwm/xfwm4/xfwm4.xml`, copied into a private xfconf in `~/.cache/bspwn/xfwm4`), so XFCE's settings are not changed. Under xfwm4 the bspwm window keys (`super+h/j/k/l`, desktops, ...) do nothing; app and system keys still work, and `alt+F4`, `alt+Tab` are xfwm4's. Logging in with the plain **bspwm** session keeps bspwm in undercover too (floating windows without frames, `FLOATING=1`). Log: `journalctl -t bspwn-session`.
 
 **Spreadsheet key** (`Super+Ctrl+e`, `scripts/boss.sh`): switches to undercover, minimises every window to the taskbar and puts an OnlyOffice spreadsheet (a new one, or the one already open) maximised on top. Log: `journalctl -t bspwn-boss`.

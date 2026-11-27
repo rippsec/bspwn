@@ -111,6 +111,26 @@ A [conky](https://github.com/brndnmtthws/conky) widget, `dot/.config/conky/hud.c
 
 `super+ctrl+u` (or symbol 15) switches the whole desktop live, with no logout: **cockpit** is the monochrome rice described here; **undercover** is a Windows 10 look (theme, icons, tint2 panel, floating windows).
 Each mode is a profile in `dot/.config/bspwm/modes/*.conf` (theme names, wallpaper, panel, gaps, borders). The active mode is remembered in `~/.cache/bspwn-mode`.
+
+> **Cockpit settings, all in one file: `dot/.config/bspwm/modes/cockpit.conf`**
+>
+> Change a value, then apply it with `~/.config/bspwm/scripts/mode.sh apply` (or `Super+Esc`). It stays across reloads and logins.
+>
+> | Setting | What it does |
+> | --- | --- |
+> | `CONKY=1` / `CONKY=0` | conky HUD on / off (on battery it is always off) |
+> | `PANEL` | `polybar` or `tint2` |
+> | `FLOATING` | `1` = new windows float, `0` = tiling |
+> | `GAP` | space between windows, in px |
+> | `BORDER`, `DOUBLE_BORDER`, `BORDER_GAP_COLOR` | window frame: `BORDER=9` with `DOUBLE_BORDER=1` = 1 px line + 8 px inner gap |
+> | `FOCUSED_COLOR`, `ACTIVE_COLOR`, `NORMAL_COLOR` | frame line colours (focused / other windows) |
+> | `GTK_THEME_NAME`, `ICON_THEME`, `CURSOR_THEME`, `UI_FONT`, `COLOR_SCHEME` | look of the apps (`themer` writes these) |
+> | `WALLPAPER` | background image |
+> | `TOP_PAD`, `BOTTOM_PAD` | room kept free for the bar |
+> | `PICOM_CONF` | picom config, used only when `PICOM=1` in `power.conf` |
+>
+> Power, battery and compositor on/off are in `dot/.config/bspwm/power.conf`. Undercover mode has the same keys in `modes/undercover.conf`.
+
 Cockpit windows have a **double border**: a 1 px line (`#808080` focused, `#55575e` unfocused) and an 8 px inner gap in the terminal background colour, so every window looks padded. bspwm draws one solid border; `scripts/double-border.py` repaints it as a two-band X border pixmap after each bspwm event (idle: no CPU; no subprocess per event; bursts coalesced; bspwm's own border colours are the gap colour, so focus changes do not flash). Profile keys: `BORDER=9` (line + gap), `DOUBLE_BORDER=1`, `BORDER_GAP_COLOR`. Set `DOUBLE_BORDER=0` and `BORDER=1` for a plain 1 px border.
 In the **bspwn** login session (`/usr/local/bin/bspwn-session` -> `scripts/session.sh`) undercover swaps bspwm for **xfwm4** (`WM=xfwm4`), so windows get real Windows-10 frames; the switch keeps all windows open and bspwm puts them back on their desktops on return. In the plain **bspwm** session undercover only floats the windows.
 `super+ctrl+e` switches to undercover, minimises every window and opens an OnlyOffice spreadsheet maximised on top (`scripts/boss.sh`).
