@@ -21,8 +21,8 @@ configuration {
 @import "shared/colors.rasi"
 
 * {
-    dim:     #7a7c84;
-    sel-bg:  #dddad31c;
+    dim:     #6f7178;
+    sel-bg:  #f2efe91c;
     font:    "Atkinson Hyperlegible Mono Medium 14";
     background-color: transparent;
     text-color:       @foreground;

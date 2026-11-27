@@ -22,10 +22,10 @@ configuration {
 
 * {
     bg:      #0b0c0eff;     /* opaque (no transparency) */
-    fg:      #ffffff;
-    dim:     #7a7c84;
-    accent:  #dddad3;
-    sel:     #dddad314;
+    fg:      #e6e3dd;
+    dim:     #6f7178;
+    accent:  #f2efe9;
+    sel:     #f2efe914;
     font:    "Atkinson Hyperlegible Mono Medium 11";
     background-color: transparent;
     text-color: @fg;
