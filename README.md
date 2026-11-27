@@ -150,7 +150,7 @@ No root is needed: the keyboard LED is set through logind and the lid is handled
 
 | Setting | Shipped | Meaning |
 | --- | --- | --- |
-| `PICOM` | `1` | `1` = run [picom](https://github.com/yshui/picom) on AC; it is always stopped on battery. `0` = never run it. The cockpit mode uses `picom/animations.conf`: a 0.2 s fade when windows appear or disappear (also on desktop switches, which hides the redraw blink of an uncomposited desktop), nothing else (no shadows, blur or transparency); fullscreen windows bypass the compositor; about 80 MB and under 2% of one core. Change the speed with `fade-in-step` / `fade-out-step` (0.05 per 10 ms = 0.2 s). Set `PICOM_CONF` in the mode profile to `picom.conf` for the full-effects config. |
+| `PICOM` | `0` | `1` = run [picom](https://github.com/yshui/picom) on AC; it is always stopped on battery. `0` = never run it. The cockpit mode uses `picom/animations.conf`: a 0.2 s fade when windows appear or disappear (also on desktop switches, which hides the redraw blink of an uncomposited desktop), nothing else (no shadows, blur or transparency); fullscreen windows bypass the compositor; about 80 MB and under 2% of one core. Change the speed with `fade-in-step` / `fade-out-step` (0.05 per 10 ms = 0.2 s). Set `PICOM_CONF` in the mode profile to `picom.conf` for the full-effects config. |
 
 `scripts/power-mode.sh` reads it whenever the power source changes or a mode is applied; to apply it at once run `~/.config/bspwm/scripts/power-mode.sh auto --force`.
 Without picom, window transparency (e.g. alacritty's `opacity`), shadows and animations are off. The bar, rofi menus, dunst and skippy-xd use opaque backgrounds, so they look the same with or without picom.
