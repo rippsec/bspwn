@@ -1,6 +1,6 @@
 # BSPWN user manual
 
-*Using it, changing it, making it yours.* Built 2026-11-26 from the repository. This manual has a printable PDF ([BSPWN-manual.pdf](BSPWN-manual.pdf)),
+*Using it, changing it, making it yours.* Built 2026-11-27 from the repository. This manual has a printable PDF ([BSPWN-manual.pdf](BSPWN-manual.pdf)),
 a one-page [cheatsheet](BSPWN-cheatsheet.md) ([PDF](BSPWN-cheatsheet.pdf)) and an [interactive version](interactive.html) you open in a browser to practise the keys.
 
 ## Contents
@@ -466,7 +466,7 @@ tmux keeps terminals alive: windows and panes live inside a *server* that keeps 
 | --- | --- |
 | `config/` | shell options (`main.zsh`), history, completion (zsh-autocomplete must run before `compinit`), key bindings, the X display fix |
 | `prompt/` | the prompt, IP detection (`get_ipaddr`), cursor style |
-| `plugins/` | fzf (`Ctrl+F`), autosuggestions, syntax highlighting (sourced once, with palette-friendly styles) |
+| `plugins/` | fzf (`Ctrl+F`), autosuggestions (off by default; `export BSPWN_AUTOSUGGEST=1` in `~/.zshenv` turns them on), syntax highlighting (sourced once, with palette-friendly styles) |
 | `aliases/` | aliases such as `ls` = `lsd`, `cat` = `batcat` |
 | `functions/` | helpers: the `setg` / `unsetg` lab variables, apt wrappers, small tools |
 | `pentest/` | optional lab helpers; a failure here never stops the shell |
