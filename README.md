@@ -212,6 +212,7 @@ while pulling the external out with the laptop running is a clean switch. The fi
 battery), so the switch cannot be automated. Instead the warnings tell you to **pull the external battery out** (the laptop carries on with the internal one) or plug in.
 If the power does cut out, the internal battery can stay locked out afterwards (it boots on AC and dies when AC is unplugged, even with the external removed). For that reason the
 internal battery's TLP charge range is 95-100% (`system/etc/tlp.d/01-rip.conf`) instead of a storage range, so it is topped up whenever AC is plugged in.
+The external (slice) battery uses the same 95-100% range, for the most runtime. Apply a change with `sudo tlp setcharge START STOP BAT1` (or reboot).
 
 It uses minutes as well as % because a small or worn battery's percentage is unreliable. It was built for this ThinkPad: when its external battery *runs out*, the laptop has sometimes
 cut off instead of switching to the internal one (which works fine on its own, tested), and Linux's own low-battery action never fires because it averages both batteries.
