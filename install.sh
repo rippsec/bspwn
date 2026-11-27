@@ -288,6 +288,14 @@ install_ly() {
     sudo install -Dm755 "$project_root/system/usr/local/sbin/enforce-ly-dm" /usr/local/sbin/enforce-ly-dm
     sudo install -Dm644 "$project_root/system/etc/apt/apt.conf.d/99-enforce-ly" /etc/apt/apt.conf.d/99-enforce-ly
     sudo /usr/local/sbin/enforce-ly-dm || log_warn "enforce-ly-dm failed"
+    # "bspwn" session (bspwm / xfwm4 launcher) next to plain bspwm
+    sudo install -Dm755 "$project_root/system/bin/bspwn-session" /usr/local/bin/bspwn-session
+    # Watchdog: back to the login prompt when ly hangs after starting Xorg (black screen)
+    sudo install -Dm755 "$project_root/system/usr/local/sbin/ly-watchdog" /usr/local/sbin/ly-watchdog
+    sudo install -Dm644 "$project_root/system/etc/systemd/system/ly-watchdog.service" \
+      /etc/systemd/system/ly-watchdog.service
+    sudo systemctl daemon-reload
+    sudo systemctl enable --now ly-watchdog.service 2>/dev/null || log_warn "Could not enable ly-watchdog"
     log_info "Ly is enabled. Log out to use Ly; then select bspwm session."
   else
     log_warn "ly binary not found after build — config placed in /etc/ly for manual setup"

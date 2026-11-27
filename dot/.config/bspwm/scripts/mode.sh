@@ -107,9 +107,26 @@ for m in $(bspc query -M); do
 done
 bspc config window_gap "$GAP"
 bspc config border_width "$BORDER"
-bspc config focused_border_color "$FOCUSED_COLOR"
-bspc config active_border_color  "$ACTIVE_COLOR"
-bspc config normal_border_color  "$NORMAL_COLOR"
+if [[ ${DOUBLE_BORDER:-0} == 1 ]]; then
+  # double border: bspwm repaints a border in one solid colour on every focus change before the helper
+  # draws the line again; with the gap colour that moment is invisible (no bright band flashing)
+  for c in focused active normal; do bspc config ${c}_border_color "${BORDER_GAP_COLOR:-#22242a}"; done
+else
+  bspc config focused_border_color "$FOCUSED_COLOR"
+  bspc config active_border_color  "$ACTIVE_COLOR"
+  bspc config normal_border_color  "$NORMAL_COLOR"
+fi
+
+# ---- double border (thin line + inner gap): double-border.py repaints the borders when the profile asks for it.
+# It exits by itself when bspwm restarts; the pid file stops the old one on a re-apply.
+DB_PID="${XDG_RUNTIME_DIR:-/tmp}/bspwn-double-border.pid"
+[[ -s $DB_PID ]] && kill "$(<"$DB_PID")" 2>/dev/null
+rm -f "$DB_PID"
+if [[ ${DOUBLE_BORDER:-0} == 1 ]]; then
+  DB_FOCUSED=$FOCUSED_COLOR DB_NORMAL=$NORMAL_COLOR DB_GAP=${BORDER_GAP_COLOR:-#22242a} \
+    setsid "$BASE/scripts/double-border.py" >/dev/null 2>&1 </dev/null &
+  echo $! >"$DB_PID"
+fi
 
 # ---- window behaviour: floating (Windows-like) vs tiling
 # remove ONLY our wildcard rule, by index (bspc rule -r PATTERN treats '*' as a wildcard and would

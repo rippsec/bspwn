@@ -68,7 +68,7 @@ Nothing here is one big program. Each job is done by a small, replaceable tool, 
 
 ![Start-up sequence](diagrams/boot.svg)
 
-1. **ly** (the login screen on tty2) starts **Xorg** on virtual terminal 2.
+1. **ly** (the login screen on tty2, white on black) starts **Xorg** on virtual terminal 2 and runs the chosen session: *bspwm*, or *bspwn* (the session launcher that also switches to xfwm4 in undercover mode). `ly-watchdog.service` restarts ly if a login hangs after Xorg starts.
 2. **`bspwmrc`** runs first: environment variables, the 10 desktops, border colours, gaps, and the *window rules* (which programs float).
 3. **`bspwm/start`** runs next: it restarts the helper programs listed in `process_list` (dunst, sxhkd, xsettingsd, nm-applet, ...), starts the power
    daemons and the idle locker, and finally calls `mode.sh apply`.
@@ -145,7 +145,7 @@ A *conky* widget on the right: a clock and calendar, then blocks for **SYSTEM**,
 
 ![Three tiled windows: terminals and a tmux session](screenshots/tiling.png)
 
-1. **Open windows.** The first window fills the screen. The second splits it in two, the third splits one of those, and so on. Gaps are 8 px and the focused window has a lighter border.
+1. **Open windows.** The first window fills the screen. The second splits it in two, the third splits one of those, and so on. Gaps are 8 px. Each window has a thin frame (lighter on the focused window) with an 8 px inner gap inside it.
 2. **Move around.** `Super+h/j/k/l` moves the focus left / down / up / right (like vim). `Super+Shift+h/j/k/l` swaps the window with its neighbour.
 3. **Resize.** `Super+Alt+h/j/k/l` grows the window towards that side, `Super+Alt+Shift+h/j/k/l` shrinks it. Or drag with `Super+right-button`.
 4. **Choose where the next window goes (preselect).** `Super+Ctrl+h/j/k/l` marks a side, `Super+Ctrl+3` sets the split ratio to 0.3, `Super+Ctrl+Space` cancels.
@@ -254,6 +254,26 @@ Each mode is a profile: `dot/.config/bspwm/modes/<mode>.conf` (theme names, icon
 `scripts/mode.sh` reads it and applies it; the active mode is remembered in `~/.cache/bspwn-mode`.
 **Important:** `mode.sh apply` rewrites the GTK settings from the profile on every start, so a look change must also go into the active profile or it will be undone on the next apply (themer does this for you).
 
+> **Cockpit settings, all in one file: `dot/.config/bspwm/modes/cockpit.conf`**
+>
+> Change a value, then apply it with `~/.config/bspwm/scripts/mode.sh apply` (or `Super+Esc`). It stays across reloads and logins.
+>
+> | Setting | What it does |
+> | --- | --- |
+> | `CONKY=1` / `CONKY=0` | conky HUD on / off (on battery it is always off) |
+> | `PANEL` | `polybar` or `tint2` |
+> | `FLOATING` | `1` = new windows float, `0` = tiling |
+> | `GAP` | space between windows, in px |
+> | `BORDER`, `DOUBLE_BORDER`, `BORDER_GAP_COLOR` | window frame: `BORDER=9` with `DOUBLE_BORDER=1` = 1 px line + 8 px inner gap |
+> | `FOCUSED_COLOR`, `ACTIVE_COLOR`, `NORMAL_COLOR` | frame line colours (focused / other windows) |
+> | `GTK_THEME_NAME`, `ICON_THEME`, `CURSOR_THEME`, `UI_FONT`, `COLOR_SCHEME` | look of the apps (`themer` writes these) |
+> | `WALLPAPER` | background image |
+> | `TOP_PAD`, `BOTTOM_PAD` | room kept free for the bar |
+> | `PICOM_CONF` | picom config, used only when `PICOM=1` in `power.conf` |
+>
+> Power, battery and compositor on/off are in `dot/.config/bspwm/power.conf`. Undercover mode has the same keys in `modes/undercover.conf`.
+
+
 **Window frames in undercover.** bspwm draws no title bars, so with `WM=xfwm4` in the profile undercover runs **xfwm4** (Windows-10 theme: title bar, minimise, maximise, close, drag to move, snap to the edges). This needs the session launcher `scripts/session.sh`, started by the **bspwn** login session (`system/etc/lightdm/xsessions/bspwn.desktop` -> `/usr/local/bin/bspwn-session`, from `system/bin`). Switching mode restarts the window manager and keeps every window open: going to undercover, the windows of all bspwm desktops are gathered on one xfwm4 workspace; going back, bspwm puts each one on its old desktop. xfwm4 reads its own settings (`dot/.config/bspwm/xfwm4/xfwm4.xml`, copied into a private xfconf in `~/.cache/bspwn/xfwm4`), so XFCE's settings are not changed. Under xfwm4 the bspwm window keys (`super+h/j/k/l`, desktops, ...) do nothing; app and system keys still work, and `alt+F4`, `alt+Tab` are xfwm4's. Logging in with the plain **bspwm** session keeps bspwm in undercover too (floating windows without frames, `FLOATING=1`). Log: `journalctl -t bspwn-session`.
 
 **Spreadsheet key** (`Super+Ctrl+e`, `scripts/boss.sh`): switches to undercover, minimises every window to the taskbar and puts an OnlyOffice spreadsheet (a new one, or the one already open) maximised on top. Log: `journalctl -t bspwn-boss`.
@@ -293,7 +313,7 @@ python3 scripts/palette_check.py     # exit code 1 means a target was missed
 | HUD | `dot/.config/conky/hud.lua` (palette) and `hud.conf` |
 | launcher | `dot/.config/rofi/colors/cockpit.rasi` |
 | notifications | `dot/.config/dunst/dunstrc` |
-| window borders | `FOCUSED_COLOR`, `ACTIVE_COLOR`, `NORMAL_COLOR` in the mode profile |
+| window borders | `FOCUSED_COLOR`, `ACTIVE_COLOR`, `NORMAL_COLOR` in the mode profile; inner gap colour `BORDER_GAP_COLOR` |
 | tmux status bar | `status-style` and friends in `dot/.tmux.conf` |
 
 ## Wallpaper
@@ -321,7 +341,7 @@ All settings are in **`~/.config/bspwm/power.conf`**, a plain `KEY=VALUE` file t
 
 | Tool | What it does | Main settings |
 | --- | --- | --- |
-| **compositor** | picom (subtle window fade only in cockpit mode) runs only on AC, and is off by default | `PICOM=0/1` |
+| **compositor** | picom (on here with `PICOM=1`; it runs only on AC): a 0.2 s fade when windows appear or disappear, no transparency, shadows or blur | `PICOM=0/1` |
 | **keyboard backlight** | lights at the first keypress, off after the last one (held keys count) | `KBD_IDLE_AC`, `KBD_IDLE_BAT`, `KBD_LEVEL`, `KBD_AUTO` |
 | **server mode** | closing the lid does not suspend: the laptop keeps running (ssh, downloads) with the screen locked and dark. Button 14 or `Super+Ctrl+s` | `SERVER_BATTERY_MIN`, `SERVER_BATTERY`, `SERVER_LOCK`, `SERVER_SCREEN_OFF` |
 | **battery guard** | warns at 15%, counts down and hibernates at 7%, never suspends below 30%, and also watches battery voltage | `GUARD_*` |
@@ -403,6 +423,8 @@ Find a window's class with `xprop WM_CLASS` and click the window.
 
 `GAP=` and `BORDER=` in `modes/cockpit.conf` (plus `TOP_PAD=` so windows do not hide under the bar); the colours are in the same file. Apply with `mode.sh apply`.
 
+**Double border (line + inner gap).** With `DOUBLE_BORDER=1` the border is split in two bands: a 1 px line in the border colour and, inside it, `BORDER - 1` px in `BORDER_GAP_COLOR` (the terminal background), which reads as padding around every window. Cockpit uses `BORDER=9`: 1 px line + 8 px gap. bspwm itself can only paint one colour, so `scripts/double-border.py` (started by `mode.sh`, needs `python3-xlib`) sets a two-band border pixmap after each bspwm event. It costs no CPU while idle: it waits on `bspc subscribe`, reads the windows from `_NET_CLIENT_LIST` instead of running `bspc`, repaints at once on the first event and once more after a burst (30 ms quiet). bspwm's own border colours are set to the gap colour, so switching windows never flashes a bright band. For a plain border set `DOUBLE_BORDER=0` and `BORDER=1`.
+
 ### Change the lock or idle time
 
 `IDLE_LOCK=${IDLE_LOCK:-300}` near the top of `dot/.config/bspwm/scripts/idle-lock.sh` (seconds of inactivity). Restart the session (`Super+Esc`) to apply it.
@@ -452,12 +474,13 @@ For adapting the setup to a different laptop there is also a dedicated skill, `.
 | An icon shows as a box or text like `\u{...}` | Polybar does not understand escapes: put the real glyph character in the file (see the browser recipe). |
 | The look reverts after a restart | The mode profile still has the old values: edit `modes/<mode>.conf`, or use `themer`. |
 | The HUD is gone | You are on battery (it is stopped on purpose), or run the conky command from chapter 12. |
+| Black screen right after logging in, only Fn keys work | ly hung after starting Xorg. `ly-watchdog` returns to the login prompt within about 40 s (`journalctl -t ly-watchdog`). By hand: `Ctrl+Alt+F1`, log in, `sudo systemctl restart ly@tty2`, then `Ctrl+Alt+F2`. |
 | The screen is solid blue | It is locked: type your password. Do not kill the locker from a terminal. |
 | Nothing responds in a tmux prompt | Press `Esc`. The prompt owns the keyboard until you accept or cancel. |
 | The touchpad is frozen | `Super+Shift+e` reconnects it; `Super+e` toggles it. |
 | Server mode does not hold | `servermode.py status`, `systemd-inhibit --list | grep bspwn`, `journalctl -t bspwn-power`. |
 | CPU is high after days of uptime | `ps -eo pid,ppid,etime,args | grep -E 'polybar/scripts|servermode.py bar'` lists leftover bar helpers; `~/.config/bspwm/scripts/polybar-reap.sh orphans` stops them (it also runs every 60 s). |
-| I want to see the log of something | `journalctl -t <tag>` with `idle-lock`, `xlock`, `bspwn-power`, `bspwn-reap`. |
+| I want to see the log of something | `journalctl -t <tag>` with `idle-lock`, `xlock`, `bspwn-power`, `bspwn-reap`, `bspwn-session`, `ly-watchdog`. |
 | I broke a config | `git -C ~/.bspwn diff` to see it, `git -C ~/.bspwn checkout -- <file>` to restore it. |
 
 # 15. Licence, credits and reuse

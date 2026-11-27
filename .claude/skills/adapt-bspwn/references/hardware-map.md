@@ -15,7 +15,8 @@ Everything below is a place where that shows. **Find your value first, then chan
 | Keyboard backlight | `ls /sys/class/leds \| grep -i kbd` | auto-detected (`*kbd_backlight*`), nothing hard-coded | no such LED: the daemon silently does nothing |
 | Touchpad / pointing stick | `xinput list` | `dot/.config/bspwm/start` (`TPPS/2 IBM TrackPoint` accel), `scripts/touchpad.sh`, `system/etc/modprobe.d/psmouse-intertouch.conf` | not a ThinkPad: remove or retarget the device names |
 | Graphics / video accel | `lspci -k \| grep -A3 VGA`, `vainfo` | `LIBVA_DRIVER_NAME=iHD` in `bspwmrc` and `system/firefox/user.js` (Intel); picom backend in `picom/picom.conf` | AMD/NVIDIA or a different Intel generation |
-| Display manager | `systemctl status display-manager` | `install.sh -full` installs XFCE + LightDM; `-ly` installs ly; `system/etc/ly/` | you already have a login manager you want to keep |
+| Display manager | `systemctl status display-manager` | `install.sh -full` installs XFCE + LightDM; `-ly` installs ly (white-on-black `system/etc/ly/config.ini`, *bspwm* and *bspwn* sessions, `ly-watchdog.service` for a login that hangs after Xorg starts); `system/etc/ly/` | you already have a login manager you want to keep |
+| Window border gap | your terminal background (`alacritty.toml` `background`) | `modes/cockpit.conf`: `BORDER=9`, `DOUBLE_BORDER=1`, `BORDER_GAP_COLOR` (painted by `bspwm/scripts/double-border.py`, needs `python3-xlib`) | you change the terminal colours, or want a plain border (`DOUBLE_BORDER=0`, `BORDER=1`) |
 | Lid / power key | `loginctl show-logind`, `ls /etc/acpi/events` | `system/etc/acpi/lid.sh` (locks on lid close), logind handles suspend | no acpid, different lid event name |
 | Screen locker | `command -v xlock i3lock slock` | sxhkd `super+x` and the idle lock (`scripts/idle-lock.sh`, started by `bspwm/start`, keeps `xss-lock` alive; it must run inside the login session, so restart it with `bspc wm -r`, not from a tmux shell) call a command named `xlock`; the repo ships `scripts/xlock` (a slock wrapper) | install it (`sudo install -m755 scripts/xlock /usr/local/bin/xlock`) or point those two places at your locker |
 | Default apps | `command -v chromium thunar alacritty kitty flameshot` | sxhkd, polybar app buttons, `bspwm/start` (chromium, Thunar, alacritty, kitty, flameshot, firefox-esr, caido) | you use other apps |
@@ -29,8 +30,8 @@ Everything below is a place where that shows. **Find your value first, then chan
   batteries and the only battery otherwise. Check battery health first (`energy_full` vs `energy_full_design` in `/sys/class/power_supply/BAT*`): watching a worn-out battery ends server mode early.
 - Keyboard LED level 1 is "minimal" on the ThinkPad (max 2). Check `cat /sys/class/leds/<kbd led>/max_brightness`; some laptops have 3 levels or an ambient-light mode.
 - The lid is ignored by a logind inhibitor, which needs systemd-logind and a polkit rule allowing the active session to inhibit (default on Debian/Ubuntu/Fedora/Arch desktops).
-- **Compositor**: `PICOM=0` in `power.conf` keeps picom off on AC and battery (the original ThinkPad runs without it). On a machine with a GPU that handles it
-  well, set `PICOM=1` (picom on AC only) and run `scripts/power-mode.sh auto --force`.
+- **Compositor**: `PICOM=0` in `power.conf` (shipped) keeps picom off; `PICOM=1` runs it on AC only (fade only, `picom/animations.conf`, GLX backend on Intel).
+  Apply with `scripts/power-mode.sh auto --force`. Slow GPU: try `backend = "xrender"` or `PICOM=0`.
 - The **battery guard** (`GUARD_*` in `power.conf`) exists because on the original ThinkPad the hand-over from a drained external battery to the internal one
   has cut the power (the internal battery itself works). On a laptop with one healthy battery, Linux's own
   low-battery action already works; keep the guard (it is harmless) or set `GUARD_ENABLED=0`. `GUARD_ACTION=hibernate` only if hibernation with resume is configured.

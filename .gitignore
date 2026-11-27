@@ -24,3 +24,75 @@ recently-used.xbel
 *.un~
 history
 !dot/.zsh/config/history.zsh
+
+# ---  / History / Session  ---
+*history*
+!dot/.zsh/config/history.zsh
+.*_history
+.zsh_sessions/
+.zsh_sessions
+.python_history
+.lesshst
+.viminfo
+.wget-hsts
+.node_repl_history
+.irb_history
+.sqlite_history
+.psql_history
+.mysql_history
+# Browser profiles (can contain cookies, autofill data)
+.config/google-chrome/
+.config/chromium/
+.mozilla/firefox/
+# --- SSH & GPG (NEVER commit private keys) ---
+.ssh/
+.gnupg/
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+id_rsa*
+id_ed25519*
+id_ecdsa*
+id_dsa*
+authorized_keys
+known_hosts
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+*.jks
+*.keystore
+*.ovpn
+# --- Environment & Credentials ---
+.env
+.env.*
+*.env
+!.env.example
+.netrc
+.pypirc
+.npmrc
+.aws/
+.kube/
+.docker/config.json
+credentials.json
+service-account.json
+secrets.yml
+secrets.yaml
+# --- OS & Editor Junk (can leak paths/usernames) ---
+.DS_Store
+Thumbs.db
+Desktop.ini
+# --- Backups & Dumps ---
+*.bak
+*.backup
+*.dump
+*.sql
+*.db
+*.sqlite
+*.mdb
+# --- Cloud / Infrastructure State ---
+.terraform/
+terraform.tfstate

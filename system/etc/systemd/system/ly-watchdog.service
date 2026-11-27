@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: GPL-2.0-only
+# Copyright (c) 2025-2026 rippsec and contributors. See LICENSE and NOTICE.md.
+# Restarts ly when a login hangs after Xorg starts (black screen). See /usr/local/sbin/ly-watchdog.
+[Unit]
+Description=Restart ly when a login hangs on a black screen
+After=systemd-user-sessions.service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/sbin/ly-watchdog
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

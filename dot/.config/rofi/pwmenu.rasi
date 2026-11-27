@@ -31,7 +31,7 @@ configuration {
 window {
     fullscreen:       true;
     transparency:     "real";
-    background-color: #0b0c0ed9;        /* translucent: blurred desktop shows through */
+    background-color: #0b0c0eff;        /* opaque (no transparency) */
     border:           0px;
 }
 

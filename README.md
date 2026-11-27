@@ -59,13 +59,13 @@ Three islands plus the launcher (far left) and power button (far right), joined 
 | 5 | folder | **File manager** (Thunar) | left: your home folder; right: Downloads |
 | 6 | chip + block | **CPU load** | none. The small block grows with load: dim grey, grey, white, and turns into an *inverted* `!` when it is in alarm (same width, so nothing in the bar shifts) |
 | 7 | memory + block | **RAM in use** | none. Same block as above |
-| 8 | disk + block | **Root disk fullness** (more blocks = less space left) | none |
+| 8 | disk + block | **Root disk fullness**: the block rises (and brightens) as the disk fills; a full bright block = almost no space left | none |
 | 9 | thermometer + block | **CPU temperature** | none |
 | 10 | keyboard | **Modifier keys.** Dim keyboard when idle; while you hold Super, Ctrl, Alt or Shift (or Caps Lock is on) it shows that one key lit with a line above and below. If several are held only the highest priority shows: Super > Ctrl > Alt > Shift > Caps | none |
 | 11 | date and time | **Clock** | click: calendar dropdown under the clock |
 | 12 | link icon + address | **LHOST**: your address for lab work (a chosen interface or a custom IP) | left: pick an interface or type an IP inline; right or double click: copy. Saved in `~/.current_ip` |
 | 13 | crosshair + address | **RHOST**: the target address, `none` when unset | left: set/edit inline; right or double click: copy. Saved in `~/.current_target`, and it **writes `export rhost=...` into `~/.zshrc`** so shells see `$rhost` |
-| - | 󰳓 / bell / 󱁣 | **Claude Code status**, shown only while a session is active (not in the picture): 󰳓 = working, **red** bell = needs an answer or a permission, underlined 󱁣 = done (plays a chime). See [Claude Code indicator](#claude-code-indicator) | click: clear finished sessions |
+| - | `[/]` / bell / 󱁣 | **Claude Code status**, shown only while a session is active (not in the picture): a turning `[/] [-] [\] [|]` spinner (pwntools style) = working, **red** bell = needs an answer or a permission, underlined 󱁣 = done (plays a chime). See [Claude Code indicator](#claude-code-indicator) | click: clear finished sessions |
 | 14 | server rack | **Server mode** (lid closed = keep running). Dim = off; bright and underlined = on; shows the battery % while on battery | click: toggle (same as `super+ctrl+s`), see [Server mode](#server-mode-lid-closed-laptop-keeps-running) |
 | 15 | mask | **Mode switch**: cockpit <-> undercover (Windows look) | click: switch (same as `super+ctrl+u`) |
 | 16 | speaker + block | **Volume.** A **red** speaker with lines above and below means muted | scroll: volume up/down (with a notification) |
@@ -112,6 +112,27 @@ A [conky](https://github.com/brndnmtthws/conky) widget, `dot/.config/conky/hud.c
 
 `super+ctrl+u` (or symbol 15) switches the whole desktop live, with no logout: **cockpit** is the monochrome rice described here; **undercover** is a Windows 10 look (theme, icons, tint2 panel, floating windows).
 Each mode is a profile in `dot/.config/bspwm/modes/*.conf` (theme names, wallpaper, panel, gaps, borders). The active mode is remembered in `~/.cache/bspwn-mode`.
+
+> **Cockpit settings, all in one file: `dot/.config/bspwm/modes/cockpit.conf`**
+>
+> Change a value, then apply it with `~/.config/bspwm/scripts/mode.sh apply` (or `Super+Esc`). It stays across reloads and logins.
+>
+> | Setting | What it does |
+> | --- | --- |
+> | `CONKY=1` / `CONKY=0` | conky HUD on / off (on battery it is always off) |
+> | `PANEL` | `polybar` or `tint2` |
+> | `FLOATING` | `1` = new windows float, `0` = tiling |
+> | `GAP` | space between windows, in px |
+> | `BORDER`, `DOUBLE_BORDER`, `BORDER_GAP_COLOR` | window frame: `BORDER=9` with `DOUBLE_BORDER=1` = 1 px line + 8 px inner gap |
+> | `FOCUSED_COLOR`, `ACTIVE_COLOR`, `NORMAL_COLOR` | frame line colours (focused / other windows) |
+> | `GTK_THEME_NAME`, `ICON_THEME`, `CURSOR_THEME`, `UI_FONT`, `COLOR_SCHEME` | look of the apps (`themer` writes these) |
+> | `WALLPAPER` | background image |
+> | `TOP_PAD`, `BOTTOM_PAD` | room kept free for the bar |
+> | `PICOM_CONF` | picom config, used only when `PICOM=1` in `power.conf` |
+>
+> Power, battery and compositor on/off are in `dot/.config/bspwm/power.conf`. Undercover mode has the same keys in `modes/undercover.conf`.
+
+Cockpit windows have a **double border**: a 1 px line (`#808080` focused, `#55575e` unfocused) and an 8 px inner gap in the terminal background colour, so every window looks padded. bspwm draws one solid border; `scripts/double-border.py` repaints it as a two-band X border pixmap after each bspwm event (idle: no CPU; no subprocess per event; bursts coalesced; bspwm's own border colours are the gap colour, so focus changes do not flash). Profile keys: `BORDER=9` (line + gap), `DOUBLE_BORDER=1`, `BORDER_GAP_COLOR`. Set `DOUBLE_BORDER=0` and `BORDER=1` for a plain 1 px border.
 In the **bspwn** login session (`/usr/local/bin/bspwn-session` -> `scripts/session.sh`) undercover swaps bspwm for **xfwm4** (`WM=xfwm4`), so windows get real Windows-10 frames; the switch keeps all windows open and bspwm puts them back on their desktops on return. In the plain **bspwm** session undercover only floats the windows.
 `super+ctrl+e` switches to undercover, minimises every window and opens an OnlyOffice spreadsheet maximised on top (`scripts/boss.sh`).
 
@@ -160,10 +181,10 @@ Read live by `scripts/idle-lock.sh`; no reload needed. The lock screen is one st
 
 | Setting | Shipped | Meaning |
 | --- | --- | --- |
-| `PICOM` | `0` | `1` = run [picom](https://github.com/yshui/picom) on AC; it is always stopped on battery. `0` = never run it. The cockpit mode uses `picom/animations.conf` (a subtle fade in/out only: no shadows, blur, scale animations or transparency; fullscreen windows bypass the compositor; about 80 MB and 3% of one core). Set `PICOM_CONF` in the mode profile to `picom.conf` for the full-effects config. |
+| `PICOM` | `1` | `1` = run [picom](https://github.com/yshui/picom) on AC; it is always stopped on battery. `0` = never run it. The cockpit mode uses `picom/animations.conf`: a 0.2 s fade when windows appear or disappear (also on desktop switches, which hides the redraw blink of an uncomposited desktop), nothing else (no shadows, blur or transparency); fullscreen windows bypass the compositor; about 80 MB and under 2% of one core. Change the speed with `fade-in-step` / `fade-out-step` (0.05 per 10 ms = 0.2 s). Set `PICOM_CONF` in the mode profile to `picom.conf` for the full-effects config. |
 
 `scripts/power-mode.sh` reads it whenever the power source changes or a mode is applied; to apply it at once run `~/.config/bspwm/scripts/power-mode.sh auto --force`.
-Without picom, window transparency (e.g. alacritty's `opacity`), shadows and animations are off.
+Without picom, window transparency (e.g. alacritty's `opacity`), shadows and animations are off. The bar, rofi menus, dunst and skippy-xd use opaque backgrounds, so they look the same with or without picom.
 
 #### Keyboard backlight
 
@@ -222,6 +243,7 @@ while pulling the external out with the laptop running is a clean switch. The fi
 battery), so the switch cannot be automated. Instead the warnings tell you to **pull the external battery out** (the laptop carries on with the internal one) or plug in.
 If the power does cut out, the internal battery can stay locked out afterwards (it boots on AC and dies when AC is unplugged, even with the external removed). For that reason the
 internal battery's TLP charge range is 95-100% (`system/etc/tlp.d/01-rip.conf`) instead of a storage range, so it is topped up whenever AC is plugged in.
+The external (slice) battery uses the same 95-100% range, for the most runtime. Apply a change with `sudo tlp setcharge START STOP BAT1` (or reboot).
 
 It uses minutes as well as % because a small or worn battery's percentage is unreliable. It was built for this ThinkPad: when its external battery *runs out*, the laptop has sometimes
 cut off instead of switching to the internal one (which works fine on its own, tested), and Linux's own low-battery action never fires because it averages both batteries.
