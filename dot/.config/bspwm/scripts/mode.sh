@@ -107,9 +107,15 @@ for m in $(bspc query -M); do
 done
 bspc config window_gap "$GAP"
 bspc config border_width "$BORDER"
-bspc config focused_border_color "$FOCUSED_COLOR"
-bspc config active_border_color  "$ACTIVE_COLOR"
-bspc config normal_border_color  "$NORMAL_COLOR"
+if [[ ${DOUBLE_BORDER:-0} == 1 ]]; then
+  # double border: bspwm repaints a border in one solid colour on every focus change before the helper
+  # draws the line again; with the gap colour that moment is invisible (no bright band flashing)
+  for c in focused active normal; do bspc config ${c}_border_color "${BORDER_GAP_COLOR:-#22242a}"; done
+else
+  bspc config focused_border_color "$FOCUSED_COLOR"
+  bspc config active_border_color  "$ACTIVE_COLOR"
+  bspc config normal_border_color  "$NORMAL_COLOR"
+fi
 
 # ---- double border (thin line + inner gap): double-border.py repaints the borders when the profile asks for it.
 # It exits by itself when bspwm restarts; the pid file stops the old one on a re-apply.

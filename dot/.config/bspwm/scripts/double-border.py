@@ -17,8 +17,10 @@ Cheap by design:
   - idle = blocked on the event pipe (0 % CPU); no timers, no polling
   - no subprocess per event: the focused window comes from _NET_ACTIVE_WINDOW and bspwm's windows
     from _NET_CLIENT_LIST (one request each); then two small requests per managed window
-  - bursts (a mouse resize sends dozens of node_geometry events) are coalesced: after an event it
-    waits SETTLE seconds for more, then repaints once
+  - repaints at once on the first event of a burst (no visible delay on focus changes), then once
+    more when the burst has been quiet for SETTLE seconds (a mouse resize sends dozens of events)
+  - mode.sh sets bspwm's own border colours to the gap colour, so the instant between bspwm's
+    solid repaint and ours shows no bright band, at most the 1 px line missing
   - windows whose border is <= OUTER (fullscreen, monocle, panels, undercover mode) are skipped
 
 Started and stopped by mode.sh from the profile (INNER_GAP > 0); exits when bspwm or X goes away.
@@ -108,10 +110,14 @@ def main():
         select.select([fd], [], [])                      # idle: block until bspwm reports something
         if not os.read(fd, 65536):
             break                                         # bspwm exited / restarted
+        repaint()                                         # leading edge: no delay on a focus change
+        more = False
         while select.select([fd], [], [], SETTLE)[0]:     # coalesce the rest of the burst
             if not os.read(fd, 65536):
                 return
-        repaint()
+            more = True
+        if more:
+            repaint()                                     # trailing edge: final sizes after a burst
 
 
 if __name__ == "__main__":
