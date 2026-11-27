@@ -57,7 +57,7 @@ case "$1" in
     ;;
   bar|watch)
     # busy colour ramp, dark -> light (monochrome palette); the last steps hold the lightest tone
-    RAMP=(3a3b40 4b4d55 6f7178 8e9099 b0ada7 c9c6c0 e6e3dd f2efe9 f2efe9 f2efe9)
+    RAMP=(3a3b40 4b4d55 6f7178 8e9099 a2a3a7 b2b2b4 c0c0c1 c0c0c1 c0c0c1 c0c0c1)
     render() {   # render FRAME
       # sessions untouched for 12 h are treated as gone (crashed or killed terminal)
       find "$DIR" -type f -mmin +720 -delete 2>/dev/null
@@ -71,7 +71,7 @@ case "$1" in
       elif grep -qx busy <<<"$states"; then
         echo "%{F#${RAMP[$1]}}${ICON_BUSY}${count}%{F-}"
       else
-        echo "%{F#f2efe9}%{u#f2efe9}%{+u}${ICON_DONE}${count}%{-u}%{F-}"
+        echo "%{F#c0c0c1}%{u#c0c0c1}%{+u}${ICON_DONE}${count}%{-u}%{F-}"
       fi
     }
     if [[ $1 == bar ]]; then
