@@ -27,8 +27,8 @@ configuration {
     font:       "Atkinson Hyperlegible Mono Medium 11";
     /* ======================================================= */
 
-    dim:      #6f7178;
-    sel-bg:   #9fa0a81c;
+    dim:      #7a7c84;
+    sel-bg:   #afb0b91c;
     background-color: transparent;
     text-color:       @foreground;
 }

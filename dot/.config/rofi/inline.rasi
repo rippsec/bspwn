@@ -7,10 +7,10 @@
 * {
     bg:      #111214;
     bg-alt:  #1c1d21;
-    fg:      #e6e3dd;
-    dim:     #6f7178;
-    line:    #2a2b30;
-    accent:  #9fa0a8;
+    fg:      #fdfaf3;
+    dim:     #7a7c84;
+    line:    #2e2f35;
+    accent:  #afb0b9;
     font:    "Atkinson Hyperlegible Mono Medium 12";
     background-color: transparent;
     text-color: @fg;
