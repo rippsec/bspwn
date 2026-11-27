@@ -72,8 +72,12 @@ def paint(win, g, outer_px):
     one 2*OUTER px stripe per axis draws all four edges."""
     b, w, h = g.border_width, g.width, g.height
     W, H = w + 2 * b, h + 2 * b
+    # 32-bit (ARGB) windows, e.g. alacritty: the colour needs an opaque alpha byte, otherwise the
+    # border is transparent under a compositor (looks lighter, what is behind shows through)
+    alpha = 0xFF000000 if g.depth == 32 else 0
+    gap_px, outer_px = PX_GAP | alpha, outer_px | alpha
     pm = win.create_pixmap(W, H, g.depth)
-    gc = pm.create_gc(foreground=PX_GAP)
+    gc = pm.create_gc(foreground=gap_px)
     pm.fill_rectangle(gc, 0, 0, W, H)
     gc.change(foreground=outer_px)
     pm.fill_rectangle(gc, w + b - OUTER, 0, 2 * OUTER, H)
