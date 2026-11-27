@@ -3,7 +3,7 @@
  * white selection (no pure black/white, no saturated blue).
  **/
 * {
-    background:     #111214F2;
+    background:     #111214FF;
     background-alt: #1c1d21FF;
     foreground:     #e6e3ddFF;
     selected:       #f2efe9FF;

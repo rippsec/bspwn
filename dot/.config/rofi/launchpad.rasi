@@ -21,7 +21,7 @@ configuration {
 }
 
 * {
-    bg:      #0b0c0ed9;     /* translucent: blurred desktop shows through */
+    bg:      #0b0c0eff;     /* opaque (no transparency) */
     fg:      #e6e3dd;
     dim:     #6f7178;
     accent:  #f2efe9;

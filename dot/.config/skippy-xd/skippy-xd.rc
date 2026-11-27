@@ -105,7 +105,7 @@ showDesktop = true
 #   background = #00000055
 # For transparent background:
 #   background = None
-background = #00000055
+background = #111214ff
 
 # During paging mode, preserve original desktop appearance
 # From the background being applied
