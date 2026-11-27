@@ -59,7 +59,7 @@ Three islands plus the launcher (far left) and power button (far right), joined 
 | 5 | folder | **File manager** (Thunar) | left: your home folder; right: Downloads |
 | 6 | chip + block | **CPU load** | none. The small block grows with load: dim grey, grey, white, and turns into an *inverted* `!` when it is in alarm (same width, so nothing in the bar shifts) |
 | 7 | memory + block | **RAM in use** | none. Same block as above |
-| 8 | disk + block | **Root disk fullness** (more blocks = less space left) | none |
+| 8 | disk + block | **Root disk fullness**: the block rises (and brightens) as the disk fills; a full bright block = almost no space left | none |
 | 9 | thermometer + block | **CPU temperature** | none |
 | 10 | keyboard | **Modifier keys.** Dim keyboard when idle; while you hold Super, Ctrl, Alt or Shift (or Caps Lock is on) it shows that one key lit with a line above and below. If several are held only the highest priority shows: Super > Ctrl > Alt > Shift > Caps | none |
 | 11 | date and time | **Clock** | click: calendar dropdown under the clock |
