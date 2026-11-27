@@ -24,8 +24,8 @@ configuration {
     bg:      #0b0c0eff;     /* opaque (no transparency) */
     fg:      #ffffff;
     dim:     #7a7c84;
-    accent:  #afb0b9;
-    sel:     #afb0b914;
+    accent:  #dddad3;
+    sel:     #dddad314;
     font:    "Atkinson Hyperlegible Mono Medium 11";
     background-color: transparent;
     text-color: @fg;

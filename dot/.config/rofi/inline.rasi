@@ -10,7 +10,7 @@
     fg:      #ffffff;
     dim:     #7a7c84;
     line:    #2e2f35;
-    accent:  #afb0b9;
+    accent:  #dddad3;
     font:    "Atkinson Hyperlegible Mono Medium 12";
     background-color: transparent;
     text-color: @fg;
