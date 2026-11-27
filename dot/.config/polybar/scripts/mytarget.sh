@@ -150,7 +150,7 @@ case "$1" in
   --bar)
     # polybar: value only (the bar adds the icon); grey "none" when unset
     t=$(cat "$TARGET_FILE" 2>/dev/null)
-    if [ -n "$t" ] && [ "$t" != "none" ]; then echo "$t"; else echo "%{F#4b4d55}none%{F-}"; fi
+    if [ -n "$t" ] && [ "$t" != "none" ]; then echo "$t"; else echo "%{F#52555e}none%{F-}"; fi
     ;;
   *)
     if [ -f "$TARGET_FILE" ]; then

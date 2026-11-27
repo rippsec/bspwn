@@ -68,9 +68,9 @@ case "$1" in
       if grep -qx wait <<<"$states"; then
         echo "%{F#e5383b}${ICON_WAIT}${count}%{F-}"
       elif grep -qx busy <<<"$states"; then
-        echo "%{F#9fa0a8}${SPIN[$1]}${count}%{F-}"
+        echo "%{F#afb0b9}${SPIN[$1]}${count}%{F-}"
       else
-        echo "%{F#9fa0a8}%{u#9fa0a8}%{+u}${ICON_DONE}${count}%{-u}%{F-}"
+        echo "%{F#afb0b9}%{u#afb0b9}%{+u}${ICON_DONE}${count}%{-u}%{F-}"
       fi
     }
     if [[ $1 == bar ]]; then

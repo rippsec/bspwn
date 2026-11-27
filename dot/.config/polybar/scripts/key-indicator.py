@@ -14,10 +14,10 @@ import sys
 
 from pynput import keyboard
 
-OFF = "#4b4d55"        # idle keyboard glyph (dim)
+OFF = "#52555e"        # idle keyboard glyph (dim)
 IDLE = "\U000f030c"    # 󰌌 keyboard
-ON = "#9fa0a8"         # lit key
-LINE = "#9fa0a8"       # underline / overline colour
+ON = "#afb0b9"         # lit key
+LINE = "#afb0b9"       # underline / overline colour
 
 SLOTS = [  # (name, glyph)
     ("caps", "\U000f030e"),   # 󰌎

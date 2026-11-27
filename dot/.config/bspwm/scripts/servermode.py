@@ -37,7 +37,7 @@ STATE = pl.RUN_DIR / "bspwn-servermode"          # exists  ->  server mode reque
 INFO = pl.RUN_DIR / "bspwn-servermode.json"      # written by the daemon, read by the bar and `status`
 PIDF = pl.RUN_DIR / "bspwn-servermode.pid"
 ICON = "\U000F048B"                              # nf-md-server
-DIM, BRIGHT = "#8e9099", "#9fa0a8"
+DIM, BRIGHT = "#9c9ea8", "#afb0b9"
 
 
 # ---------------------------------------------------------------- policy (pure)
