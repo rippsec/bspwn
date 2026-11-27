@@ -7,7 +7,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/utils.sh"
 
 # Neovim version to install
-NVIM_VERSION="${NVIM_VERSION:-v0.11.0}"
+NVIM_VERSION="${NVIM_VERSION:-v0.12.6}"  # LazyVim needs >= 0.11.2
 
 install_neovim() {
   local arch
@@ -43,6 +43,9 @@ install_neovim() {
   sudo install -Dm755 "$nvim_dir/bin/nvim" "/usr/local/bin/nvim"
 
   log "Installing Neovim runtime files..."
+  # drop the previous runtime so files from an older release are not mixed in
+  sudo rm -rf /usr/local/share/nvim/runtime /usr/local/lib/nvim
+  sudo mkdir -p /usr/local/share/man/man1
   sudo cp "$nvim_dir/share/man/man1/nvim.1" "/usr/local/share/man/man1/" 2>/dev/null || true
   sudo cp -r "$nvim_dir/lib/nvim" "/usr/local/lib/" 2>/dev/null || true
   sudo cp -r "$nvim_dir/share/nvim" "/usr/local/share/" 2>/dev/null || true
@@ -91,9 +94,12 @@ install_nvim_dependencies() {
   sudo apt install -y "${deps[@]}" || log_warn "Some dependencies may have failed"
   
   # Install tree-sitter CLI if not present
-  if ! command_exists tree-sitter; then
+  # (check that it runs: the npm wrapper exists even when its binary download failed)
+  if ! tree-sitter --version &>/dev/null; then
     log "Installing tree-sitter CLI via npm..."
-    sudo npm install -g tree-sitter-cli || log_warn "Failed to install tree-sitter"
+    # npm >= 11 skips install scripts by default; this package's script fetches the binary
+    sudo npm install -g --allow-scripts=tree-sitter-cli tree-sitter-cli 2>/dev/null \
+      || sudo npm install -g tree-sitter-cli || log_warn "Failed to install tree-sitter"
   fi
   
   log "Neovim dependencies installed"
