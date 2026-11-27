@@ -16,7 +16,7 @@ configuration {
 
 * {
     dim:      #6f7178;
-    sel-bg:   #f2efe91c;
+    sel-bg:   #c0c0c11c;
     font:     "Atkinson Hyperlegible Mono Medium 11";
     background-color: transparent;
     text-color:       @foreground;
