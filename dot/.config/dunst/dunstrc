@@ -293,7 +293,7 @@
     # IMPORTANT: colors have to be defined in quotation marks.
     # Otherwise the "#" and following would be interpreted as a comment.
     background = "#111214"
-    foreground = "#9c9ea8"
+    foreground = "#acaeb9"
     highlight = "#c2beb8"
     timeout = 5
     # Icon for notifications with low urgency, uncomment to enable
@@ -301,7 +301,7 @@
 
 [urgency_normal]
     background = "#111214"
-    foreground = "#fdfaf3"
+    foreground = "#ffffff"
     frame_color = "#afb0b9"
     highlight = "#afb0b9"
     timeout = 9

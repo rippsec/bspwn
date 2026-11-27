@@ -22,7 +22,7 @@ configuration {
 
 * {
     bg:      #0b0c0eff;     /* opaque (no transparency) */
-    fg:      #fdfaf3;
+    fg:      #ffffff;
     dim:     #7a7c84;
     accent:  #afb0b9;
     sel:     #afb0b914;

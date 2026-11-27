@@ -7,7 +7,7 @@
 * {
     bg:      #111214;
     bg-alt:  #1c1d21;
-    fg:      #fdfaf3;
+    fg:      #ffffff;
     dim:     #7a7c84;
     line:    #2e2f35;
     accent:  #afb0b9;
