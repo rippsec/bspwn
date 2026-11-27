@@ -426,6 +426,24 @@ Find a window's class with `xprop WM_CLASS` and click the window.
 
 **Double border (line + inner gap).** With `DOUBLE_BORDER=1` the border is split in two bands: a 1 px line in the border colour and, inside it, `BORDER - 1` px in `BORDER_GAP_COLOR` (the terminal background), which reads as padding around every window. Cockpit uses `BORDER=9`: 1 px line + 8 px gap. bspwm itself can only paint one colour, so `scripts/double-border.py` (started by `mode.sh`, needs `python3-xlib`) sets a two-band border pixmap after each bspwm event. It costs no CPU while idle: it waits on `bspc subscribe`, reads the windows from `_NET_CLIENT_LIST` instead of running `bspc`, repaints at once on the first event and once more after a burst (30 ms quiet). bspwm's own border colours are set to the gap colour, so switching windows never flashes a bright band. For a plain border set `DOUBLE_BORDER=0` and `BORDER=1`.
 
+### Change the bar height
+
+The bar is 20 px high and sits 6 px below the top edge, so it uses the top 26 px. Everything placed under it follows those two numbers; change them together:
+
+| File | Setting | Now |
+| --- | --- | --- |
+| `polybar/config.ini` | `[bar/base]` `height`, `offset-y`; font sizes and `;N` vertical offsets so icons fit | `20`, `6` |
+| `polybar/config.ini` | `[bar/tray]` `offset-y` (tray drawer, 6 px under the bar) | `32` |
+| `bspwm/modes/cockpit.conf` | `TOP_PAD` = offset + height | `26` |
+| `rofi/launch.rasi` | `bar-height`, `bar-top` (launcher drawn over the bar) | `20px`, `6px` |
+| `rofi/inline.rasi`, `rofi/shared/pentest-input.rasi` | `y-offset` (just under the bar) | `30px`, `28px` |
+| `polybar/scripts/calendar-popup.py` | `BAR_BOTTOM` | `26` |
+| `jgmenu/jgmenurc` | `menu_margin_y` | `26` |
+| `dunst/dunstrc` | `offset` (y) | `(16, 40)` |
+| `conky/hud.conf` | `gap_y` and `minimum_height`/`maximum_height` (top moves, bottom stays at 868) | `54`, `814` |
+
+Apply with `mode.sh apply` (bar and padding), then restart conky and dunst. The wallpaper does not depend on the bar: its frame keeps a 40 px margin on every side.
+
 ### Change the lock or idle time
 
 `IDLE_LOCK=${IDLE_LOCK:-300}` near the top of `dot/.config/bspwm/scripts/idle-lock.sh` (seconds of inactivity). Restart the session (`Super+Esc`) to apply it.

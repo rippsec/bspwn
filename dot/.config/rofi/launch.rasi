@@ -21,9 +21,9 @@ configuration {
 
 * {
     /* ===================== User Config ===================== */
-    bar-height: 28px;      /* = polybar height (config.ini: [bar/base] height)   */
+    bar-height: 20px;      /* = polybar height (config.ini: [bar/base] height)   */
     bar-top:    6px;       /* = polybar offset-y                                  */
-    icon-size:  18px;
+    icon-size:  14px;
     font:       "Atkinson Hyperlegible Mono Medium 11";
     /* ======================================================= */
 
@@ -56,7 +56,7 @@ horibox {
 }
 
 prompt {
-    font:           "Symbols Nerd Font Mono 14";
+    font:           "Symbols Nerd Font Mono 12";
     padding:        0px 10px 0px 6px;
     text-color:     @dim;
     vertical-align: 0.5;
