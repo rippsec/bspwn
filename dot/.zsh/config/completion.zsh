@@ -1,9 +1,12 @@
 # Completion — compinit runs exactly ONCE per shell.
 #
-# zsh-autocomplete (live completion menu while typing) must be sourced before
-# any compdef and runs compinit itself. Without it, fall back to a cached
-# compinit (-C: skip the security audit; full rebuild at most once a day).
-if [[ -r /usr/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh ]]; then
+# zsh-autocomplete (live completion menu while typing) is DISABLED: completion
+# lists only appear on Tab. Its settings below are kept for reference; set
+# _bspwn_autocomplete=1 here to use it again. When used, it must be sourced
+# before any compdef and runs compinit itself. Otherwise: a cached compinit
+# (-C: skip the security audit; full rebuild at most once a day).
+_bspwn_autocomplete=0
+if (( _bspwn_autocomplete )) && [[ -r /usr/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh ]]; then
     # Tuned for a slow CPU: the live menu only runs after a pause, on 3+ chars,
     # and shows a short list; history search is kept (cheap), file globbing is not.
     zstyle ':autocomplete:*' delay 0.25
@@ -39,7 +42,7 @@ zstyle ':completion:*' cache-path ${XDG_CACHE_HOME:-$HOME/.cache}/zsh-compcache
 # Left/Right keep moving the cursor even when the autocomplete menu is open
 # (the menu used to hijack them to change the selected item). Up/Down/Tab/Shift-Tab
 # still navigate the menu.
-if [[ -r /usr/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh ]]; then
+if (( _bspwn_autocomplete )) && [[ -r /usr/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh ]]; then
     _ac_cursor_left()  { zle send-break; zle .backward-char }
     _ac_cursor_right() { zle send-break; zle .forward-char }
     zle -N _ac_cursor_left; zle -N _ac_cursor_right
@@ -47,5 +50,7 @@ if [[ -r /usr/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh ]]; then
     bindkey -M menuselect '^[[C' _ac_cursor_right '^[OC' _ac_cursor_right
     bindkey -M menuselect '^I' menu-complete '^[[Z' reverse-menu-complete
     # Shift-Tab in the normal prompt: open menu backwards instead of undo
-    bindkey '^[[Z' reverse-menu-complete
 fi
+# Shift-Tab in the normal prompt: open the completion menu backwards instead of undo
+bindkey '^[[Z' reverse-menu-complete
+unset _bspwn_autocomplete

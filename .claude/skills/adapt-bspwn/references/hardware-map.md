@@ -48,7 +48,7 @@ This repo has only been run on the ThinkPad above. A Dell (or any other laptop) 
 ## Shell (not hardware, but often tuned)
 
 - `dot/.zsh/plugins/fzf.zsh`: Ctrl+F file finder, exact + case-insensitive; quote a term (`'word'`) for whole-word matching.
-- `dot/.zsh/config/completion.zsh`: needs the `zsh-autocomplete` package (`/usr/share/zsh-autocomplete`); Left/Right move the cursor, Tab/Shift-Tab cycle the menu.
+- `dot/.zsh/config/completion.zsh`: plain zsh completion (menu on Tab, Tab/Shift-Tab cycle it). The as-you-type `zsh-autocomplete` menu is disabled (`_bspwn_autocomplete=0`); it needs `/usr/share/zsh-autocomplete` if you turn it on.
   `config/keybindings.zsh` loads after it, so never rebind `^[[Z` there.
 
 ## Slow after resume (CPU stuck at minimum clock)

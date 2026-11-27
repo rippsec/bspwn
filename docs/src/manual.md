@@ -221,7 +221,7 @@ tmux keeps terminals alive: windows and panes live inside a *server* that keeps 
 
 | Folder / file | What is in it |
 | --- | --- |
-| `config/` | shell options (`main.zsh`), history, completion (zsh-autocomplete must run before `compinit`), key bindings, the X display fix |
+| `config/` | shell options (`main.zsh`), history, completion (zsh-autocomplete is disabled; lists appear only on Tab), key bindings, the X display fix |
 | `prompt/` | the prompt, IP detection (`get_ipaddr`), cursor style |
 | `plugins/` | fzf (`Ctrl+F`), autosuggestions (disabled; the settings stay in `plugins/autosuggestions.zsh`, delete its `return` line to use them), syntax highlighting (sourced once, with palette-friendly styles) |
 | `aliases/` | aliases such as `ls` = `lsd`, `cat` = `batcat` |
@@ -236,7 +236,7 @@ Machine-specific things (a language manager's PATH line, a GPU variable) belong 
 <!--KEYS:zsh-->
 
 - **Ctrl+F** is the most useful key: type a few letters of any file name from anywhere and press Enter to paste the full path. Quote a word (`'name'`) to match it as a whole word.
-- The completion menu opens as you type; Tab and Shift+Tab cycle through it.
+- Completion appears only when you press Tab (the as-you-type menu of zsh-autocomplete is disabled); Tab and Shift+Tab cycle through the menu.
 - The prompt can show your LHOST address; the bar's LHOST/RHOST widgets set the same variables (`rhost` is written into `~/.zshrc`).
 
 # 8. Modes: cockpit and undercover

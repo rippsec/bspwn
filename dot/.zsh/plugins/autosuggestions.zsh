@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0-only
 # Copyright (c) 2025-2026 rippsec and contributors. See LICENSE and NOTICE.md.
-# zsh-autosuggestions. (zsh-autocomplete is loaded earlier, in config/completion.zsh,
-# because it has to come before compinit/compdef; syntax highlighting is plugins/syntax-highlighting.zsh.)
+# zsh-autosuggestions. (zsh-autocomplete, disabled too, is in config/completion.zsh,
+# when enabled it has to come before compinit/compdef; syntax highlighting is plugins/syntax-highlighting.zsh.)
 # Auto suggestions (grey history hint after the cursor): DISABLED. The settings below are kept
 # for reference but never run. To use them again, delete the `return` line.
 return 0
