@@ -383,7 +383,7 @@ tmux keeps terminals alive: windows and panes live inside a *server* that keeps 
 ![tmux structure](diagrams/tmux.svg)
 
 - **Two ways to press keys.** Most useful commands work with just **Alt** (no prefix). The classic way is the **prefix `Ctrl+b`**, release, then a key. Both are listed below.
-- The status bar is at the **top**. Windows are numbered from 1. The session name is on the left and the clock on the right, both on a slightly lighter block (`#434649`, the bar colour 10% brighter); the pane size and the current window use a shade 2% darker (`#3e4144`). The current window's text is `#c5c5c5` (the window grey 10% brighter) and it keeps its `*` mark, so it is also visible on a text console without colours. The blocks are padded with spaces and touch each other, with no gaps or `|` separators.
+- The status bar is at the **top**. Windows are numbered from 1. The session name is on the left and the clock on the right, both on a slightly lighter block (`#434649`, the bar colour 10% brighter); the pane size and the current window use a shade 2% darker (`#3e4144`). The current window's text is `#c5c5c5` (the window grey 10% brighter) and it keeps its `*` mark, so it is also visible on a text console without colours. A window with new output or a bell gets a `!` after its name, in the normal text colour. The blocks are padded with spaces and touch each other, with no gaps or `|` separators.
 - Copy mode uses **vim keys**; selecting with the mouse copies to the system clipboard (`xclip`) when you release. Mouse mode is **on by default** (`Alt+m` toggles it; hold Shift to select text natively).
 - Reload the config with `Alt+r` after editing `~/.tmux.conf`.
 
