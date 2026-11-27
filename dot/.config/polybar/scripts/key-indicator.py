@@ -16,8 +16,8 @@ from pynput import keyboard
 
 OFF = "#4b4d55"        # idle keyboard glyph (dim)
 IDLE = "\U000f030c"    # 󰌌 keyboard
-ON = "#c0c0c1"         # lit key
-LINE = "#c0c0c1"       # underline / overline colour
+ON = "#9fa0a8"         # lit key
+LINE = "#9fa0a8"       # underline / overline colour
 
 SLOTS = [  # (name, glyph)
     ("caps", "\U000f030e"),   # 󰌎

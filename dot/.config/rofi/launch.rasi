@@ -28,7 +28,7 @@ configuration {
     /* ======================================================= */
 
     dim:      #6f7178;
-    sel-bg:   #c0c0c11c;
+    sel-bg:   #9fa0a81c;
     background-color: transparent;
     text-color:       @foreground;
 }
