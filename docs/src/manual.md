@@ -343,7 +343,7 @@ All settings are in **`~/.config/bspwm/power.conf`**, a plain `KEY=VALUE` file t
 | Tool | What it does | Main settings |
 | --- | --- | --- |
 | **compositor** | picom (off by default; with `PICOM=1` it runs only on AC): a 0.2 s fade when windows appear or disappear, no transparency, shadows or blur | `PICOM=0/1` |
-| **keyboard backlight** | lights at the first keypress, off after the last one (held keys count) | `KBD_IDLE_AC`, `KBD_IDLE_BAT`, `KBD_LEVEL`, `KBD_AUTO` |
+| **keyboard backlight** | lights at the first keypress or pointer movement (touchpad, TrackPoint, any mouse), off after the last input (held keys count) | `KBD_IDLE_AC`, `KBD_IDLE_BAT`, `KBD_LEVEL`, `KBD_AUTO`, `KBD_WAKE_POINTER` |
 | **server mode** | closing the lid does not suspend: the laptop keeps running (ssh, downloads) with the screen locked and dark. Button 14 or `Super+Ctrl+s` | `SERVER_BATTERY_MIN`, `SERVER_BATTERY`, `SERVER_LOCK`, `SERVER_SCREEN_OFF` |
 | **battery guard** | warns at 15%, counts down and hibernates at 7%, never suspends below 30%, and also watches battery voltage | `GUARD_*` |
 

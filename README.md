@@ -185,7 +185,7 @@ A keypress lights the backlight at the minimal level; it turns off `KBD_IDLE_AC`
 | `KBD_IDLE_AC` | `9` | seconds after the last keypress before it turns off, on AC. Use `1` for a quick off, `10` for a longer glow, `0` = never turn off |
 | `KBD_IDLE_BAT` | `9` | the same, on battery |
 | `KBD_LEVEL` | `1` | level a keypress lights it to (`1` = minimal; `0` = the level it had before) |
-| `KBD_WAKE_POINTER` | `0` | `1` = touchpad/mouse input also lights it |
+| `KBD_WAKE_POINTER` | `1` | `1` = pointer input also lights it: movement or clicks from the touchpad, TrackPoint or any USB/Bluetooth mouse (XInput raw events, so devices plugged in later count too); `0` = keyboard only |
 
 #### Server mode (lid closed, laptop keeps running)
 
