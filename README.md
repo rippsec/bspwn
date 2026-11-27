@@ -301,7 +301,9 @@ Edit both files together, re-run the checker, and look at it in a real terminal.
 ## Other pieces
 
 - **Wallpapers**: generated with Pillow by `scripts/wallpaper/gen_*.py` into `assets/wallpaper/`; the active one is set in `modes/cockpit.conf` and `bspwm/start`.
-- **system/**: root-level files (ACPI lid handler, X11, tlp, display manager) installed by `./install.sh -system`.
+- **system/**: root-level files (ACPI lid handler, X11, tlp, display manager, resume hook) installed by `./install.sh -system`.
+  `usr/lib/systemd/system-sleep/bspwn-cpufreq` re-applies the CPU governor after suspend or hibernate: on this firmware the CPU can otherwise
+  stay at its lowest clock (about 0.8 GHz) after resume while the governor still reads `performance`. Log: `journalctl -t bspwn-cpufreq`.
 - **Volume keys**: `sxhkd/scripts/volume_control.sh` uses `pactl` only and takes a lock, so a held key (about 25 repeats per second) cannot queue more runs than the machine can finish; a press that arrives while one is running is dropped.
 - **Autostart**: `bspwm/start` runs `jgmenu`, `skippy-xd` and `unclutter` in the background and replaces any old copy, so `bspc wm -r` no longer leaves extra `start` shells or helpers behind.
 - **Stale polybar helpers**: `bspwm/scripts/polybar-reap.sh` stops module scripts (`tail = true` modules such as `micvol.sh` or `servermode.py bar --follow`) that outlive their bar. `polybar/launch.sh` and `mode.sh` run `polybar-reap.sh all` after stopping polybar, and `power-watch.sh` runs `polybar-reap.sh orphans` every 60 s. The module list is read from `polybar/config.ini`. Log: `journalctl -t bspwn-reap`.

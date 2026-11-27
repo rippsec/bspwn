@@ -241,6 +241,7 @@ A *conky* widget on the right: a clock and calendar, then blocks for **SYSTEM**,
 
 The power symbol (21) opens a full-screen menu: **Lock, Sleep, Hibernate, Logout, Restart, Shutdown**. `Esc` or a second click closes it.
 *Hibernate* saves the session to disk and powers off; on the next boot you enter the disk passphrase and everything is back, so nothing is lost and no battery is used.
+After a resume, the hook `/usr/lib/systemd/system-sleep/bspwn-cpufreq` (from `system/`) re-applies the CPU governor, because the CPU can otherwise stay at its lowest clock. If everything is slow after a resume, check `grep MHz /proc/cpuinfo` and `journalctl -t bspwn-cpufreq`.
 
 # 5. Desktop shortcuts
 

@@ -1,0 +1,29 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-2.0-only
+# Copyright (c) 2025-2026 rippsec and contributors. See LICENSE and NOTICE.md.
+#
+# Re-apply the CPU frequency governor after resume (suspend or hibernate).
+# On some firmware (seen on a ThinkPad T450, intel_cpufreq passive mode) the CPU
+# comes back at its lowest clock while scaling_governor still reads "performance";
+# writing the same governor again is a no-op, so switch to another one and back.
+# Installed to /usr/lib/systemd/system-sleep/ by `install.sh -system`.
+# Undo: delete that file. Log: journalctl -t bspwn-cpufreq
+
+[ "$1" = post ] || exit 0
+
+# Let other resume hooks (TLP) finish setting the governor first.
+sleep 2
+
+for pol in /sys/devices/system/cpu/cpufreq/policy*; do
+    [ -w "$pol/scaling_governor" ] || continue
+    gov=$(cat "$pol/scaling_governor")
+    other=
+    for g in $(cat "$pol/scaling_available_governors"); do
+        [ "$g" != "$gov" ] && { other=$g; break; }
+    done
+    [ -n "$other" ] || continue
+    echo "$other" > "$pol/scaling_governor" && echo "$gov" > "$pol/scaling_governor"
+done
+
+logger -t bspwn-cpufreq "resume ($2): governor re-applied, cur MHz: $(awk '{printf "%d ", $1/1000}' /sys/devices/system/cpu/cpufreq/policy*/scaling_cur_freq)"
+exit 0

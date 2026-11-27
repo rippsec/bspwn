@@ -51,6 +51,11 @@ This repo has only been run on the ThinkPad above. A Dell (or any other laptop) 
 - `dot/.zsh/config/completion.zsh`: needs the `zsh-autocomplete` package (`/usr/share/zsh-autocomplete`); Left/Right move the cursor, Tab/Shift-Tab cycle the menu.
   `config/keybindings.zsh` loads after it, so never rebind `^[[Z` there.
 
+## Slow after resume (CPU stuck at minimum clock)
+
+If the desktop lags after suspend/hibernate and `grep MHz /proc/cpuinfo` shows the minimum clock under load while `scaling_governor` says `performance`,
+install `system/usr/lib/systemd/system-sleep/bspwn-cpufreq` (`./install.sh -system` does it). It switches the governor away and back after resume. Harmless on machines without the problem.
+
 ## Hibernate button (power menu)
 
 `polybar/scripts/pwmenu.sh` has a Hibernate button (`systemctl hibernate`). It only works if you have a swap area at least as big as your RAM **and** resume is configured
