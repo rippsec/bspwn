@@ -66,6 +66,7 @@ Three islands plus the launcher (far left) and power button (far right), joined 
 | 12 | link icon + address | **LHOST**: your address for lab work (a chosen interface or a custom IP) | left: pick an interface or type an IP inline; right or double click: copy. Saved in `~/.current_ip` |
 | 13 | crosshair + address | **RHOST**: the target address, `none` when unset | left: set/edit inline; right or double click: copy. Saved in `~/.current_target`, and it **writes `export rhost=...` into `~/.zshrc`** so shells see `$rhost` |
 | - | `[/]` / bell / 󱁣 | **Claude Code status**, shown only while a session is active (not in the picture): a turning `[/] [-] [\] [|]` spinner (pwntools style) = working, **red** bell = needs an answer or a permission, underlined 󱁣 = done (plays a chime). See [Claude Code indicator](#claude-code-indicator) | click: clear finished sessions |
+| - | 󰨸 clipboard | **Clipboard** (xfce4-clipman), left of the Wi-Fi icon (not in the picture) | left: history menu, pick an entry to copy it again; right: searchable history window |
 | 14 | server rack | **Server mode** (lid closed = keep running). Dim = off; bright and underlined = on; shows the battery % while on battery | click: toggle (same as `super+ctrl+s`), see [Server mode](#server-mode-lid-closed-laptop-keeps-running) |
 | 15 | mask | **Mode switch**: cockpit <-> undercover (Windows look) | click: switch (same as `super+ctrl+u`) |
 | 16 | speaker + block | **Volume.** A **red** speaker with lines above and below means muted | scroll: volume up/down (with a notification) |

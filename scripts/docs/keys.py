@@ -154,6 +154,7 @@ BAR = [
  ("12", "Link icon", "LHOST: your address for lab work", "left: pick an interface or type an IP; right/double click: copy"),
  ("13", "Crosshair", "RHOST: the target address", "left: set/edit; right/double click: copy"),
  ("-", "󰳓 / bell / 󱁣", "Claude Code status, shown only while a session is active (not in the picture)", "click: clear finished sessions"),
+ ("-", "󰨸", "Clipboard (xfce4-clipman), left of the Wi-Fi icon (not in the picture)", "left: history menu, pick an entry to copy it again; right: searchable history window"),
  ("14", "Server rack", "Server mode (lid closed = keep running)", "click: toggle"),
  ("15", "Mask", "Mode switch cockpit <-> undercover", "click: switch"),
  ("16", "Speaker", "Volume", "scroll: volume; red speaker = muted"),
