@@ -177,13 +177,13 @@ Without picom, window transparency (e.g. alacritty's `opacity`), shadows and ani
 
 #### Keyboard backlight
 
-A keypress lights the backlight at the minimal level; it turns off `KBD_IDLE_AC`/`KBD_IDLE_BAT` seconds (default 9) after the last key. Held keys count as typing. A manual off (Fn+Space) stays off until the next keypress, and it stays off while the lid is closed. Keys come from XInput raw events (also seen on the lock screen). Works with any `/sys/class/leds/*kbd_backlight*`; does nothing without one.
+A keypress lights the backlight at the minimal level; it turns off `KBD_IDLE_AC`/`KBD_IDLE_BAT` seconds (default 30) after the last key (or pointer input, see `KBD_WAKE_POINTER`). Held keys count as typing. A manual off (Fn+Space) stays off until the next keypress, and it stays off while the lid is closed. Keys come from XInput raw events (also seen on the lock screen). Works with any `/sys/class/leds/*kbd_backlight*`; does nothing without one.
 
 | Setting | Shipped | Meaning |
 | --- | --- | --- |
 | `KBD_AUTO` | `1` | `0` = never touch the keyboard backlight |
-| `KBD_IDLE_AC` | `9` | seconds after the last keypress before it turns off, on AC. Use `1` for a quick off, `10` for a longer glow, `0` = never turn off |
-| `KBD_IDLE_BAT` | `9` | the same, on battery |
+| `KBD_IDLE_AC` | `30` | seconds after the last input before it turns off, on AC. Use `1` for a quick off, `9` for a short glow, `0` = never turn off |
+| `KBD_IDLE_BAT` | `30` | the same, on battery |
 | `KBD_LEVEL` | `1` | level a keypress lights it to (`1` = minimal; `0` = the level it had before) |
 | `KBD_WAKE_POINTER` | `1` | `1` = pointer input also lights it: movement or clicks from the touchpad, TrackPoint or any USB/Bluetooth mouse (XInput raw events, so devices plugged in later count too); `0` = keyboard only |
 
