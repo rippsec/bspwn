@@ -368,6 +368,9 @@ I2C-HID touchpad, Dell keyboard backlight). What differs from the ThinkPad on `m
 - **Battery guard**: one healthy battery whose % gauge is reliable, so the voltage trigger and the
   pull-the-external-battery hint are off; the guard works on % and minutes left.
 - **Charge thresholds** (`system/etc/tlp.d/01-rip.conf`): 85/90 on the single Dell battery.
+- **Resume hook** (`system-sleep/bspwn-cpufreq`, from `main`): installed here too. With `intel_pstate` (active) it
+  switches `performance` → `powersave` → `performance` after resume, harmless if the clock was fine.
+  Undo: `sudo rm /usr/lib/systemd/system-sleep/bspwn-cpufreq`.
 - **Touchpad**: `touchpad.sh` also finds the Dell pad and resets it by rebinding `i2c_hid_acpi`.
 - **Conky HUD**: GPU section, CPU/NVMe/RAM temperatures and both Dell fans (`dell_smm`), one battery.
 - **Notifications never show over the lock screen**: `xlock` pauses every running dunst on the bus it actually

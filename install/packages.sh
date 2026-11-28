@@ -60,7 +60,7 @@ install_packages() {
     zsh zsh-syntax-highlighting zsh-autosuggestions
 
     # Archive tools
-    zip unzip p7zip-full
+    zip unzip                    # 7z archives: the 7zip package above (p7zip-full is gone from Kali)
 
     # Fonts (apt) — Nerd Fonts are handled by fonts.sh
     fonts-noto-core fonts-noto-cjk fonts-noto-color-emoji
