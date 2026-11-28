@@ -21,10 +21,10 @@ configuration {
 
 * {
     /* ===================== User Config ===================== */
-    bar-height: 28px;      /* = polybar height (config.ini: [bar/base] height)   */
+    bar-height: 20px;      /* = polybar height (config.ini: [bar/base] height)   */
     bar-top:    6px;       /* = polybar offset-y                                  */
-    icon-size:  18px;
-    font:       "Atkinson Hyperlegible Mono Medium 11";
+    icon-size:  14px;
+    font:       "Atkinson Hyperlegible Mono Medium 10";   /* 10 pt: an entry (text + 1 px underline) must fit the 20 px bar or rofi hides it */
     /* ======================================================= */
 
     dim:      #6f7178;
@@ -56,7 +56,7 @@ horibox {
 }
 
 prompt {
-    font:           "Symbols Nerd Font Mono 14";
+    font:           "Symbols Nerd Font Mono 12";
     padding:        0px 10px 0px 6px;
     text-color:     @dim;
     vertical-align: 0.5;
@@ -88,7 +88,7 @@ listview {
 element {
     padding:       0px 12px;
     spacing:       8px;
-    border:        0px 0px 2px 0px;
+    border:        0px 0px 1px 0px;
     border-color:  transparent;
     border-radius: 0px;
     cursor:        pointer;

@@ -465,6 +465,13 @@ EOF'
     sudo cp "$project_root/system/etc/tlp.d/01-rip.conf" /etc/tlp.d/01-rip.conf
   fi
 
+  # Resume hook: re-apply the CPU governor (the CPU can stay at its lowest clock after resume)
+  if [[ -f "$project_root/system/usr/lib/systemd/system-sleep/bspwn-cpufreq" ]]; then
+    log "Installing resume hook (system-sleep/bspwn-cpufreq)..."
+    sudo install -Dm755 "$project_root/system/usr/lib/systemd/system-sleep/bspwn-cpufreq" \
+      /usr/lib/systemd/system-sleep/bspwn-cpufreq
+  fi
+
   # TLP (power management) — enable after drop-in is in place
   if command -v tlp &>/dev/null; then
     log "Enabling TLP..."

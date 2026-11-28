@@ -66,6 +66,7 @@ Three islands plus the launcher (far left) and power button (far right), joined 
 | 12 | link icon + address | **LHOST**: your address for lab work (a chosen interface or a custom IP) | left: pick an interface or type an IP inline; right or double click: copy. Saved in `~/.current_ip` |
 | 13 | crosshair + address | **RHOST**: the target address, `none` when unset | left: set/edit inline; right or double click: copy. Saved in `~/.current_target`, and it **writes `export rhost=...` into `~/.zshrc`** so shells see `$rhost` |
 | - | `[/]` / bell / 󱁣 | **Claude Code status**, shown only while a session is active (not in the picture): a turning `[/] [-] [\] [|]` spinner (pwntools style) = working, **red** bell = needs an answer or a permission, underlined 󱁣 = done (plays a chime). See [Claude Code indicator](#claude-code-indicator) | click: clear finished sessions |
+| - | 󰨸 clipboard | **Clipboard** (xfce4-clipman), left of the Wi-Fi icon (not in the picture) | left: history menu, pick an entry to copy it again; right: searchable history window |
 | 14 | server rack | **Server mode** (lid closed = keep running). Dim = off; bright and underlined = on; shows the battery % while on battery | click: toggle (same as `super+ctrl+s`), see [Server mode](#server-mode-lid-closed-laptop-keeps-running) |
 | 15 | mask | **Mode switch**: cockpit <-> undercover (Windows look) | click: switch (same as `super+ctrl+u`) |
 | 16 | speaker + block | **Volume.** A **red** speaker with lines above and below means muted | scroll: volume up/down (with a notification) |
@@ -190,15 +191,15 @@ Without picom, window transparency (e.g. alacritty's `opacity`), shadows and ani
 
 #### Keyboard backlight
 
-A keypress lights the backlight at the minimal level; it turns off `KBD_IDLE_AC`/`KBD_IDLE_BAT` seconds (default 9) after the last key. Held keys count as typing. A manual off (Fn+Space) stays off until the next keypress, and it stays off while the lid is closed. Keys come from XInput raw events (also seen on the lock screen). Works with any `/sys/class/leds/*kbd_backlight*`; does nothing without one.
+A keypress lights the backlight at the minimal level; it turns off `KBD_IDLE_AC`/`KBD_IDLE_BAT` seconds (default 30) after the last key (or pointer input, see `KBD_WAKE_POINTER`). Held keys count as typing. A manual off (Fn+Space) stays off until the next keypress, and it stays off while the lid is closed. Keys come from XInput raw events (also seen on the lock screen). Works with any `/sys/class/leds/*kbd_backlight*`; does nothing without one.
 
 | Setting | Shipped | Meaning |
 | --- | --- | --- |
 | `KBD_AUTO` | `1` | `0` = never touch the keyboard backlight |
-| `KBD_IDLE_AC` | `9` | seconds after the last keypress before it turns off, on AC. Use `1` for a quick off, `10` for a longer glow, `0` = never turn off |
-| `KBD_IDLE_BAT` | `9` | the same, on battery |
+| `KBD_IDLE_AC` | `30` | seconds after the last input before it turns off, on AC. Use `1` for a quick off, `9` for a short glow, `0` = never turn off |
+| `KBD_IDLE_BAT` | `30` | the same, on battery |
 | `KBD_LEVEL` | `1` | level a keypress lights it to (`1` = minimal; `0` = the level it had before) |
-| `KBD_WAKE_POINTER` | `0` | `1` = touchpad/mouse input also lights it |
+| `KBD_WAKE_POINTER` | `1` | `1` = pointer input also lights it: movement or clicks from the touchpad, TrackPoint or any USB/Bluetooth mouse (XInput raw events, so devices plugged in later count too); `0` = keyboard only |
 
 #### Server mode (lid closed, laptop keeps running)
 
@@ -308,13 +309,15 @@ Edit both files together, re-run the checker, and look at it in a real terminal.
 
 - **`Ctrl+F`** fuzzy-finds any file on the system and pastes it (`dot/.zsh/plugins/fzf.zsh`). Matching is exact and case-insensitive, so `claude` is a plain substring.
   For a whole word, quote it: `'claude'` matches `claude-code` and `/x/claude/y` but not `claudette`. Also `!word` (exclude), `^word`, `word$`, and space = AND.
-- **Completion menu** (`zsh-autocomplete`): Up/Down and Tab / Shift-Tab cycle through the options (Tab next, Shift-Tab previous, nothing is deleted; Shift-Tab used to be `undo`); **Left/Right still move the text cursor** (they close the menu) so you can edit a recalled command
+- **Completion menu**: opens only on Tab (the as-you-type menu of `zsh-autocomplete` is permanently disabled; its settings are kept, unused, in `dot/.zsh/config/completion.zsh`). Autosuggestions (`zsh-autosuggestions`) show a grey history hint after the cursor; Right arrow or End accepts it. `Ctrl+R` is zsh's own inline history search (fzf's history list on `Ctrl+R` is disabled; fzf stays on `Ctrl+F` for files). Tab / Shift-Tab cycle through the options (Tab next, Shift-Tab previous; Shift-Tab used to be `undo`)
   (`dot/.zsh/config/completion.zsh`).
 
 ## Other pieces
 
 - **Wallpapers**: generated with Pillow by `scripts/wallpaper/gen_*.py` into `assets/wallpaper/`; the active one is set in `modes/cockpit.conf` and `bspwm/start`.
-- **system/**: root-level files (ACPI lid handler, X11, tlp, display manager) installed by `./install.sh -system`.
+- **system/**: root-level files (ACPI lid handler, X11, tlp, display manager, resume hook) installed by `./install.sh -system`.
+  `usr/lib/systemd/system-sleep/bspwn-cpufreq` re-applies the CPU governor after suspend or hibernate: on this firmware the CPU can otherwise
+  stay at its lowest clock (about 0.8 GHz) after resume while the governor still reads `performance`. Log: `journalctl -t bspwn-cpufreq`.
 - **Volume keys**: `sxhkd/scripts/volume_control.sh` uses `pactl` only and takes a lock, so a held key (about 25 repeats per second) cannot queue more runs than the machine can finish; a press that arrives while one is running is dropped.
 - **Autostart**: `bspwm/start` runs `jgmenu`, `skippy-xd` and `unclutter` in the background and replaces any old copy, so `bspc wm -r` no longer leaves extra `start` shells or helpers behind.
 - **Stale polybar helpers**: `bspwm/scripts/polybar-reap.sh` stops module scripts (`tail = true` modules such as `micvol.sh` or `servermode.py bar --follow`) that outlive their bar. `polybar/launch.sh` and `mode.sh` run `polybar-reap.sh all` after stopping polybar, and `power-watch.sh` runs `polybar-reap.sh orphans` every 60 s. The module list is read from `polybar/config.ini`. Log: `journalctl -t bspwn-reap`.

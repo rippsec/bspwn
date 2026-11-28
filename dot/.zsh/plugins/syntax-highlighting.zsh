@@ -48,9 +48,12 @@ if [[ -r /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
     ZSH_HIGHLIGHT_STYLES[bracket-level-5]=fg=cyan
     ZSH_HIGHLIGHT_STYLES[cursor-matchingbracket]=standout
     ZSH_HIGHLIGHT_STYLES[alias]=fg=cyan
-    ZSH_HIGHLIGHT_REGEXP+=('sudo' bg=#ff0000,fg=#ffffff,bold)
-    ZSH_HIGHLIGHT_REGEXP+=('sudo' bg=ff0000,fg=ffffff,bold)
-    ZSH_HIGHLIGHT_REGEXP+=('rm(\s+-[^\s]+|\s+--[^\s]+)*' bg=red,fg=black,bold)
-    ZSH_HIGHLIGHT_REGEXP+=('sudo\s+rm(\s+-[^\s]+|\s+--[^\s]+)*' bg=red,fg=black,bold)
-    ZSH_HIGHLIGHT_REGEXP+=('\$\([^\)]*rm[^\)]*\)|`[^`]*rm[^`]*`' bg=red,fg=black,bold)
+    # Warning blocks for sudo and rm: bg "red" / fg "black" are the terminal palette colours (alacritty and
+    # kitty red #d78a7b, black #2e3135), so the block follows the theme. \<...\> matches whole words only
+    # (not sudoedit, format, rmdir); [[:space:]] because \s is not valid inside a bracket expression.
+    ZSH_HIGHLIGHT_REGEXP+=(
+        '\<sudo\>'                                      bg=red,fg=black,bold
+        '\<rm\>([[:space:]]+-[^[:space:]]+)*'           bg=red,fg=black,bold   # rm plus its options
+        '\$\([^)]*\<rm\>[^)]*\)|`[^`]*\<rm\>[^`]*`'     bg=red,fg=black,bold   # rm inside $( ) or ` `
+    )
 fi

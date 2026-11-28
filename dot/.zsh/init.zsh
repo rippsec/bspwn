@@ -3,7 +3,7 @@
 # bspwn zsh entry point: ~/.zshrc sources this file, everything else lives in ~/.zsh/.
 #
 # Load order (it matters, do not sort it alphabetically):
-#   config/     shell options, history, completion (zsh-autocomplete must come before compinit), keybindings, display fix
+#   config/     shell options, history, completion (zsh-autocomplete disabled, Tab-only menu), keybindings, display fix
 #   prompt/     prompt, IP detection (get_ipaddr), cursor style
 #   plugins/    fzf, autosuggestions, syntax highlighting
 #   aliases/    aliases

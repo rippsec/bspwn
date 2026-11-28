@@ -22,7 +22,7 @@ gi.require_version("Gdk", "3.0")
 from gi.repository import Gdk, GLib, Gtk  # noqa: E402
 
 PIDFILE = os.path.join(os.environ.get("XDG_RUNTIME_DIR", "/tmp"), "polybar-calendar.pid")
-BAR_BOTTOM = 34          # polybar islands: offset 6 + height 28
+BAR_BOTTOM = 26          # polybar islands: offset 6 + height 20
 GAP = 4
 
 CSS = b"""

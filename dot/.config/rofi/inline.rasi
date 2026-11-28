@@ -20,7 +20,7 @@ window {
     location:  north west;
     anchor:    north west;
     x-offset:  0px;
-    y-offset:  38px;          /* just under the bar (bar = 6 + 28 px) */
+    y-offset:  30px;          /* just under the bar (bar = 6 + 20 px) */
     width:     300px;
     border:    0px 0px 2px 0px;
     border-color: @accent;

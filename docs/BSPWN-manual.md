@@ -1,6 +1,6 @@
 # BSPWN user manual
 
-*Using it, changing it, making it yours.* Built 2026-11-27 from the repository. This manual has a printable PDF ([BSPWN-manual.pdf](BSPWN-manual.pdf)),
+*Using it, changing it, making it yours.* Built 2026-11-28 from the repository. This manual has a printable PDF ([BSPWN-manual.pdf](BSPWN-manual.pdf)),
 a one-page [cheatsheet](BSPWN-cheatsheet.md) ([PDF](BSPWN-cheatsheet.pdf)) and an [interactive version](interactive.html) you open in a browser to practise the keys.
 
 ## Contents
@@ -189,6 +189,7 @@ The bar is a set of floating islands. Every symbol is listed here with what a cl
 | 12 | Link icon | LHOST: your address for lab work | left: pick an interface or type an IP; right/double click: copy |
 | 13 | Crosshair | RHOST: the target address | left: set/edit; right/double click: copy |
 | - | 󰳓 / bell / 󱁣 | Claude Code status, shown only while a session is active (not in the picture) | click: clear finished sessions |
+| - | 󰨸 | Clipboard (xfce4-clipman), left of the Wi-Fi icon (not in the picture) | left: history menu, pick an entry to copy it again; right: searchable history window |
 | 14 | Server rack | Server mode (lid closed = keep running) | click: toggle |
 | 15 | Mask | Mode switch cockpit <-> undercover | click: switch |
 | 16 | Speaker | Volume | scroll: volume; red speaker = muted |
@@ -241,6 +242,7 @@ A *conky* widget on the right: a clock and calendar, then blocks for **SYSTEM**,
 
 The power symbol (21) opens a full-screen menu: **Lock, Sleep, Hibernate, Logout, Restart, Shutdown**. `Esc` or a second click closes it.
 *Hibernate* saves the session to disk and powers off; on the next boot you enter the disk passphrase and everything is back, so nothing is lost and no battery is used.
+After a resume, the hook `/usr/lib/systemd/system-sleep/bspwn-cpufreq` (from `system/`) re-applies the CPU governor, because the CPU can otherwise stay at its lowest clock. If everything is slow after a resume, check `grep MHz /proc/cpuinfo` and `journalctl -t bspwn-cpufreq`.
 
 # 5. Desktop shortcuts
 
@@ -382,7 +384,7 @@ tmux keeps terminals alive: windows and panes live inside a *server* that keeps 
 ![tmux structure](diagrams/tmux.svg)
 
 - **Two ways to press keys.** Most useful commands work with just **Alt** (no prefix). The classic way is the **prefix `Ctrl+b`**, release, then a key. Both are listed below.
-- The status bar is at the **top**. Windows are numbered from 1. The session name is on the left and the clock on the right, both on a slightly lighter block (`#434649`, the bar colour 10% brighter); the pane size and the current window use a shade 2% darker (`#3e4144`). The current window is shown as a block: the `#3e4144` shade with `#c5c5c5` text in a terminal with true colour, reverse video on a text console (tty, 8 colours), where the shades cannot be drawn. tmux picks this per attached terminal. The current window also gets a `+` after its name, a window with new output or a bell a `*`, a zoomed pane a `Z`; these plain characters read the same in a GUI and on a tty. True colour is only enabled for GUI terminals, so a tty gets the 8 basic colours instead of codes it cannot show. The blocks are padded with spaces and touch each other, with no gaps or `|` separators.
+- The status bar is at the **top**. Windows are numbered from 1. The session name is on the left and the clock on the right, both on `#3c3f42`; the pane size uses `#383a3d`. Their text is `#e6e3dd`. The window list has no background of its own and sits on the bar colour: other windows are grey text, the current window is red text in brackets (`[1:name]`) in a terminal with true colour, and reverse video with a `+` after its name on a text console (tty, 8 colours). tmux picks this per attached terminal. A window with new output shows its name in light amber (`#f9d49e`), one with a bell in orange; a zoomed pane gets a `^`, a plain character that reads the same in a GUI and on a tty. True colour is only enabled for GUI terminals, so a tty gets the 8 basic colours instead of codes it cannot show. The blocks touch each other, with no gaps or `|` separators.
 - Copy mode uses **vim keys**; selecting with the mouse copies to the system clipboard (`xclip`) when you release. Mouse mode is **on by default** (`Alt+m` toggles it; hold Shift to select text natively).
 - Reload the config with `Alt+r` after editing `~/.tmux.conf`.
 
@@ -464,9 +466,9 @@ tmux keeps terminals alive: windows and panes live inside a *server* that keeps 
 
 | Folder / file | What is in it |
 | --- | --- |
-| `config/` | shell options (`main.zsh`), history, completion (zsh-autocomplete must run before `compinit`), key bindings, the X display fix |
+| `config/` | shell options (`main.zsh`), history, completion (zsh-autocomplete permanently disabled; lists appear only on Tab), key bindings, the X display fix |
 | `prompt/` | the prompt, IP detection (`get_ipaddr`), cursor style |
-| `plugins/` | fzf (`Ctrl+F`), autosuggestions, syntax highlighting (sourced once, with palette-friendly styles) |
+| `plugins/` | fzf (`Ctrl+F` file finder; its `Ctrl+R` history list is disabled, `Ctrl+R` is zsh's inline history search), autosuggestions (grey history hint; Right arrow or End accepts it), syntax highlighting (sourced once, with palette-friendly styles; `sudo`, `rm` with its options, and `rm` inside `$( )` or backticks show as a block in the palette red `#d78a7b`, matched as whole words only) |
 | `aliases/` | aliases such as `ls` = `lsd`, `cat` = `batcat` |
 | `functions/` | helpers: the `setg` / `unsetg` lab variables, apt wrappers, small tools |
 | `pentest/` | optional lab helpers; a failure here never stops the shell |
@@ -480,13 +482,14 @@ Machine-specific things (a language manager's PATH line, a GPU variable) belong 
 | --- | --- |
 | `Ctrl+F` | Fuzzy-find any file and paste its path (exact, case-insensitive; 'word' quotes whole words) |
 | `Tab / Shift+Tab` | Cycle the completion menu forward / back |
-| `Left / Right` | Move the text cursor (closes the menu) |
+| `Left / Right` | Move the text cursor; Right (or End) at the end of the line accepts the grey suggestion |
+| `Ctrl+R` | Search the history backward, inline (zsh's own search; Ctrl+R again for older matches) |
 | `Ctrl+Left / Right` | Jump a word |
 | `Ctrl+Delete` | Delete the next word |
 | `PageUp / PageDown` | Start / end of history |
 
 - **Ctrl+F** is the most useful key: type a few letters of any file name from anywhere and press Enter to paste the full path. Quote a word (`'name'`) to match it as a whole word.
-- The completion menu opens as you type; Tab and Shift+Tab cycle through it.
+- Completion appears only when you press Tab (the as-you-type menu of zsh-autocomplete is disabled); Tab and Shift+Tab cycle through the menu.
 - The prompt can show your LHOST address; the bar's LHOST/RHOST widgets set the same variables (`rhost` is written into `~/.zshrc`).
 
 # 8. Modes: cockpit and undercover
@@ -594,7 +597,7 @@ All settings are in **`~/.config/bspwm/power.conf`**, a plain `KEY=VALUE` file t
 | Tool | What it does | Main settings |
 | --- | --- | --- |
 | **compositor** | picom (on here with `PICOM=1`; it runs only on AC): a 0.2 s fade when windows appear or disappear, no transparency, shadows or blur | `PICOM=0/1` |
-| **keyboard backlight** | lights at the first keypress, off after the last one (held keys count) | `KBD_IDLE_AC`, `KBD_IDLE_BAT`, `KBD_LEVEL`, `KBD_AUTO` |
+| **keyboard backlight** | lights at the first keypress or pointer movement (touchpad, TrackPoint, any mouse), off 30 s after the last input (held keys count) | `KBD_IDLE_AC`, `KBD_IDLE_BAT`, `KBD_LEVEL`, `KBD_AUTO`, `KBD_WAKE_POINTER` |
 | **server mode** | closing the lid does not suspend: the laptop keeps running (ssh, downloads) with the screen locked and dark. Button 14 or `Super+Ctrl+s` | `SERVER_BATTERY_MIN`, `SERVER_BATTERY`, `SERVER_LOCK`, `SERVER_SCREEN_OFF` |
 | **battery guard** | warns at 15%, counts down and hibernates at 7%, never suspends below 30%, and also watches battery voltage | `GUARD_*` |
 
@@ -676,6 +679,24 @@ Find a window's class with `xprop WM_CLASS` and click the window.
 `GAP=` and `BORDER=` in `modes/cockpit.conf` (plus `TOP_PAD=` so windows do not hide under the bar); the colours are in the same file. Apply with `mode.sh apply`.
 
 **Double border (line + inner gap).** With `DOUBLE_BORDER=1` the border is split in two bands: a 1 px line in the border colour and, inside it, `BORDER - 1` px in `BORDER_GAP_COLOR` (the terminal background), which reads as padding around every window. Cockpit uses `BORDER=9`: 1 px line + 8 px gap. bspwm itself can only paint one colour, so `scripts/double-border.py` (started by `mode.sh`, needs `python3-xlib`) sets a two-band border pixmap after each bspwm event. It costs no CPU while idle: it waits on `bspc subscribe`, reads the windows from `_NET_CLIENT_LIST` instead of running `bspc`, repaints at once on the first event and once more after a burst (30 ms quiet). bspwm's own border colours are set to the gap colour, so switching windows never flashes a bright band. For a plain border set `DOUBLE_BORDER=0` and `BORDER=1`.
+
+### Change the bar height
+
+The bar is 20 px high and sits 6 px below the top edge, so it uses the top 26 px. Everything placed under it follows those two numbers; change them together:
+
+| File | Setting | Now |
+| --- | --- | --- |
+| `polybar/config.ini` | `[bar/base]` `height`, `offset-y`; font sizes and `;N` vertical offsets so icons fit | `20`, `6` |
+| `polybar/config.ini` | `[bar/tray]` `offset-y` (tray drawer, 6 px under the bar) | `32` |
+| `bspwm/modes/cockpit.conf` | `TOP_PAD` = offset + height | `26` |
+| `rofi/launch.rasi` | `bar-height`, `bar-top` (launcher drawn over the bar); `font` and the `element` underline must fit inside `bar-height`, or rofi shows no entries at all | `20px`, `6px`, 10 pt, 1 px |
+| `rofi/inline.rasi`, `rofi/shared/pentest-input.rasi` | `y-offset` (just under the bar) | `30px`, `28px` |
+| `polybar/scripts/calendar-popup.py` | `BAR_BOTTOM` | `26` |
+| `jgmenu/jgmenurc` | `menu_margin_y` | `26` |
+| `dunst/dunstrc` | `offset` (y) | `(16, 40)` |
+| `conky/hud.conf` | `gap_y` and `minimum_height`/`maximum_height` (top moves, bottom stays at 868) | `54`, `814` |
+
+Apply with `mode.sh apply` (bar and padding), then restart conky and dunst. The wallpaper does not depend on the bar: its frame keeps a 40 px margin on every side.
 
 ### Change the lock or idle time
 

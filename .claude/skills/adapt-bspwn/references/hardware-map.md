@@ -48,8 +48,13 @@ This repo has only been run on the ThinkPad above. A Dell (or any other laptop) 
 ## Shell (not hardware, but often tuned)
 
 - `dot/.zsh/plugins/fzf.zsh`: Ctrl+F file finder, exact + case-insensitive; quote a term (`'word'`) for whole-word matching.
-- `dot/.zsh/config/completion.zsh`: needs the `zsh-autocomplete` package (`/usr/share/zsh-autocomplete`); Left/Right move the cursor, Tab/Shift-Tab cycle the menu.
+- `dot/.zsh/config/completion.zsh`: plain zsh completion (menu on Tab, Tab/Shift-Tab cycle it). The as-you-type `zsh-autocomplete` menu is permanently disabled (`_bspwn_autocomplete=0`). `plugins/autosuggestions.zsh` needs the `zsh-autosuggestions` package.
   `config/keybindings.zsh` loads after it, so never rebind `^[[Z` there.
+
+## Slow after resume (CPU stuck at minimum clock)
+
+If the desktop lags after suspend/hibernate and `grep MHz /proc/cpuinfo` shows the minimum clock under load while `scaling_governor` says `performance`,
+install `system/usr/lib/systemd/system-sleep/bspwn-cpufreq` (`./install.sh -system` does it). It switches the governor away and back after resume. Harmless on machines without the problem.
 
 ## Hibernate button (power menu)
 
