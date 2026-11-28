@@ -435,7 +435,7 @@ The bar is 20 px high and sits 6 px below the top edge, so it uses the top 26 px
 | `polybar/config.ini` | `[bar/base]` `height`, `offset-y`; font sizes and `;N` vertical offsets so icons fit | `20`, `6` |
 | `polybar/config.ini` | `[bar/tray]` `offset-y` (tray drawer, 6 px under the bar) | `32` |
 | `bspwm/modes/cockpit.conf` | `TOP_PAD` = offset + height | `26` |
-| `rofi/launch.rasi` | `bar-height`, `bar-top` (launcher drawn over the bar) | `20px`, `6px` |
+| `rofi/launch.rasi` | `bar-height`, `bar-top` (launcher drawn over the bar); `font` and the `element` underline must fit inside `bar-height`, or rofi shows no entries at all | `20px`, `6px`, 10 pt, 1 px |
 | `rofi/inline.rasi`, `rofi/shared/pentest-input.rasi` | `y-offset` (just under the bar) | `30px`, `28px` |
 | `polybar/scripts/calendar-popup.py` | `BAR_BOTTOM` | `26` |
 | `jgmenu/jgmenurc` | `menu_margin_y` | `26` |
